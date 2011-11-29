@@ -15,15 +15,15 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import net.local.clustercontrol.model.JkBalancer;
-import net.local.clustercontrol.model.JkBalancers;
-import net.local.clustercontrol.model.JkMap;
-import net.local.clustercontrol.model.JkMember;
-import net.local.clustercontrol.model.JkResult;
-import net.local.clustercontrol.model.JkServer;
-import net.local.clustercontrol.model.JkSoftware;
-import net.local.clustercontrol.model.JkStatus;
-import net.local.clustercontrol.model.ObjectFactory;
+import net.local.clustercontrol.api.model.JkBalancer;
+import net.local.clustercontrol.api.model.JkBalancers;
+import net.local.clustercontrol.api.model.JkMap;
+import net.local.clustercontrol.api.model.JkMember;
+import net.local.clustercontrol.api.model.JkResult;
+import net.local.clustercontrol.api.model.JkServer;
+import net.local.clustercontrol.api.model.JkSoftware;
+import net.local.clustercontrol.api.model.JkStatus;
+import net.local.clustercontrol.api.model.ObjectFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,7 +42,7 @@ public class JAXBTest extends TestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	public void testUnmarshallStatus() throws JAXBException, FileNotFoundException, URISyntaxException {
-		JAXBContext jc = JAXBContext.newInstance("se.avegagroup.clustercontrol.domain");
+		JAXBContext jc = JAXBContext.newInstance("net.local.clustercontrol.api.model");
 		Unmarshaller unmarshaller = jc.createUnmarshaller();
 		
 		Schema mySchema;
@@ -75,7 +75,7 @@ public class JAXBTest extends TestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	public void testUnmarshallActionStatus() throws JAXBException, FileNotFoundException, URISyntaxException {
-		JAXBContext jc = JAXBContext.newInstance("se.avegagroup.clustercontrol.domain");
+		JAXBContext jc = JAXBContext.newInstance("net.local.clustercontrol.api.model");
 		Unmarshaller unmarshaller = jc.createUnmarshaller();
 		
 		Schema mySchema;
@@ -104,7 +104,7 @@ public class JAXBTest extends TestCase {
 	 * @throws JAXBException
 	 */
 	public void testMarshall() throws JAXBException {
-		JAXBContext jc = JAXBContext.newInstance("se.avegagroup.clustercontrol.domain");
+		JAXBContext jc = JAXBContext.newInstance("net.local.clustercontrol.api.model");
 		ObjectFactory factory = new ObjectFactory();
 		JkStatus status = factory.createJkStatus();
 		JkServer server = factory.createJkServer();

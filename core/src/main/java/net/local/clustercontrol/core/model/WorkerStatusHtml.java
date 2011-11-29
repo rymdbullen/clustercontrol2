@@ -6,11 +6,11 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.local.clustercontrol.model.JkBalancer;
-import net.local.clustercontrol.model.JkBalancers;
-import net.local.clustercontrol.model.JkMember;
-import net.local.clustercontrol.model.JkServer;
-import net.local.clustercontrol.model.JkStatus;
+import net.local.clustercontrol.api.model.JkBalancer;
+import net.local.clustercontrol.api.model.JkBalancers;
+import net.local.clustercontrol.api.model.JkMember;
+import net.local.clustercontrol.api.model.JkServer;
+import net.local.clustercontrol.api.model.JkStatus;
 
 public class WorkerStatusHtml extends IWorkerStatus {
 	

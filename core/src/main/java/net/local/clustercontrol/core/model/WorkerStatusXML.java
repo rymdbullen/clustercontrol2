@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import net.local.clustercontrol.core.configuration.Constants;
-import net.local.clustercontrol.model.JkStatus;
+import net.local.clustercontrol.api.model.JkStatus;
 
 public class WorkerStatusXML extends IWorkerStatus {
 	

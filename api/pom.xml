@@ -14,7 +14,7 @@
     <artifactId>clustercontrol-api</artifactId>
     <packaging>jar</packaging>
     <name>ClusterControl 2 - API</name>
-    <description>API - ClusterControl for Tomcat AJP Clusters</description>
+    <description>API - ClusterControl2 for Tomcat AJP Clusters</description>
 
     <build>
 	    <plugins>
@@ -31,7 +31,7 @@
 			    </executions>
 			    <configuration>
 				    <schemaDirectory>${basedir}/src/main/resources/xsd</schemaDirectory>
-				    <packageName>${project.groupId}.model</packageName>
+				    <packageName>${project.groupId}.api.model</packageName>
 			    </configuration>
 		    </plugin>
 	    </plugins>

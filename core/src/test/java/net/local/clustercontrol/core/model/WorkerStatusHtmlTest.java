@@ -1,7 +1,7 @@
 package net.local.clustercontrol.core.model;
 
 import net.local.clustercontrol.core.model.WorkerStatusHtml;
-import net.local.clustercontrol.model.JkStatus;
+import net.local.clustercontrol.api.model.JkStatus;
 
 import org.junit.Assert;
 import org.junit.Test;

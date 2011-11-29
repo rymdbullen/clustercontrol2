@@ -15,11 +15,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.local.clustercontrol.model.Host;
-import net.local.clustercontrol.model.Hosts;
-import net.local.clustercontrol.model.ResponseError;
-import net.local.clustercontrol.model.WorkerResponse;
-import net.local.clustercontrol.model.WorkerResponses;
+import net.local.clustercontrol.api.model.Host;
+import net.local.clustercontrol.api.model.Hosts;
+import net.local.clustercontrol.api.model.ResponseError;
+import net.local.clustercontrol.api.model.WorkerResponse;
+import net.local.clustercontrol.api.model.WorkerResponses;
 
 public class HttpClient {
 

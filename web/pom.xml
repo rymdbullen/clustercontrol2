@@ -12,7 +12,7 @@
 	<artifactId>clustercontrol-web</artifactId>
 	<packaging>war</packaging>
 	<name>ClusterControl 2 - WEB</name>
-	<description>WEB - ClusterControl for Tomcat AJP Clusters</description>
+	<description>WEB - ClusterControl2 for Tomcat AJP Clusters</description>
 
 	<dependencies>
 
@@ -87,19 +87,6 @@
 			<version>1.2</version>
 		</dependency>
 
-		<!-- Test -->
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.9</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
-			<version>${org.springframework-version}</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 	<repositories>
 		<!-- For Hibernate Validator -->

@@ -15,10 +15,10 @@ import org.slf4j.LoggerFactory;
 import net.local.clustercontrol.core.configuration.Constants;
 import net.local.clustercontrol.core.logic.WorkerNotFoundException;
 import net.local.clustercontrol.core.logic.impl.WorkerManager;
-import net.local.clustercontrol.model.JkBalancer;
-import net.local.clustercontrol.model.JkMember;
-import net.local.clustercontrol.model.JkStatus;
-import net.local.clustercontrol.model.WorkerResponse;
+import net.local.clustercontrol.api.model.JkBalancer;
+import net.local.clustercontrol.api.model.JkMember;
+import net.local.clustercontrol.api.model.JkStatus;
+import net.local.clustercontrol.api.model.WorkerResponse;
 import junit.framework.TestCase;
 
 /**

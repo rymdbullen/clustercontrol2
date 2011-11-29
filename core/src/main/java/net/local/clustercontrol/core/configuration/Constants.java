@@ -10,5 +10,5 @@ public class Constants {
 	public static final String WORKER_DISABLED = "1";
 	public static final String WORKER_ACTIVATE = "0";
 	public static final String TEST_URL = "http://192.168.10.115/jkmanager";
-	public static final String JAXB_DOMAIN_NAMESPACE = "net.local.clustercontrol.model";
+	public static final String JAXB_DOMAIN_NAMESPACE = "net.local.clustercontrol.api.model";
 }
