@@ -1,0 +1,14 @@
+#col1 {
+		width:150px;
+		float: left;
+	}
+
+#stat {
+		padding-bottom:10px;
+		width:125px;
+	}
+#stat div {
+		padding:10px;
+		border:10px solid #bbb;
+		float:left;
+	}
