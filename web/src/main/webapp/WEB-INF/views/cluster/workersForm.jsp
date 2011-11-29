@@ -89,15 +89,15 @@
 		function fieldUpdate(cluster) {
 			var retval = '';
 			var workerHosts = cluster.workerHosts;
-			//alert('test'+workerHosts+' '+workerHosts.length);
+//alert('test'+workerHosts+' '+workerHosts.length);
 			for (i=0;i < workerHosts.length;i++)
 			{
 				var workerHost = workerHosts[i];
 				var workers = workerHost.workers;
 				
-				//alert(workers.length);
-				//alert(workerHost.hostName);
-				//alert(workerHost.url);
+//alert(workers.length);
+//alert(workerHost.hostName);
+//alert(workerHost.url);
 				retval += workerHost.hostName+ ': ' + workerHost.url + '\n';
 				for (j=0;j < workers.length;j++)
 				{
