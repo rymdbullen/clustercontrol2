@@ -1,4 +1,10 @@
+#workerstable {
+		border:2px solid #bbb;
+		background: whitesmoke;
+	}
+
 #col1 {
+		margin-left:10px;
 		width:150px;
 		float: left;
 	}
@@ -6,9 +12,9 @@
 #stat {
 		padding-bottom:10px;
 		width:125px;
+		float: left;
 	}
 #stat div {
-		padding:10px;
-		border:10px solid #bbb;
-		float:left;
+		padding: 10px;
+		border: 10px solid #bbb;
 	}

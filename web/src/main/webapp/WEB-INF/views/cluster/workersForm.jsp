@@ -21,7 +21,7 @@
 			<h1>
 				ClusterControl View
 			</h1>
-			<div class="span-12 last">
+			<div id="workerstable" class="span-12 last">
 	
 				<!-- header -->
 				<div class="headers">
@@ -37,20 +37,17 @@
 <c:forEach items="${cluster.workerHosts}" var="workerHost">
 					<div id="col1" class="hostName"><c:out value="${workerHost.hostName}"/></div>
 	<c:forEach items="${workerHost.workers}" var="worker">
-					<div class="status ${workerHost.hostName}-${worker.workerName}" id="stat" style="float: left;"><c:out value="${worker.status}"/></div>
+					<div class="status ${workerHost.hostName}-${worker.workerName}" id="stat"><c:out value="${worker.status}"/></div>
 	</c:forEach>
 					<div style="clear: both;"></div>
 </c:forEach>
 				</div>
 				<!-- footer -->
 				<div class="headers">
-					<div id="col1" class="header">hostname</div>
+					<div id="col1" class="header">&nbsp;</div>
 <c:forEach items="${cluster.workerNames}" var="workerName">
-					<div id="stat" class="header"><c:out value="${workerName}"/></div>
-					
-					<div style="clear: both;"></div>
-			        <input id="${workerName}" class="${workerName}-disable" type="button" value="Disable" onclick="disable(this.id)" disasbled="disabled" />
-			        <input id="${workerName}" class="${workerName}-enable" type="button" value="Enable" onclick="enable(this.id)" disasbled="disabled" />
+			        <input id="${workerName}-disable" class="${workerName}-disable" type="button" value="Disable" onclick="disable(this.id)" disasbled="disabled" />
+			        <input id="${workerName}-enable" class="${workerName}-enable" type="button" value="Enable" onclick="enable(this.id)" disasbled="disabled" />
 </c:forEach>
 				</div>
 			</div>
