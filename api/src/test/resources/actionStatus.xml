@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<status
+  xmlns:jk="http://tomcat.apache.org">
+  <result
+    type="OK"
+    message="Action finished"
+  />
+</status>
