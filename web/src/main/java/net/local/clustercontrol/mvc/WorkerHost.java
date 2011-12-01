@@ -20,7 +20,7 @@ public class WorkerHost {
 
 	private String url;
 	private String hostName;
-
+	
 	private ArrayList<Status> workers = new ArrayList<Status>(0);
 	
 	public String getUrl() {
@@ -45,6 +45,22 @@ public class WorkerHost {
 
 	public void setHostName(String hostName) {
 		this.hostName = hostName;
+	}
+	
+	public String getStatus() {
+		String thisStatus = null;
+//		HashMap<String, ArrayList<String>> hm = new HashMap<String, ArrayList<String>>();
+//		
+//		for (int j = 0; j < workerHosts.size(); j++) {
+//			WorkerHost status = workerHosts.get(j);
+//			ArrayList<Status> list = status.getWorkers();
+//			for (Status thiStatus : list) {
+//				if(thiStatus.getWorkerName().equals(name)) {
+//					
+//				}
+//			}
+//		}
+		return thisStatus;
 	}
 
 	@Override

@@ -86,25 +86,8 @@ public class ClusterController {
 	}
 	
 	private Cluster populate(String url) {
-		Status status1 = new Status();
-		if(Math.random() < 0.5d) {
-			status1.setLastStatus("nok");
-			status1.setStatus("ok");
-		} else {
-			status1.setLastStatus("ok");
-			status1.setStatus("nok");			
-		}
-		status1.setWorkerName("worker1");
-		
-		Status status2 = new Status();
-		if(Math.random() < 0.5d) {
-			status2.setLastStatus("nok");
-			status2.setStatus("ok");
-		} else {
-			status2.setLastStatus("ok");
-			status2.setStatus("nok");			
-		}
-		status2.setWorkerName("worker2");
+		Status status1 = setStatus("worker1");
+		Status status2 = setStatus("worker2");
 		
 		WorkerHost workerHost = new WorkerHost();
 		ArrayList<Status> aworkers = workerHost.getWorkers();
@@ -120,25 +103,8 @@ public class ClusterController {
 		workerHost2.setUrl("url2");
 		ArrayList<Status> aworkers2 = workerHost2.getWorkers(); 
 
-		Status status3 = new Status();
-		if(Math.random() < 0.5d) {
-			status3.setLastStatus("nok");
-			status3.setStatus("ok");
-		} else {
-			status3.setLastStatus("ok");
-			status3.setStatus("nok");			
-		}
-		status3.setWorkerName("worker1");
-		
-		Status status4 = new Status();
-		if(Math.random() < 0.5d) {
-			status4.setLastStatus("nok");
-			status4.setStatus("ok");
-		} else {
-			status4.setLastStatus("ok");
-			status4.setStatus("nok");			
-		}
-		status4.setWorkerName("worker2");
+		Status status3 = setStatus("worker1");
+		Status status4 = setStatus("worker2");
 
 		aworkers2.add(status3);
 		aworkers2.add(status4);
@@ -147,15 +113,66 @@ public class ClusterController {
 		list.add(workerHost);
 		list.add(workerHost2);
 		
+		Workers workers1 = new Workers();
+		workers1.setName("workerName1");
+		ArrayList<WorkerStatus> workerStatusList1 = new ArrayList<WorkerStatus>();
+		WorkerStatus workerStatus11 = setWorkerStatus("wsHost1");
+		WorkerStatus workerStatus12 = setWorkerStatus("wsHost2");
+		workerStatusList1.add(workerStatus11);
+		workerStatusList1.add(workerStatus12);
+		workers1.setName("workerName1");
+		workers1.setStatuses(workerStatusList1);
+		
+		ArrayList<WorkerStatus> workerStatusList2 = new ArrayList<WorkerStatus>();
+		WorkerStatus workerStatus21 = setWorkerStatus("wsHost1");
+		WorkerStatus workerStatus22 = setWorkerStatus("wsHost2");
+		workerStatusList2.add(workerStatus21);
+		workerStatusList2.add(workerStatus22);
+		
+		Workers workers2 = new Workers();
+		workers2.setName("workerName2");
+		workers2.setStatuses(workerStatusList2);
+		
+		ArrayList<Workers> workersList = new ArrayList<Workers>();
+		workersList.add(workers1);
+		workersList.add(workers2);
+		
 		Cluster cluster = new Cluster();
-		cluster.setWorkerHosts(list);
+		cluster.setWorkers(workersList);
+		//cluster.setWorkerHosts(list);
 		ArrayList<String> names = new ArrayList<String>();
-		names.add("worker1");
-		names.add("worker2");
-		cluster.setWorkerNames(names);
+		names.add(workerStatus11.getHostName());
+		names.add(workerStatus21.getHostName());
+		cluster.setHostNames(names);
+		
 		// set cluster
 		_cluster = cluster;
 		return cluster;
+	}
+
+	private WorkerStatus setWorkerStatus(String hostName) {
+		WorkerStatus status = new WorkerStatus();
+		status.setHostName(hostName);
+		if(Math.random() < 0.5d) {
+			status.setLastStatus("nok");
+			status.setStatus("ok");
+		} else {
+			status.setLastStatus("ok");
+			status.setStatus("nok");			
+		}
+		return status;
+	}
+	private Status setStatus(String hostName) {
+		Status status = new Status();
+		status.setHostName(hostName);
+		if(Math.random() < 0.5d) {
+			status.setLastStatus("nok");
+			status.setStatus("ok");
+		} else {
+			status.setLastStatus("ok");
+			status.setStatus("nok");			
+		}
+		return status;
 	}
 
 	@RequestMapping(value="{id}", method=RequestMethod.GET)

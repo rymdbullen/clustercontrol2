@@ -18,57 +18,58 @@
 	</head>
 	<body>
 		<div class="container">
-			<h1>
-				ClusterControl View
-			</h1>
+			<h1>ClusterControl View</h1>
 			<div id="workerstable" class="span-12 last">
 	
 				<!-- header -->
 				<div class="headers">
 					<div id="col1" class="header" style="float: left;">hostname</div>
-<c:forEach items="${cluster.workerNames}" var="workerName">
-					<div id="stat" class="header" style="float: left;"><c:out value="${workerName}"/></div>
+<c:forEach items="${cluster.hostNames}" var="hostName">
+					<div id="stat" class="header" style="float: left;"><c:out value="${hostName}"/></div>
 </c:forEach>
 				</div>
 				<div style="clear: both;"></div>
 				
 				<!-- statuses -->
 				<div class="workers">
-<c:forEach items="${cluster.workerHosts}" var="workerHost">
-					<div id="col1" class="hostName"><c:out value="${workerHost.hostName}"/></div>
-	<c:forEach items="${workerHost.workers}" var="worker">
-					<div class="status ${workerHost.hostName}-${worker.workerName}" id="stat"><c:out value="${worker.status}"/></div>
+<c:forEach items="${cluster.workers}" var="worker">
+					<div id="col1" class="hostName"><c:out value="${worker.name}"/></div>
+	<c:forEach items="${worker.statuses}" var="status">
+					<div class="status ${status.hostName}-${worker.name}" id="stat"><c:out value="${status.status}"/></div>
 	</c:forEach>
-					<div style="clear: both;"></div>
-</c:forEach>
-				</div>
-				<!-- footer -->
-				<div class="headers">
-					<div id="col1" class="header">&nbsp;</div>
-<c:forEach items="${cluster.workerNames}" var="workerName">
-			        <input id="${workerName}-disable" class="${workerName}-disable" type="button" value="Disable" onclick="disable(this.id)" disasbled="disabled" />
-			        <input id="${workerName}-enable" class="${workerName}-enable" type="button" value="Enable" onclick="enable(this.id)" disasbled="disabled" />
+					<div class="status ${status.hostName}-${worker.name}" id="stat-btn">
+ 			        	<input id="${worker.name}-disable" class="${worker.name}-disable" type="button" value="Disable" onclick="confirmAction('disable','${worker.name}')" disabled="disabled" />
+					</div>
+					<div class="status ${status.hostName}-${worker.name}" id="stat-btn">
+			        	<input id="${worker.name}-enable" class="${worker.name}-enable" type="button" value="Enable" onclick="confirmAction('enable','${worker.name}')" disabled="disabled" />
+			        </div>
 </c:forEach>
 				</div>
 			</div>
-			<div id="alternatives" class="refresh" style="background: whitesmoke;">
-				<input id="btnStatusComplex" value="Refresh" type="button" onclick="pollUpdate();" disabled="disabled" title="Update Status table"/>
-				<div id="autorefreshtext" style="display: none;">
-					<span>AutoRefresh</span>
-					On&nbsp;<input type="radio" id="ctrlautorefresh" value="on"  onclick="convertToGetAndRelocate(this.value);" />
-					Off&nbsp;<input type="radio" id="ctrlautorefresh" value="off"  onclick="convertToGetAndRelocate(this.value);" />
-				</div>
-				<div id="acceleration" style="display: none;">
-				<label>Activate: <input type="radio" name="enablerate" value="slow" title="Slow Activation" onclick="initiate(this.value)" />(S)low
-				                 <input type="radio" name="enablerate" value="medium" title="Medium Activation" onclick="initiate(this.value)" />(M)edium
-				                 <input type="radio" name="enablerate" value="aggressive" title="Fast Activation" onclick="initiate(this.value)" />(A)ggressive
-				                 <input type="radio" name="enablerate" value="custom" title="Custom Activation" onclick="initiate(this.value)" />(C)ustom
-								&nbsp;&nbsp;&nbsp;Disable: <input type="radio" name="enablerate" value="disable" title="Deactivate" onclick="initiate(this.value)" />
-				</label>
-				</div>
+			<div id="alternatives">
+				<span>AutoRefresh</span>
+				On&nbsp;<input type="radio" id="ctrlautorefresh" value="on"  onclick="convertToGetAndRelocate(this.value);" />
+				Off&nbsp;<input type="radio" id="ctrlautorefresh" value="off"  onclick="convertToGetAndRelocate(this.value);" />
+				<span>Manual Refresh</span>
+				<input value="Refresh" type="button" onclick="pollUpdate();" disabled="disabled" title="Update Status table"/>
 			</div>
-				<div id="actionStatus"></div>
-			<hr>
+			<div id="actionStatus"></div>
+			<div id="mask" style="display: none;"></div>
+			<div id="popup" style="display: none;">
+				<div class="span-10 last">
+					<h3 id="actionHeader">Action:</h3>
+					<div id="acceleration">
+					<label>Activate: <input type="radio" name="enablerate" value="slow" title="Slow Activation" onclick="initiate(this.value)" />(S)low
+					                 <input type="radio" name="enablerate" value="medium" title="Medium Activation" onclick="initiate(this.value)" />(M)edium
+					                 <input type="radio" name="enablerate" value="aggressive" title="Fast Activation" onclick="initiate(this.value)" />(A)ggressive
+					                 <input type="radio" name="enablerate" value="custom" title="Custom Activation" onclick="initiate(this.value)" />(C)ustom
+									&nbsp;&nbsp;&nbsp;Disable: <input type="radio" name="enablerate" value="disable" title="Deactivate" onclick="initiate(this.value)" />
+					</label>
+					</div>
+					<a href="#" onclick="closePopup();">Close</a>
+				</div>			
+			</div>	
+			<hr/>
 			<ul>
 				<li> <a href="?locale=en_us">us</a> |  <a href="?locale=en_gb">gb</a> | <a href="?locale=es_es">es</a> | <a href="?locale=de_de">de</a> </li>
 			</ul>
@@ -77,8 +78,9 @@
 
 	<script type="text/javascript">	
 		$(document).ready(function() {
-			// do nothing yet
-			
+	        //
+	        // runs at body onload
+	        startTimer();
 		});
 
 		function pollUpdate() {
@@ -88,86 +90,96 @@
 		}
 		function fieldUpdate(cluster) {
 			var retval = '';
-			var workerHosts = cluster.workerHosts;
-//alert('test'+workerHosts+' '+workerHosts.length);
-			for (i=0;i < workerHosts.length;i++)
+			var workers = cluster.workers;
+			
+			for (i=0;i < workers.length;i++)
 			{
-				var workerHost = workerHosts[i];
-				var workers = workerHost.workers;
-				
-//alert(workers.length);
-//alert(workerHost.hostName);
-//alert(workerHost.url);
-				retval += workerHost.hostName+ ': ' + workerHost.url + '\n';
-				for (j=0;j < workers.length;j++)
+				var statuses = workers[i].statuses;
+				var workerName = workers[i].name;
+				var lastStatus = workers[i].status;
+
+				for (j=0;j < statuses.length;j++)
 				{
-					var worker = workers[j];
+					var status = statuses[j];
+					var field = status.hostName+"-"+workerName;
 					
-					var field = workerHost.hostName+"-"+worker.workerName;
+					$("div.status."+field).html(status.status);
 					
-					$("div.status."+field).html(worker.status);
-					
-					if(worker.status == "ok") {
+					if(status.status == "ok") {
 						$("div.status."+field).css("color", "green");
-					} else if(worker.status == "nok") {
+					} else if(status.status == "nok") {
 						$("div.status."+field).css("color", "red");
+					} else {
+						$("div.status."+field).css("color", "yellow");
 					}
 				}
+				if(workers[i].status == "allDisabled") {
+					// set button state - Disable #x
+					$('#'+workerName+'-disable').attr('disabled', true);
+					$('#'+workerName+'-enable').attr('disabled', false);
+				} else if(workers[i].status == "allEnabled") {
+					// set button state - Enable #x
+					$('#'+workerName+'-disable').attr('disabled', false);
+					$('#'+workerName+'-enable').attr('disabled', true);
+				} else {
+					// set button state - Enable all
+					$('#'+workerName+'-disable').attr('disabled', false);
+					$('#'+workerName+'-enable').attr('disabled', false);
+				}
 			}
-			//alert("retval="+retval);
-			//$("#url2").val(retval);
 		}
-    	function atload() 
+    	function startTimer()
     	{
 			var url = window.location.search;
         	var ctrlautorefresh = document.getElementById('ctrlautorefresh');
-//alert('hej: '+ctrlautorefresh.size+' '+ctrlautorefresh.checked);
 			if(url.indexOf('autorefresh') > -1) {
             	timerID = setTimeout("refreshPeriodic()", interval*1000);
 			} else {
-				window.setInterval(pollUpdate, 60000);
+				window.setInterval(pollUpdate, 10000);
+	    		$('#actionStatus').html("Started timer ");
 			}
     	}
     	function confirmAction(action, workerName) 
     	{
-    		var answer = confirm ("Do you want to \'" + action + "\' worker \'" + workerName + "\'?")
+			$('#actionHeader').html("Action: \'" + action + "\' worker \'" + workerName + "\'");
+    		worker = workerName;
+    		performAction = action;
+    		showPopup();
+    	}
+    	function initiate(acceleration) 
+    	{
+    		var answer = confirm ("Do you want to \'" + performAction + "\' worker \'" + worker + "\'?")
     		if (answer) {
-    			$('#actionStatus').html("Performing \'" + action + "\' worker \'" + workerName + "\'");
+    			$('#actionStatus').html("Performing \'" + performAction + "\' worker \'" + worker + "\'");
+            	// do you want to activate this worker?
+            	if(!confirmAction(performAction, worker)) return;
+                
+    			$.getJSON("cluster/"+performAction+"/" + worker, function(cluster) {
+    				fieldUpdate(cluster);
+    			});
+    			closePopup()
     			return true;
     		}
-    		$('#actionStatus').html("Cancelled action \'" + action + "\' worker \'" + workerName + "\'");
+    		$('#actionStatus').html("Cancelled action \'" + performAction + "\' worker \'" + worker + "\'");
 			$('#actionStatus').fadeIn('fast');
 
     		return false;
     	}
-        function enable(workerName)
-        {
-        	//alert(eleid);
-        	// we have an id of the form "edit{id}", eg "edit42". We lookup the "42"
-        	//var workerName = eleid.substring(6);
-        	// do you want to activate this worker?
-        	if(!confirmAction("activate", workerName)) return;
-            
-			$.getJSON("cluster/enable/" + workerName, function(cluster) {
-				fieldUpdate(cluster);
-			});
-      	}
-        function disable(workerName)
-        {
-        	//alert(eleid);
-        	// we have an id of the form "edit{id}", eg "edit42". We lookup the "42"
-        	//var workerName = eleid.substring(6);
-        	// do you want to activate this worker?
-        	if(!confirmAction("disable", workerName)) return;
-        	
-			$.getJSON("cluster/disable/"+workerName, function(cluster) {
-				fieldUpdate(cluster);
-			});
-      	}
-
-        //
-        // runs at body onload
-        window.onload=atload;
+		function showPopup() {
+			alert(worker);
+			$('body').css('overflow','hidden');
+			$('#popup').fadeIn('fast');
+			$('#mask').fadeIn('fast');
+		}
+		
+		function closePopup() {
+			$('#popup').fadeOut('fast');
+			$('#mask').fadeOut('fast');
+			$('body').css('overflow','auto');
+			resetForm();
+		}
+		var worker = '';
+		var performAction = '';
     --></script>
 	
 </html>

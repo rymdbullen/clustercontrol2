@@ -5,16 +5,31 @@
 
 #col1 {
 		margin-left:10px;
-		width:150px;
+		width:100px;
 		float: left;
 	}
 
+#autorefreshtext {
+		float: left;
+	}
+
+#stat-btn {
+		padding-bottom:10px;
+		width:70px;
+		float: left;
+	}
 #stat {
 		padding-bottom:10px;
-		width:125px;
+		width:100px;
 		float: left;
 	}
 #stat div {
 		padding: 10px;
 		border: 10px solid #bbb;
+	}
+	
+#actionStatus {
+		padding: 10px;
+		margin-left:10px;
+		border: 1px solid #bbb;
 	}

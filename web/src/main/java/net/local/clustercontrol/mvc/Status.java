@@ -1,9 +1,11 @@
 package net.local.clustercontrol.mvc;
 
 public class Status {
-	private String workerName;
 	private String status;
 	private String lastStatus;
+	private String workerName;
+	private String hostName;
+	
 	public String getStatus() {
 		return status;
 	}
@@ -22,9 +24,15 @@ public class Status {
 	public void setWorkerName(String workerName) {
 		this.workerName = workerName;
 	}
+	public String getHostName() {
+		return hostName;
+	}
+	public void setHostName(String hostName) {
+		this.hostName = hostName;
+	}
 	@Override
 	public String toString() {
-		return "Status [workerName=" + workerName + ", status=" + status
+		return "Status [workerName=" + workerName + ", hostName=" + hostName + ", status=" + status
 				+ ", lastStatus=" + lastStatus + "]";
 	}
 }
