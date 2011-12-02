@@ -57,14 +57,14 @@ public class ClusterController {
 		return populate(url);
 	}
 	
-	@RequestMapping(value="/enable/{id}", method=RequestMethod.GET)
-	public @ResponseBody Cluster getEnable(@PathVariable String id) {
+	@RequestMapping(value="/enable/{id}/{speed}", method=RequestMethod.GET)
+	public @ResponseBody Cluster getEnable(@PathVariable String id, @PathVariable String speed) {
 		String url = "enable";
 		return populate(url);
 	}
 	
-	@RequestMapping(value="/disable/{id}", method=RequestMethod.GET)
-	public @ResponseBody Cluster getDisable(@PathVariable String id) {
+	@RequestMapping(value="/disable/{id}/{speed}", method=RequestMethod.GET)
+	public @ResponseBody Cluster getDisable(@PathVariable String id, @PathVariable String speed) {
 		String url = "disable";
 		return populate(url);
 	}

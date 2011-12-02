@@ -86,8 +86,20 @@
 			<artifactId>jstl</artifactId>
 			<version>1.2</version>
 		</dependency>
-
-	</dependencies>
+		<!-- test -->
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>2.14.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.opera</groupId>
+			<artifactId>operadriver</artifactId>
+			<version>0.8.1</version>
+			<scope>test</scope>
+		</dependency>
+    </dependencies>
 	<repositories>
 		<!-- For Hibernate Validator -->
 		<repository>

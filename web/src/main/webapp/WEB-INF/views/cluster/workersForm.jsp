@@ -51,19 +51,19 @@
 				On&nbsp;<input type="radio" id="ctrlautorefresh" value="on"  onclick="convertToGetAndRelocate(this.value);" />
 				Off&nbsp;<input type="radio" id="ctrlautorefresh" value="off"  onclick="convertToGetAndRelocate(this.value);" />
 				<span>Manual Refresh</span>
-				<input value="Refresh" type="button" onclick="pollUpdate();" disabled="disabled" title="Update Status table"/>
+				<input value="Refresh" type="button" onclick="pollUpdate();" title="Update Status table"/>
 			</div>
 			<div id="actionStatus"></div>
 			<div id="mask" style="display: none;"></div>
 			<div id="popup" style="display: none;">
 				<div class="span-10 last">
 					<h3 id="actionHeader">Action:</h3>
-					<div id="acceleration">
-					<label>Activate: <input type="radio" name="enablerate" value="slow" title="Slow Activation" onclick="initiate(this.value)" />(S)low
-					                 <input type="radio" name="enablerate" value="medium" title="Medium Activation" onclick="initiate(this.value)" />(M)edium
-					                 <input type="radio" name="enablerate" value="aggressive" title="Fast Activation" onclick="initiate(this.value)" />(A)ggressive
-					                 <input type="radio" name="enablerate" value="custom" title="Custom Activation" onclick="initiate(this.value)" />(C)ustom
-									&nbsp;&nbsp;&nbsp;Disable: <input type="radio" name="enablerate" value="disable" title="Deactivate" onclick="initiate(this.value)" />
+					<div id="speed">
+					<label>Activate: <input type="radio" name="enablerate" value="slow" title="Slow Activation" onmouseup="initiate(this.value);" />(S)low
+					                 <input type="radio" name="enablerate" value="medium" title="Medium Activation" onmouseup="initiate(this.value);" />(M)edium
+					                 <input type="radio" name="enablerate" value="aggressive" title="Fast Activation" onmouseup="initiate(this.value);" />(A)ggressive
+					                 <input type="radio" name="enablerate" value="custom" title="Custom Activation" onmouseup="initiate(this.value);" />(C)ustom
+									&nbsp;&nbsp;&nbsp;Disable: <input type="radio" name="enablerate" value="disable" title="Disable All" onclick="initiate(this.value);" />
 					</label>
 					</div>
 					<a href="#" onclick="closePopup();">Close</a>
@@ -72,6 +72,14 @@
 			<hr/>
 			<ul>
 				<li> <a href="?locale=en_us">us</a> |  <a href="?locale=en_gb">gb</a> | <a href="?locale=es_es">es</a> | <a href="?locale=de_de">de</a> </li>
+			</ul>
+		</div>
+		<div>TODO</div>
+		<div>
+			<ul>
+				<li>handle on/off autorefresh</li>
+				<li>hook up with backend</li>
+				<li>sign off</li>
 			</ul>
 		</div>
 	</body>
@@ -144,29 +152,26 @@
 			$('#actionHeader').html("Action: \'" + action + "\' worker \'" + workerName + "\'");
     		worker = workerName;
     		performAction = action;
+    		
     		showPopup();
     	}
-    	function initiate(acceleration) 
+    	function initiate(speed) 
     	{
-    		var answer = confirm ("Do you want to \'" + performAction + "\' worker \'" + worker + "\'?")
-    		if (answer) {
-    			$('#actionStatus').html("Performing \'" + performAction + "\' worker \'" + worker + "\'");
-            	// do you want to activate this worker?
-            	if(!confirmAction(performAction, worker)) return;
-                
-    			$.getJSON("cluster/"+performAction+"/" + worker, function(cluster) {
+    		var text = "\'" + performAction + "\' worker \'" + worker + "\', "+speed + " speed";
+    		if (confirm ("Do you want to "+text+"?")) {
+    			$('#actionStatus').html("Performing " + text);
+
+            	// perform action on this worker
+     			$.getJSON("cluster/"+performAction+"/" + worker+"/"+speed, function(cluster) {
     				fieldUpdate(cluster);
     			});
-    			closePopup()
-    			return true;
+    			closePopup();
+    			return;
     		}
-    		$('#actionStatus').html("Cancelled action \'" + performAction + "\' worker \'" + worker + "\'");
-			$('#actionStatus').fadeIn('fast');
-
-    		return false;
+    		closePopup();
+    		$('#actionStatus').html("Cancelled action " + text);
     	}
 		function showPopup() {
-			alert(worker);
 			$('body').css('overflow','hidden');
 			$('#popup').fadeIn('fast');
 			$('#mask').fadeIn('fast');
@@ -177,6 +182,9 @@
 			$('#mask').fadeOut('fast');
 			$('body').css('overflow','auto');
 			resetForm();
+		}
+		function resetForm() {
+			// reset all variables	
 		}
 		var worker = '';
 		var performAction = '';
