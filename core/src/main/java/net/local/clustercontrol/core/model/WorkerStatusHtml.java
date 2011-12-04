@@ -36,19 +36,23 @@ public class WorkerStatusHtml extends IWorkerStatus {
 	 */
 	private void getJkStatus(String body) {
 		JkStatus jkStatus = new JkStatus();
-		Pattern pattern = Pattern.compile("<td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td>");
+		Pattern workerPattern = Pattern.compile("<td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td>");
+		
+		JkBalancers jkBalancers = new JkBalancers();
+		JkBalancer jkBalancer = new JkBalancer();
+		int memberCount = 0;
 
 		Pattern patternRow = Pattern.compile("<tr>\\s{0,2}(<td><a href.*?)</tr>");
 		Matcher matcherRow = patternRow.matcher(body);
 		while(matcherRow.find()) {
             String row = matcherRow.group(1);
+			logger.debug("Pattern: ["+patternRow.pattern()+"]: "+row);
     		if(logger.isTraceEnabled()) {
     			logger.trace("Pattern: ["+patternRow.pattern()+"]: "+row);
     		}
-            Matcher matcher = pattern.matcher(row);
+            Matcher matcher = workerPattern.matcher(row);
             while (matcher.find()) {
-            	JkBalancers jkBalancers = new JkBalancers();
-            	JkBalancer jkBalancer = new JkBalancer();
+            	logger.debug("Pattern: ["+workerPattern.pattern()+"]: "+row);
             	JkMember member = new JkMember();
             	member.setLbfactor(Integer.valueOf(matcher.group(_4FACTOR)));
             	member.setAddress(matcher.group(_1WORKER_URL));
@@ -59,12 +63,13 @@ public class WorkerStatusHtml extends IWorkerStatus {
             	member.setState(matcher.group(_6STATUS));
             	
 				jkBalancer.getMember().add(member);
-				jkBalancers.setBalancer(jkBalancer);
-				jkStatus.setBalancers(jkBalancers);
-            	
-            }     
-            jkStatus.setServer(getJkServer(body));
+				memberCount++;
+            }
         }
+		jkBalancer.setMemberCount(memberCount);
+		jkBalancers.setBalancer(jkBalancer);
+		jkStatus.setBalancers(jkBalancers);
+		jkStatus.setServer(getJkServer(body));
 		
 		this.jkStatus = jkStatus;
 	}

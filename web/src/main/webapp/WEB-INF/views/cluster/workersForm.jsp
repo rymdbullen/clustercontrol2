@@ -13,7 +13,7 @@
 			<link rel="stylesheet" href="<c:url value="/resources/blueprint/ie.css" />" type="text/css" media="screen, projection">
 		<![endif]-->
 		<link rel="stylesheet" href="<c:url value="/resources/popup.css" />" type="text/css" media="screen, projection">
-		<script type="text/javascript" src="<c:url value="/resources/jquery-1.4.min.js" /> "></script>
+		<script type="text/javascript" src="<c:url value="/resources/jquery-1.7.1.min.js" /> "></script>
 		<script type="text/javascript" src="<c:url value="/resources/json.min.js" /> "></script>
 	</head>
 	<body>
@@ -47,13 +47,20 @@
 				</div>
 			</div>
 			<div id="alternatives">
-				<span>AutoRefresh</span>
-				On&nbsp;<input type="radio" id="ctrlautorefresh" value="on"  onclick="convertToGetAndRelocate(this.value);" />
-				Off&nbsp;<input type="radio" id="ctrlautorefresh" value="off"  onclick="convertToGetAndRelocate(this.value);" />
-				<span>Manual Refresh</span>
-				<input value="Refresh" type="button" onclick="pollUpdate();" title="Update Status table"/>
+				<span class="col1">AutoRefresh</span>
+				On&nbsp;<input type="radio" id="ctrlautorefreshon" value="on" onmouseup="startTimer(this.value);" />
+				Off&nbsp;<input type="radio" id="ctrlautorefreshoff" value="off" onmouseup="startTimer(this.value);" />
+				<div>
+					<span class="col1">Manual Refresh</span>
+					<input value="Refresh" type="button" onclick="pollUpdate();" title="Update Status table"/>
+				</div>
+				<div>
+					<span class="col1">Status:</span>&nbsp;<div id="actionStatus"></div>
+				</div>		
+				<div>
+					<span class="col1">Last Update:</span>&nbsp;<span id="lastPoll"></span>
+				</div>
 			</div>
-			<div id="actionStatus"></div>
 			<div id="mask" style="display: none;"></div>
 			<div id="popup" style="display: none;">
 				<div class="span-10 last">
@@ -77,21 +84,25 @@
 		<div>TODO</div>
 		<div>
 			<ul>
-				<li>handle on/off autorefresh</li>
-				<li>hook up with backend</li>
+				<li>handle on/off autorefresh - how does javacript timer work?</li>
+				<li>hook up with backend - </li>
 				<li>sign off</li>
 			</ul>
 		</div>
 	</body>
 
-	<script type="text/javascript">	
+	<script type="text/javascript">
+	<!--
+		var triggerId = '';
 		$(document).ready(function() {
 	        //
 	        // runs at body onload
-	        startTimer();
+	        triggerId = startTimer('on');
 		});
 
 		function pollUpdate() {
+			// reset the actionStatus field
+			$('#actionStatus').html("");
 			$.getJSON("cluster/poll", { name: $('#name').val() }, function(cluster) {
 				fieldUpdate(cluster);
 			});
@@ -135,16 +146,20 @@
 					$('#'+workerName+'-enable').attr('disabled', false);
 				}
 			}
+			// add last poll time
+			$('#lastPoll').html(cluster.lastPoll);
 		}
-    	function startTimer()
+    	function startTimer(toggle)
     	{
-			var url = window.location.search;
-        	var ctrlautorefresh = document.getElementById('ctrlautorefresh');
-			if(url.indexOf('autorefresh') > -1) {
-            	timerID = setTimeout("refreshPeriodic()", interval*1000);
-			} else {
-				window.setInterval(pollUpdate, 10000);
+			if(toggle == 'on') {
+    			$('#ctrlautorefreshoff').attr('checked', false);
 	    		$('#actionStatus').html("Started timer ");
+	    		triggerId = window.setInterval(pollUpdate, 10000);
+	    		return triggerId;
+			} else if(toggle == 'off') {
+    			$('#ctrlautorefreshon').attr('checked', false);
+	    		$('#actionStatus').html("Stopped timer ");
+				window.clearInterval(triggerId);
 			}
     	}
     	function confirmAction(action, workerName) 

@@ -1,8 +1,11 @@
 package net.local.clustercontrol.mvc;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,6 +13,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import net.local.clustercontrol.api.model.JkBalancer;
+import net.local.clustercontrol.api.model.JkMember;
+import net.local.clustercontrol.api.model.JkStatus;
+import net.local.clustercontrol.core.logic.WorkerNotFoundException;
+import net.local.clustercontrol.core.logic.impl.WorkerManager;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +33,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping(value="/cluster")
 public class ClusterController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(WorkerManager.class);
 	
 	private Cluster _cluster = null;
 	
@@ -80,39 +93,101 @@ public class ClusterController {
 		}
 		else
 		{
-			populate(setupHost.getUrl());
+			init(setupHost.getUrl());
 			return Collections.singletonMap("initStatus", "ok");
 		}
 	}
 	
+	private Cluster init(String url) {
+		Cluster cluster = null;
+		try {
+			ArrayList<JkStatus> statuses = WorkerManager.init(url);
+			convert(statuses, cluster);
+			
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (WorkerNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		cluster = populate(url);
+		return cluster;
+	}
+	public void convert(ArrayList<JkStatus> statuses, Cluster cluster) {
+		LinkedHashMap<String, HashMap<String, String>> list = new LinkedHashMap<String, HashMap<String, String>>();
+		// convert statuses to cluster object
+		for (int jkStatusIdx = 0; jkStatusIdx < statuses.size(); jkStatusIdx++) {
+			JkBalancer balancer = statuses.get(jkStatusIdx).getBalancers().getBalancer();
+			String hostName = statuses.get(jkStatusIdx).getServer().getName();
+			for (int memberIdx = 0; memberIdx < balancer.getMember().size(); memberIdx++) {
+				JkMember workerStatus = balancer.getMember().get(memberIdx);
+				logger.debug(hostName+": ["+jkStatusIdx+":"+memberIdx+"]: "+workerStatus.getName()+" "+workerStatus.getActivation());
+				String workerName = workerStatus.getName();
+				String status = workerStatus.getActivation();
+				HashMap<String, String> workerList = list.get(workerName);
+				if(workerList==null) {
+					// create new list
+					workerList = new HashMap<String, String>();
+					list.put(workerName, workerList);
+				}
+				workerList.put(hostName, status);
+			}
+			cluster.getHostNames().add(hostName);
+		}
+		
+		// convert to cluster
+		
+		Workers workers = new Workers();
+		Iterator<String> keysIter = list.keySet().iterator();
+		while (keysIter.hasNext()) {
+			String key = (String) keysIter.next();
+			HashMap<String, String> workerList = list.get(key);
+			Iterator<String> workerKeysIter = workerList.keySet().iterator();
+			while (workerKeysIter.hasNext()) {
+				String hostName = workerKeysIter.next();
+				String status = workerList.get(hostName);
+				WorkerStatus thisWorkerStatus = new WorkerStatus();
+				thisWorkerStatus.setHostName(hostName);
+				thisWorkerStatus.setStatus(status);
+				workers.getStatuses().add(thisWorkerStatus);
+			}
+		}
+		
+		cluster.getWorkerNames().addAll(list.keySet());
+		cluster.getWorkers().add(workers);
+	}
+
 	private Cluster populate(String url) {
-		Status status1 = setStatus("worker1");
-		Status status2 = setStatus("worker2");
 		
-		WorkerHost workerHost = new WorkerHost();
-		ArrayList<Status> aworkers = workerHost.getWorkers();
-		workerHost.setHostName("host1");
-		aworkers.add(status1);
-		aworkers.add(status2);
-		
-		workerHost.setWorkers(aworkers);
-		workerHost.setUrl(workerHost.getUrl());
-		
-		WorkerHost workerHost2 = new WorkerHost();
-		workerHost2.setHostName("host2");
-		workerHost2.setUrl("url2");
-		ArrayList<Status> aworkers2 = workerHost2.getWorkers(); 
-
-		Status status3 = setStatus("worker1");
-		Status status4 = setStatus("worker2");
-
-		aworkers2.add(status3);
-		aworkers2.add(status4);
-		
-		ArrayList<WorkerHost> list = new ArrayList<WorkerHost>();
-		list.add(workerHost);
-		list.add(workerHost2);
-		
+//		Status status1 = setStatus("worker1");
+//		Status status2 = setStatus("worker2");
+//		
+//		WorkerHost workerHost = new WorkerHost();
+//		ArrayList<Status> aworkers = workerHost.getWorkers();
+//		workerHost.setHostName("host1");
+//		aworkers.add(status1);
+//		aworkers.add(status2);
+//		
+//		workerHost.setWorkers(aworkers);
+//		workerHost.setUrl(workerHost.getUrl());
+//		
+//		WorkerHost workerHost2 = new WorkerHost();
+//		workerHost2.setHostName("host2");
+//		workerHost2.setUrl("url2");
+//		ArrayList<Status> aworkers2 = workerHost2.getWorkers(); 
+//
+//		Status status3 = setStatus("worker1");
+//		Status status4 = setStatus("worker2");
+//
+//		aworkers2.add(status3);
+//		aworkers2.add(status4);
+//		
+//		ArrayList<WorkerHost> list = new ArrayList<WorkerHost>();
+//		list.add(workerHost);
+//		list.add(workerHost2);
+//		
 		Workers workers1 = new Workers();
 		workers1.setName("workerName1");
 		ArrayList<WorkerStatus> workerStatusList1 = new ArrayList<WorkerStatus>();
@@ -120,7 +195,6 @@ public class ClusterController {
 		WorkerStatus workerStatus12 = setWorkerStatus("wsHost2");
 		workerStatusList1.add(workerStatus11);
 		workerStatusList1.add(workerStatus12);
-		workers1.setName("workerName1");
 		workers1.setStatuses(workerStatusList1);
 		
 		ArrayList<WorkerStatus> workerStatusList2 = new ArrayList<WorkerStatus>();
@@ -162,29 +236,12 @@ public class ClusterController {
 		}
 		return status;
 	}
-	private Status setStatus(String hostName) {
-		Status status = new Status();
-		status.setHostName(hostName);
-		if(Math.random() < 0.5d) {
-			status.setLastStatus("nok");
-			status.setStatus("ok");
-		} else {
-			status.setLastStatus("ok");
-			status.setStatus("nok");			
-		}
-		return status;
-	}
 
 	@RequestMapping(value="{id}", method=RequestMethod.GET)
 	public @ResponseBody Cluster get(@PathVariable Long id) {
 		WorkerHost workerHost = new WorkerHost();
 		workerHost.setUrl("url111");
 		return populate(workerHost.getUrl());
-//		WorkerHost account = workerHosts.get(id);
-//		if (account == null) {
-//			throw new ResourceNotFoundException(id);
-//		}
-//		return account;
 	}
 	
 	// internal helpers

@@ -1,11 +1,11 @@
 package net.local.clustercontrol.core.model;
 
-import net.local.clustercontrol.core.model.WorkerStatusHtml;
-import net.local.clustercontrol.api.model.JkStatus;
+import static org.junit.Assert.*;
 
-import org.junit.Assert;
 import org.junit.Test;
 
+import net.local.clustercontrol.core.model.WorkerStatusHtml;
+import net.local.clustercontrol.api.model.JkStatus;
 
 public class WorkerStatusHtmlTest {
 	
@@ -26,12 +26,12 @@ public class WorkerStatusHtmlTest {
 		WorkerStatusHtml ws = new WorkerStatusHtml(body);
 		JkStatus jkStatus = ws.getStatus();
 		
-		Assert.assertEquals(new Integer(80), jkStatus.getServer().getPort());
+		assertEquals(new Integer(80), jkStatus.getServer().getPort());
 	}
 	@Test
 	public void getHostTest() {
 		WorkerStatusHtml ws = new WorkerStatusHtml(body);
 		String value = ws.getStatus().getServer().getName();
-		Assert.assertEquals("the host was not retrieved correct", "192.168.10.116", value);
+		assertEquals("the host was not retrieved correct", "192.168.10.116", value);
 	}
 }

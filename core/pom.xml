@@ -17,40 +17,7 @@
     <description>CORE - ClusterControl2 for Tomcat AJP Clusters</description>
 
     <build>
-	    <plugins>
-<!--			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.10</version>
-				<configuration>
-					<configuration>
-						<excludes>
-							<exclude>**/Manual*.java</exclude>
-							<exclude>%regex[.*[integration].*Test.*]</exclude>
-							<exclude>**/integration/**</exclude>
-						</excludes>
-					</configuration>
-				</configuration>
-				<executions>
-					<execution>
-					     <id>surefire-itest</id>
-					     <phase>integration-test</phase>
-					     <goals>
-					          <goal>test</goal>
-					     </goals>
-					     <configuration>
-					          <excludes>
-					              <exclude>none</exclude>
-					          </excludes>
-					          <includes>
-					              <include>**/itest/**</include>
-					          </includes>
-					     </configuration>
-					</execution>
-			    </executions>
-			</plugin>
-			-->	    
-	    </plugins>
+	    <plugins/>
     </build>
     
 	<dependencies>
@@ -58,6 +25,20 @@
 			<groupId>net.local.clustercontrol</groupId>
 			<artifactId>clustercontrol-api</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		
+		<!--  Spring -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${org.springframework-version}</version>
+			<exclusions>
+				<!-- Exclude Commons Logging in favor of SLF4j -->
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>

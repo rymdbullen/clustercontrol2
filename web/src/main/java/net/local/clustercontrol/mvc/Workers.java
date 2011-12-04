@@ -13,7 +13,8 @@ import java.util.ArrayList;
  *
  */
 public class Workers {
-	private String name;
+//	private ArrayList<String> names = new ArrayList<String>();
+	private String name = new String();
 	@SuppressWarnings("unused")
 	private String status;
 	/** all workers with same name, ie not per host */
@@ -37,11 +38,11 @@ public class Workers {
 		boolean allEnabled = false;
 		for (WorkerStatus workerStatus : statuses) {
 			String thisStatus = workerStatus.getStatus();
-			if(lastStatus != null && thisStatus.equals("ok")) {
+			if(lastStatus != null && thisStatus.equalsIgnoreCase("ok")) {
 				if(lastStatus.equals(thisStatus)) {
 					allEnabled = true;
 				}
-			} else if(lastStatus != null && thisStatus.equals("nok")) {
+			} else if(lastStatus != null && thisStatus.equalsIgnoreCase("nok")) {
 				if(lastStatus.equals(thisStatus)) {
 					allDisabled = true;
 				}

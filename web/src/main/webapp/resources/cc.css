@@ -9,6 +9,12 @@
 		float: left;
 	}
 
+.col1 {
+		margin-left:10px;
+		width:100px;
+		float: left;
+	}
+
 #autorefreshtext {
 		float: left;
 	}
@@ -29,7 +35,13 @@
 	}
 	
 #actionStatus {
+		width:50px;
 		padding: 10px;
 		margin-left:10px;
-		border: 1px solid #bbb;
+	}
+	
+#lastPoll {
+		width:50px;
+		padding: 10px;
+		margin-left:10px;
 	}
