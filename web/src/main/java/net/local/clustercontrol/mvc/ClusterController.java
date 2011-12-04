@@ -159,35 +159,7 @@ public class ClusterController {
 		cluster.getWorkers().add(workers);
 	}
 
-	private Cluster populate(String url) {
-		
-//		Status status1 = setStatus("worker1");
-//		Status status2 = setStatus("worker2");
-//		
-//		WorkerHost workerHost = new WorkerHost();
-//		ArrayList<Status> aworkers = workerHost.getWorkers();
-//		workerHost.setHostName("host1");
-//		aworkers.add(status1);
-//		aworkers.add(status2);
-//		
-//		workerHost.setWorkers(aworkers);
-//		workerHost.setUrl(workerHost.getUrl());
-//		
-//		WorkerHost workerHost2 = new WorkerHost();
-//		workerHost2.setHostName("host2");
-//		workerHost2.setUrl("url2");
-//		ArrayList<Status> aworkers2 = workerHost2.getWorkers(); 
-//
-//		Status status3 = setStatus("worker1");
-//		Status status4 = setStatus("worker2");
-//
-//		aworkers2.add(status3);
-//		aworkers2.add(status4);
-//		
-//		ArrayList<WorkerHost> list = new ArrayList<WorkerHost>();
-//		list.add(workerHost);
-//		list.add(workerHost2);
-//		
+	private Cluster populate(String url) {		
 		Workers workers1 = new Workers();
 		workers1.setName("workerName1");
 		ArrayList<WorkerStatus> workerStatusList1 = new ArrayList<WorkerStatus>();

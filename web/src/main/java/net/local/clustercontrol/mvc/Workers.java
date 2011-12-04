@@ -34,28 +34,26 @@ public class Workers {
 	}
 	public String getStatus() {
 		String lastStatus = null;
-		boolean allDisabled = false;
-		boolean allEnabled = false;
+		boolean sameAsLast = false;
+		
 		for (WorkerStatus workerStatus : statuses) {
 			String thisStatus = workerStatus.getStatus();
-			if(lastStatus != null && thisStatus.equalsIgnoreCase("ok")) {
-				if(lastStatus.equals(thisStatus)) {
-					allEnabled = true;
-				}
-			} else if(lastStatus != null && thisStatus.equalsIgnoreCase("nok")) {
-				if(lastStatus.equals(thisStatus)) {
-					allDisabled = true;
-				}
+			if(lastStatus!=null && lastStatus.equalsIgnoreCase(thisStatus)) {
+				sameAsLast = true;
+			} else {
+				sameAsLast = false;
 			}
 			lastStatus = thisStatus;
 		}
-		if(allDisabled) {
-			return "allDisabled";
-		} else if(allEnabled) {
-			return "allEnabled";
-		} else {
+		if(!sameAsLast) {
 			return "unknown";
 		}
+		if(lastStatus.equalsIgnoreCase("nok")) {
+			return "allDisabled";
+		} if(lastStatus.equalsIgnoreCase("ok")) {
+			return "allEnabled";
+		}
+		return "unknown";
 	}
 	public void setStatus(String status) {
 		this.status = status;

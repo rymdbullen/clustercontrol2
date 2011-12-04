@@ -9,6 +9,7 @@ import net.local.clustercontrol.api.model.JkStatus;
 import net.local.clustercontrol.core.model.WorkerStatusHtml;
 import net.local.clustercontrol.mvc.Cluster;
 import net.local.clustercontrol.mvc.ClusterController;
+import net.local.clustercontrol.mvc.Workers;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.BeforeClass;
@@ -53,6 +54,10 @@ public class ClusterControllerTest {
 		statuses.add(jkStatus2);
 		cc.convert(statuses, cluster);
 		
+		ArrayList<Workers> workers = cluster.getWorkers();
+		for (Workers worker : workers) {
+			System.out.println(worker.getStatus());
+		}
 		assertEquals(new Integer(80), jkStatus.getServer().getPort());
 	}
 

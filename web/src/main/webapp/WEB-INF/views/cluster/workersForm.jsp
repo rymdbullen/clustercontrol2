@@ -47,15 +47,16 @@
 				</div>
 			</div>
 			<div id="alternatives">
-				<span class="col1">AutoRefresh</span>
-				On&nbsp;<input type="radio" id="ctrlautorefreshon" value="on" onmouseup="startTimer(this.value);" />
-				Off&nbsp;<input type="radio" id="ctrlautorefreshoff" value="off" onmouseup="startTimer(this.value);" />
 				<div>
-					<span class="col1">Manual Refresh</span>
-					<input value="Refresh" type="button" onclick="pollUpdate();" title="Update Status table"/>
+					<span class="col1">AutoRefresh</span>
+					On&nbsp;<input type="radio" id="ctrlautorefreshon" value="on" onmouseup="startTimer(this.value);" />
+					Off&nbsp;<input type="radio" id="ctrlautorefreshoff" value="off" onmouseup="startTimer(this.value);" />
 				</div>
 				<div>
-					<span class="col1">Status:</span>&nbsp;<div id="actionStatus"></div>
+					<span class="col1">Manual Refresh</span><input value="Refresh" type="button" onclick="pollUpdate();" title="Refresh Status"/>
+				</div>
+				<div>
+					<span class="col1">Status:</span>&nbsp;<span id="actionStatus"></span>
 				</div>		
 				<div>
 					<span class="col1">Last Update:</span>&nbsp;<span id="lastPoll"></span>
@@ -153,12 +154,12 @@
     	{
 			if(toggle == 'on') {
     			$('#ctrlautorefreshoff').attr('checked', false);
-	    		$('#actionStatus').html("Started timer ");
+	    		$('#actionStatus').html("Started autorefresh");
 	    		triggerId = window.setInterval(pollUpdate, 10000);
 	    		return triggerId;
 			} else if(toggle == 'off') {
     			$('#ctrlautorefreshon').attr('checked', false);
-	    		$('#actionStatus').html("Stopped timer ");
+	    		$('#actionStatus').html("Stopped autorefresh");
 				window.clearInterval(triggerId);
 			}
     	}
