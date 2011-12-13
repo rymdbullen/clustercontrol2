@@ -1,6 +1,6 @@
 package net.local.clustercontrol.core.logic;
 
-public class ControlCommandException extends Exception {
+public class ControlCommandException extends RuntimeException {
 	/**
 	 * Generated Serial Verion UID
 	 */

@@ -15,21 +15,22 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import net.local.clustercontrol.api.model.JkBalancer;
-import net.local.clustercontrol.api.model.JkBalancers;
-import net.local.clustercontrol.api.model.JkMap;
-import net.local.clustercontrol.api.model.JkMember;
-import net.local.clustercontrol.api.model.JkResult;
-import net.local.clustercontrol.api.model.JkServer;
-import net.local.clustercontrol.api.model.JkSoftware;
-import net.local.clustercontrol.api.model.JkStatus;
-import net.local.clustercontrol.api.model.ObjectFactory;
+import net.local.clustercontrol.api.model.xml.JkBalancer;
+import net.local.clustercontrol.api.model.xml.JkBalancers;
+import net.local.clustercontrol.api.model.xml.JkMap;
+import net.local.clustercontrol.api.model.xml.JkMember;
+import net.local.clustercontrol.api.model.xml.JkResult;
+import net.local.clustercontrol.api.model.xml.JkServer;
+import net.local.clustercontrol.api.model.xml.JkSoftware;
+import net.local.clustercontrol.api.model.xml.JkStatus;
+import net.local.clustercontrol.api.model.xml.ObjectFactory;
 
 import org.xml.sax.SAXException;
 
 import junit.framework.TestCase;
 
 public class JAXBTest extends TestCase {
+	private static final String JAXB_DOMAIN_NAMESPACE = "net.local.clustercontrol.api.model.xml";
 	//private static Log logger = LogFactory.getLog(JAXBTest.class);
 //	private static final Logger logger = LoggerFactory.getLogger(JAXBTest.class);
 	/**
@@ -40,7 +41,7 @@ public class JAXBTest extends TestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	public void testUnmarshallStatus() throws JAXBException, FileNotFoundException, URISyntaxException {
-		JAXBContext jc = JAXBContext.newInstance("net.local.clustercontrol.api.model");
+		JAXBContext jc = JAXBContext.newInstance(JAXB_DOMAIN_NAMESPACE);
 		Unmarshaller unmarshaller = jc.createUnmarshaller();
 		
 		Schema mySchema;
@@ -75,7 +76,7 @@ public class JAXBTest extends TestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	public void testUnmarshallActionStatus() throws JAXBException, FileNotFoundException, URISyntaxException {
-		JAXBContext jc = JAXBContext.newInstance("net.local.clustercontrol.api.model");
+		JAXBContext jc = JAXBContext.newInstance(JAXB_DOMAIN_NAMESPACE);
 		Unmarshaller unmarshaller = jc.createUnmarshaller();
 		
 		Schema mySchema;
@@ -105,7 +106,7 @@ public class JAXBTest extends TestCase {
 	 * @throws JAXBException
 	 */
 	public void testMarshall() throws JAXBException {
-		JAXBContext jc = JAXBContext.newInstance("net.local.clustercontrol.api.model");
+		JAXBContext jc = JAXBContext.newInstance(JAXB_DOMAIN_NAMESPACE);
 		ObjectFactory factory = new ObjectFactory();
 		JkStatus status = factory.createJkStatus();
 		JkServer server = factory.createJkServer();

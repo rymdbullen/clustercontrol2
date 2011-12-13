@@ -1,4 +1,4 @@
-package net.local.clustercontrol.mvc;
+package net.local.clustercontrol.core.model.dto;
 
 public class Status {
 	private String status;

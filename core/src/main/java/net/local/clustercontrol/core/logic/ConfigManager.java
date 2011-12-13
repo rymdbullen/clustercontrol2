@@ -1,6 +1,6 @@
 package net.local.clustercontrol.core.logic;
 
-import net.local.clustercontrol.api.model.Hosts;
+import net.local.clustercontrol.api.model.xml.Hosts;
 
 public class ConfigManager {
 

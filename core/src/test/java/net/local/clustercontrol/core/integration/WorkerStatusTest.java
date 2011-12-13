@@ -11,14 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.local.clustercontrol.core.configuration.Constants;
-import net.local.clustercontrol.api.model.JkBalancer;
-import net.local.clustercontrol.api.model.JkBalancers;
-import net.local.clustercontrol.api.model.JkMember;
-import net.local.clustercontrol.api.model.JkStatus;
-import net.local.clustercontrol.api.model.WorkerResponse;
-import net.local.clustercontrol.api.model.WorkerResponses;
+import net.local.clustercontrol.api.model.xml.JkBalancer;
+import net.local.clustercontrol.api.model.xml.JkBalancers;
+import net.local.clustercontrol.api.model.xml.JkMember;
+import net.local.clustercontrol.api.model.xml.JkStatus;
+import net.local.clustercontrol.api.model.xml.WorkerResponse;
+import net.local.clustercontrol.api.model.xml.WorkerResponses;
 import net.local.clustercontrol.core.logic.impl.WorkerManager;
-import net.local.clustercontrol.core.model.WorkerStatusXML;
+import net.local.clustercontrol.core.parsers.StatusParserXML;
 import junit.framework.TestCase;
 
 /**
@@ -37,7 +37,7 @@ public class WorkerStatusTest extends TestCase {
 		WorkerManager.init(Constants.TEST_URL);
 	}
 	/**
-	 * Test method for {@link se.avegagroup.clustercontrol.util.WorkerStatusXML#unmarshal(java.lang.String)}.
+	 * Test method for {@link StatusParserXML.avegagroup.clustercontrol.util.WorkerStatusXML#unmarshal(java.lang.String)}.
 	 */
 	public void testGetStatusUnmarshall() {
 		
@@ -48,7 +48,7 @@ public class WorkerStatusTest extends TestCase {
 		int hostsCount = workerResponses.getResponseList().size();
 		for (int hostIdx = 0; hostIdx < hostsCount; hostIdx++) {
 			WorkerResponse workerResponse = workerResponses.getResponseList().get(hostIdx);
-			WorkerStatusXML workerStatus = new WorkerStatusXML(workerResponse.getBody());
+			StatusParserXML workerStatus = new StatusParserXML(workerResponse.getBody());
 			JkStatus jkStatus = workerStatus.getStatus();
 			assertNotNull(jkStatus);
 			assertEquals(new Integer(1), jkStatus.getBalancers().getCount());
@@ -63,7 +63,7 @@ public class WorkerStatusTest extends TestCase {
 		}
 	}
 	/**
-	 * Test method for {@link se.avegagroup.clustercontrol.util.WorkerStatusXML#unmarshal(java.lang.String)}.
+	 * Test method for {@link StatusParserXML.avegagroup.clustercontrol.util.WorkerStatusXML#unmarshal(java.lang.String)}.
 	 */
 	public void testActivateUnmarshall() {
 		logger.debug("Running testActivateUnmarshall");
@@ -82,7 +82,7 @@ public class WorkerStatusTest extends TestCase {
 		}
 	}
 	/**
-	 * Test method for {@link se.avegagroup.clustercontrol.util.WorkerStatusXML#unmarshal(java.lang.String)}.
+	 * Test method for {@link StatusParserXML.avegagroup.clustercontrol.util.WorkerStatusXML#unmarshal(java.lang.String)}.
 	 */
 	public void testDisableUnmarshall() {
 		logger.debug("Running testDisableUnmarshall");

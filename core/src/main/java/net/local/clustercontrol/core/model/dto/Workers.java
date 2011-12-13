@@ -1,4 +1,4 @@
-package net.local.clustercontrol.mvc;
+package net.local.clustercontrol.core.model.dto;
 
 import java.util.ArrayList;
 
@@ -13,10 +13,13 @@ import java.util.ArrayList;
  *
  */
 public class Workers {
-//	private ArrayList<String> names = new ArrayList<String>();
-	private String name = new String();
+	public String TYPE_XML  = "XML";
+	public String TYPE_HTML = "HTML";
 	@SuppressWarnings("unused")
 	private String status;
+	private String name;
+	private String type;
+	
 	/** all workers with same name, ie not per host */
 	private ArrayList<WorkerStatus> statuses = new ArrayList<WorkerStatus>();
 
@@ -31,6 +34,15 @@ public class Workers {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public void setStatus(String status) {
+		this.status = status;
 	}
 	public String getStatus() {
 		String lastStatus = null;
@@ -54,9 +66,6 @@ public class Workers {
 			return "allEnabled";
 		}
 		return "unknown";
-	}
-	public void setStatus(String status) {
-		this.status = status;
 	}
 	@Override
 	public String toString() {

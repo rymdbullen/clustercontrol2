@@ -1,4 +1,4 @@
-package net.local.clustercontrol.core.model;
+package net.local.clustercontrol.core.parsers;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -6,15 +6,15 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.local.clustercontrol.api.model.JkBalancer;
-import net.local.clustercontrol.api.model.JkBalancers;
-import net.local.clustercontrol.api.model.JkMember;
-import net.local.clustercontrol.api.model.JkServer;
-import net.local.clustercontrol.api.model.JkStatus;
+import net.local.clustercontrol.api.model.xml.JkBalancer;
+import net.local.clustercontrol.api.model.xml.JkBalancers;
+import net.local.clustercontrol.api.model.xml.JkMember;
+import net.local.clustercontrol.api.model.xml.JkServer;
+import net.local.clustercontrol.api.model.xml.JkStatus;
 
-public class WorkerStatusHtml extends IWorkerStatus {
+public class StatusParserHtml extends IStatusParser {
 	
-	private static final Logger logger = LoggerFactory.getLogger(WorkerStatusHtml.class);
+	private static final Logger logger = LoggerFactory.getLogger(StatusParserHtml.class);
 	public static final int _1WORKER_URL = 1;
 	public static final int _2ROUTE = 2;
 	public static final int _3ROUTE_REDIR = 3;
@@ -25,7 +25,7 @@ public class WorkerStatusHtml extends IWorkerStatus {
 	public static final int _8TO = 8;
 	public static final int _9FROM = 9;
 	
-	public WorkerStatusHtml(String body) {
+	public StatusParserHtml(String body) {
 		getJkStatus(body);
 	}
 	
@@ -119,5 +119,17 @@ public class WorkerStatusHtml extends IWorkerStatus {
 		}
 		
 		return body.substring(beginIndex+tag.length(), endIndex);
+	}
+
+	@Override
+	public String getEnableUrl(String workerName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getDisableUrl(String workerName) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

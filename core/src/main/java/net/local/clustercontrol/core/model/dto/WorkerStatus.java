@@ -1,4 +1,4 @@
-package net.local.clustercontrol.mvc;
+package net.local.clustercontrol.core.model.dto;
 
 /**
  * Cluster of tomcats contains arrays of workers. Each worker contains one status for each host.
@@ -15,6 +15,7 @@ public class WorkerStatus {
 	private String status;
 	private String lastStatus;
 	private String hostName;
+	private String hostPort;
 	
 	public String getStatus() {
 		return status;
@@ -34,8 +35,14 @@ public class WorkerStatus {
 	public void setHostName(String hostName) {
 		this.hostName = hostName;
 	}
+	public String getHostPort() {
+		return hostPort;
+	}
+	public void setHostPort(String hostPort) {
+		this.hostPort = hostPort;
+	}
 	@Override
 	public String toString() {
-		return "Status [hostName=" + hostName + ", status=" + status + ", lastStatus=" + lastStatus + "]";
+		return "Status [hostName=" + hostName + ", hostPort=" + hostPort + ", status=" + status + ", lastStatus=" + lastStatus + "]";
 	}
 }

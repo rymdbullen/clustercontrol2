@@ -1,4 +1,4 @@
-package net.local.clustercontrol.mvc;
+package net.local.clustercontrol.core.model.dto;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,6 +16,7 @@ import java.util.Date;
  */
 public class Cluster {
 	private String name;
+	private String statusMessage;
 	private String lastPoll;
 	
 	private ArrayList<Workers> workers = new ArrayList<Workers>(0);
@@ -52,6 +53,12 @@ public class Cluster {
 	}
 	public void setWorkerNames(ArrayList<String> workerNames) {
 		this.workerNames = workerNames;
+	}
+	public String getStatusMessage() {
+		return statusMessage;
+	}
+	public void setStatusMessage(String statusMessage) {
+		this.statusMessage = statusMessage;
 	}
 	@Override
 	public String toString() {

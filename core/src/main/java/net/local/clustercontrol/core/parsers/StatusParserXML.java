@@ -1,4 +1,4 @@
-package net.local.clustercontrol.core.model;
+package net.local.clustercontrol.core.parsers;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -18,14 +18,14 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import net.local.clustercontrol.core.configuration.Constants;
-import net.local.clustercontrol.api.model.JkStatus;
+import net.local.clustercontrol.api.model.xml.JkStatus;
 
-public class WorkerStatusXML extends IWorkerStatus {
+public class StatusParserXML extends IStatusParser {
 	
-	private static final Logger logger = LoggerFactory.getLogger(WorkerStatusXML.class);
+	private static final Logger logger = LoggerFactory.getLogger(StatusParserXML.class);
 	
-	public WorkerStatusXML(String body) {
-		getJkStatus(body);
+	public StatusParserXML(String body) {
+		init(body);
 	}
 	
 	/**
@@ -33,7 +33,7 @@ public class WorkerStatusXML extends IWorkerStatus {
 	 * @param body
 	 * @return
 	 */
-	private void getJkStatus(String body) {
+	private void init(String body) {
 		Schema mySchema;
 		SchemaFactory sf = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
 	
@@ -64,5 +64,17 @@ public class WorkerStatusXML extends IWorkerStatus {
 		} catch (JAXBException e) {
 			logger.error("Could not unmarshal file: "+e.getErrorCode()+": "+e.getMessage());
 		}
+	}
+
+	@Override
+	public String getEnableUrl(String workerName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getDisableUrl(String workerName) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -4,8 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import net.local.clustercontrol.core.model.WorkerStatusHtml;
-import net.local.clustercontrol.api.model.JkStatus;
+import net.local.clustercontrol.core.parsers.StatusParserHtml;
+import net.local.clustercontrol.api.model.xml.JkStatus;
 
 public class WorkerStatusHtmlTest {
 	
@@ -23,14 +23,14 @@ public class WorkerStatusHtmlTest {
 	
 	@Test
 	public void getEntityTest() {
-		WorkerStatusHtml ws = new WorkerStatusHtml(body);
+		StatusParserHtml ws = new StatusParserHtml(body);
 		JkStatus jkStatus = ws.getStatus();
 		
 		assertEquals(new Integer(80), jkStatus.getServer().getPort());
 	}
 	@Test
 	public void getHostTest() {
-		WorkerStatusHtml ws = new WorkerStatusHtml(body);
+		StatusParserHtml ws = new StatusParserHtml(body);
 		String value = ws.getStatus().getServer().getName();
 		assertEquals("the host was not retrieved correct", "192.168.10.116", value);
 	}

@@ -5,24 +5,19 @@ import static org.junit.Assert.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import com.opera.core.systems.OperaDriver;
-
 import org.junit.Test;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class ManualSeleniumTest {
+public class SeleniumTestRemote {
 
 	@Test
-	public void testGetAvailability() throws MalformedURLException {
+	public void testMyRolex() throws MalformedURLException {
 		
 		// Create a new instance of the Firefox driver
 		// Notice that the remainder of the code relies on the interface,
@@ -31,25 +26,27 @@ public class ManualSeleniumTest {
 		//WebDriver driver = new OperaDriver();
 		WebDriver driver = new RemoteWebDriver(new URL("http://172.18.151.172:4444/wd/hub"), DesiredCapabilities.firefox());
 		
+		assertNotNull(driver);
 		
 		// http://sunc01017.gva.pictet.com:13350/workspace/
 			 
 		// tu peux utiliser ce user : sptest1/password
 			
 		// And now use this to visit Google
-		driver.get("http://sunc01017.gva.pictet.com:13350/workspace/");
-		// Alternatively the same thing can be done like this
-		// driver.navigate().to("http://www.google.com");
+//driver.get("http://sunc01017.gva.pictet.com:13350/workspace/");
+		driver.get("http://172.18.151.172:8080/MyRolexWorldService/static/login.jsp");
 
 		// Find the login text input element by its name
-		WebElement element = driver.findElement(By.name("q"));
-		
-		// Enter something to search for
-		element.sendKeys("Cheese!");
+		driver.findElement(By.name("j_username")).clear();
+		driver.findElement(By.name("j_username")).sendKeys("fred");
+		driver.findElement(By.name("j_password")).clear();
+		driver.findElement(By.name("j_password")).sendKeys("a");
+		driver.findElement(By.cssSelector("input.submitBtn")).click();
 
-		// Now submit the form. WebDriver will find the form for us from the
-		// element
-		element.submit();
+		
+		driver.findElement(By.name("searchButton")).click();
+
+		driver.findElement(By.name("contentBox")).sendKeys("a");
 
 		// Check the title of the page
 		System.out.println("Page title is: " + driver.getTitle());

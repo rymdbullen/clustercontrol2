@@ -10,21 +10,22 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-import net.local.clustercontrol.api.model.Hosts;
-import net.local.clustercontrol.api.model.Host;
-import net.local.clustercontrol.api.model.JkStatus;
-import net.local.clustercontrol.api.model.JkMember;
-import net.local.clustercontrol.api.model.JkResult;
-import net.local.clustercontrol.api.model.WorkerResponse;
-import net.local.clustercontrol.api.model.WorkerResponses;
+import net.local.clustercontrol.api.model.xml.Hosts;
+import net.local.clustercontrol.api.model.xml.Host;
+import net.local.clustercontrol.api.model.xml.JkStatus;
+import net.local.clustercontrol.api.model.xml.JkMember;
+import net.local.clustercontrol.api.model.xml.JkResult;
+import net.local.clustercontrol.api.model.xml.WorkerResponse;
+import net.local.clustercontrol.api.model.xml.WorkerResponses;
 import net.local.clustercontrol.core.http.HttpClient;
 import net.local.clustercontrol.core.logic.ControlCommandException;
-import net.local.clustercontrol.core.logic.IWorkerManager;
 import net.local.clustercontrol.core.logic.WorkerNotFoundException;
 import net.local.clustercontrol.core.util.StringUtil;
 
-public class WorkerManager implements IWorkerManager {
+@Component
+public class WorkerManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(WorkerManager.class);
 
@@ -448,7 +449,7 @@ public class WorkerManager implements IWorkerManager {
 	 */
 	private static JkStatus unmarshalResponse(WorkerResponse workerResponse) {
 		return getWorkerStatus(workerResponse.getBody());
-		//IWorkerStatus workerStatus = new IWorkerStatus(workerResponse.getBody());
+		//IStatusParser workerStatus = new IStatusParser(workerResponse.getBody());
 		//return workerStatus.unmarshal(workerResponse.getBody());
 	}
 	private static JkStatus getWorkerStatus(String body) {

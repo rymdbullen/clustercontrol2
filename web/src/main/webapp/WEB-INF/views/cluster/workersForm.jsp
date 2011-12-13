@@ -75,8 +75,8 @@
 					</label>
 					</div>
 					<a href="#" onclick="closePopup();">Close</a>
-				</div>			
-			</div>	
+				</div>
+			</div>
 			<hr/>
 			<ul>
 				<li> <a href="?locale=en_us">us</a> |  <a href="?locale=en_gb">gb</a> | <a href="?locale=es_es">es</a> | <a href="?locale=de_de">de</a> </li>
@@ -85,8 +85,11 @@
 		<div>TODO</div>
 		<div>
 			<ul>
-				<li>handle on/off autorefresh - how does javacript timer work?</li>
-				<li>hook up with backend - </li>
+				<li>implement interfaces of ClusterManager and WorkerFactory</li>
+				<li>implement error handling - no worker for url found</li>
+				<li>implement error handling - error reading old worker setup</li>
+				<li>layout - fix two column layout for "alternatives"</li>
+				<li>layout - flowing layout for "alternatives"</li>
 				<li>sign off</li>
 			</ul>
 		</div>
@@ -94,6 +97,8 @@
 
 	<script type="text/javascript">
 	<!--
+		var worker = '';
+		var performAction = '';
 		var triggerId = '';
 		$(document).ready(function() {
 	        //
@@ -202,8 +207,6 @@
 		function resetForm() {
 			// reset all variables	
 		}
-		var worker = '';
-		var performAction = '';
     --></script>
 	
 </html>

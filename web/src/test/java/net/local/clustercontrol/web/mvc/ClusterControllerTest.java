@@ -5,11 +5,11 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.Properties;
 
-import net.local.clustercontrol.api.model.JkStatus;
-import net.local.clustercontrol.core.model.WorkerStatusHtml;
-import net.local.clustercontrol.mvc.Cluster;
-import net.local.clustercontrol.mvc.ClusterController;
-import net.local.clustercontrol.mvc.Workers;
+import net.local.clustercontrol.api.model.xml.JkStatus;
+import net.local.clustercontrol.core.logic.impl.ClusterManager;
+import net.local.clustercontrol.core.model.dto.Cluster;
+import net.local.clustercontrol.core.model.dto.Workers;
+import net.local.clustercontrol.core.parsers.StatusParserHtml;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.BeforeClass;
@@ -41,18 +41,18 @@ public class ClusterControllerTest {
 	}
 	@Test
 	public void convertTest() {
-		JkStatus jkStatus = (new WorkerStatusHtml(body)).getStatus();
-		JkStatus jkStatus2 = (new WorkerStatusHtml(body)).getStatus();
+		JkStatus jkStatus = (new StatusParserHtml(body)).getStatus();
+		JkStatus jkStatus2 = (new StatusParserHtml(body)).getStatus();
 		String server = jkStatus2.getServer().getName();
 		server = server.substring(0, server.length()-1) + "7";
 		jkStatus2.getServer().setName(server);
 		
-		ClusterController cc = new ClusterController(null);
+		ClusterManager cm = new ClusterManager(null, null);
 		Cluster cluster = new Cluster();
 		ArrayList<JkStatus> statuses = new ArrayList<JkStatus>();
 		statuses.add(jkStatus);
 		statuses.add(jkStatus2);
-		cc.convert(statuses, cluster);
+		cm.convert(statuses, cluster);
 		
 		ArrayList<Workers> workers = cluster.getWorkers();
 		for (Workers worker : workers) {

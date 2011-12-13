@@ -1,4 +1,4 @@
-package net.local.clustercontrol.core.http;
+package net.local.clustercontrol.core.http.impl;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -14,14 +14,18 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import net.local.clustercontrol.api.model.xml.Host;
 import net.local.clustercontrol.api.model.xml.Hosts;
 import net.local.clustercontrol.api.model.xml.ResponseError;
 import net.local.clustercontrol.api.model.xml.WorkerResponse;
 import net.local.clustercontrol.api.model.xml.WorkerResponses;
+import net.local.clustercontrol.core.http.IHttpClient;
+import net.local.clustercontrol.core.logic.ControlCommandException;
 
-public class HttpClient {
+@Component
+public class HttpClient implements IHttpClient {
 
 	private static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
@@ -33,18 +37,14 @@ public class HttpClient {
 	 * @throws MalformedURLException 
 	 * @throws URISyntaxException 
 	 */
-	public static WorkerResponses executeUrls(Hosts hosts, String parameters) {
+	@Override
+	public WorkerResponses performActionOnHosts(Hosts hosts) {
 		int hostsCount = hosts.getHostList().size();
 		WorkerResponses workerResponses = new WorkerResponses();
 		
 		for (int hostIdx = 0; hostIdx < hostsCount; hostIdx++) {
 			Host host = hosts.getHostList().get(hostIdx);
-			try {
-				workerResponses.getResponseList().add(executeUrl(host, parameters));
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			workerResponses.getResponseList().add(performActionOnHost(host));
 		}
 		return workerResponses;
 	}
@@ -60,38 +60,8 @@ public class HttpClient {
 	 * @throws MalformedURLException 
 	 * @throws URISyntaxException 
 	 */
-	public static WorkerResponse executeUrl(Host host, String parameters) throws MalformedURLException {
-		String targetUrl = createTargetUrl(host, parameters);
-		return executeUrl(new URL(targetUrl));
-	}
-	/**
-	 * Creates the request (GET) and receives a encapsulated response object, ie
-	 * the html body. Returns a WorkerResponse for this request.
-	 * 
-	 * @param host
-	 * 			  the host to request
-	 * @param parameters
-	 *            the parameters to execute
-	 * @return the response, ie html body
-	 * @throws MalformedURLException 
-	 * @throws URISyntaxException 
-	 */
-	public static WorkerResponse executeUrl(String url, String parameters) throws MalformedURLException {
-		String targetUrl = url+"?"+parameters;
-		return executeUrl(new URL(targetUrl));
-	}
-	/**
-	 * Creates the request (GET) and receives a encapsulated response object, ie
-	 * the html body. Returns a WorkerResponse for this request.
-	 * 
-	 * @param url
-	 * 			  the url to request
-	 * @param parameters
-	 *            the parameters to execute
-	 * @return the response, ie html body
-	 * @throws URISyntaxException 
-	 */
-	public static WorkerResponse executeUrl(URL url) {
+	public WorkerResponse performActionOnHost(Host host) {
+		URL url = createTargetUrl(host);
 		if(logger.isDebugEnabled()) { logger.debug("executing request " + url.toExternalForm()); }
 		// creates the response handler
 		DefaultHttpClient httpclient = new DefaultHttpClient();
@@ -139,7 +109,7 @@ public class HttpClient {
 	 * @param parameters the control parameters, added as url parameters 
 	 * @return the target url to execute by the http client
 	 */
-	public static String createTargetUrl(Host host, String parameters) {
+	URL createTargetUrl(Host host) {
 		Integer port = host.getPort();
 		String portPart = "";
 		String targetHost = "";
@@ -147,7 +117,12 @@ public class HttpClient {
 			portPart = ":"+port;
 		}
 		targetHost = "http://"+ host.getIpAddress() + portPart;
-		String targetContext = "/"+host.getContext() + "?" + parameters;
-		return targetHost + targetContext;
+		String targetContext = "/"+host.getContext();
+		String url = targetHost + targetContext;
+		try {
+			return new URL(url);
+		} catch (MalformedURLException e) {
+			throw new ControlCommandException("Failed to execute url: "+url);
+		}
 	}
 }
