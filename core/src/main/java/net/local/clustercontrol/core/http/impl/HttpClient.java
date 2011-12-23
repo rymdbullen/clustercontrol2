@@ -8,6 +8,7 @@ import java.net.URL;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.BasicResponseHandler;
@@ -17,36 +18,26 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import net.local.clustercontrol.api.model.xml.Host;
-import net.local.clustercontrol.api.model.xml.Hosts;
 import net.local.clustercontrol.api.model.xml.ResponseError;
 import net.local.clustercontrol.api.model.xml.WorkerResponse;
 import net.local.clustercontrol.api.model.xml.WorkerResponses;
 import net.local.clustercontrol.core.http.IHttpClient;
 import net.local.clustercontrol.core.logic.ControlCommandException;
+import net.local.clustercontrol.core.model.dto.Cluster;
 
 @Component
 public class HttpClient implements IHttpClient {
 
 	private static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
-	/**
-	 * Executes urls
-	 * @param hosts the hosts to request
-	 * @param parameters the parameters to execute
-	 * @return the workerlists, ie html bodys
-	 * @throws MalformedURLException 
-	 * @throws URISyntaxException 
-	 */
 	@Override
-	public WorkerResponses performActionOnHosts(Hosts hosts) {
-		int hostsCount = hosts.getHostList().size();
-		WorkerResponses workerResponses = new WorkerResponses();
-		
-		for (int hostIdx = 0; hostIdx < hostsCount; hostIdx++) {
-			Host host = hosts.getHostList().get(hostIdx);
-			workerResponses.getResponseList().add(performActionOnHost(host));
-		}
-		return workerResponses;
+	public WorkerResponse getWorkerResponseForUrl(String url) {
+		URL targetUrl = createTargetUrl(url);
+		return performActionOnHost(targetUrl);
+	}
+	@Override
+	public WorkerResponses getWorkerResponseForAction(Cluster cluster) {
+		throw new IllegalArgumentException("not implemented");
 	}
 	/**
 	 * Creates the request (GET) and receives a encapsulated response object, ie
@@ -60,9 +51,12 @@ public class HttpClient implements IHttpClient {
 	 * @throws MalformedURLException 
 	 * @throws URISyntaxException 
 	 */
-	public WorkerResponse performActionOnHost(Host host) {
-		URL url = createTargetUrl(host);
-		if(logger.isDebugEnabled()) { logger.debug("executing request " + url.toExternalForm()); }
+	WorkerResponse performActionOnHost(URL url) {
+		if(url == null) {
+			throw new IllegalArgumentException("Url cannot be null");
+		}
+		if(logger.isDebugEnabled()) { logger.debug("Performing request " + url.toExternalForm()); }
+		
 		// creates the response handler
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpRequestRetryHandler retryHandler = new RetryHandler();
@@ -70,12 +64,15 @@ public class HttpClient implements IHttpClient {
 
 		WorkerResponse workerResponse = new WorkerResponse();
 		String responseBody = null;
+		ResponseError responseError = new ResponseError();
 		try {
 			HttpGet httpget = new HttpGet(url.toExternalForm());
-			org.apache.http.client.ResponseHandler<String> responseHandler = new BasicResponseHandler();
-			responseBody = (String) httpclient.execute(httpget, responseHandler);
+			ResponseHandler<String> responseHandler = new BasicResponseHandler();
+			responseBody = httpclient.execute(httpget, responseHandler);
 			workerResponse.setBody(responseBody);
 			workerResponse.setHost(url.getHost());
+			responseError.setMessageKey("");
+			responseError.setMessage("");
 		} catch (ClientProtocolException e) {
 			logger.error(e.getClass().getCanonicalName() +" "+e.getMessage()+" "+e.getLocalizedMessage());
 			if(e instanceof HttpResponseException) {
@@ -83,10 +80,8 @@ public class HttpClient implements IHttpClient {
 			} else {
 				logger.error("ClientProtocolException: Failed to connect to host: "+url.getHost()+", "+url.getPort());
 			}
-			ResponseError responseError = new ResponseError();
 			responseError.setMessageKey(e.getClass().getCanonicalName());
 			responseError.setMessage(e.getMessage());
-			workerResponse.setError(responseError);
 		} catch (IOException e) {
 			logger.error(e.getClass() +" "+e.getMessage()+" "+e.getLocalizedMessage());
 			if(e instanceof HttpHostConnectException) {
@@ -94,14 +89,28 @@ public class HttpClient implements IHttpClient {
 			} else {
 				logger.error("IOException: Failed to connect to host: "+url.getHost()+", "+url.getPort());
 			}
-			ResponseError responseError = new ResponseError();
 			responseError.setMessageKey(e.getClass().getCanonicalName());
 			responseError.setMessage(e.getMessage());
-			workerResponse.setError(responseError);
 		}
+		workerResponse.setError(responseError);
 		// shutdown the client
 		httpclient.getConnectionManager().shutdown();
 		return workerResponse;
+	}
+	
+	/**
+	 * Creates the target url to execute by the http client
+	 * @param host the host with all info about the target, ie ipaddress, port, context
+	 * @param parameters the control parameters, added as url parameters 
+	 * @return the target url to execute by the http client
+	 */
+	URL createTargetUrl(String url) {
+		try {
+			return new URL(url);
+		} catch (MalformedURLException e) {
+			throw new ControlCommandException("Failed to execute url: "+url);
+		}
+		
 	}
 	/**
 	 * Creates the target url to execute by the http client
@@ -117,7 +126,10 @@ public class HttpClient implements IHttpClient {
 			portPart = ":"+port;
 		}
 		targetHost = "http://"+ host.getIpAddress() + portPart;
-		String targetContext = "/"+host.getContext();
+		String targetContext = host.getContext(); 
+		if(false == targetContext.startsWith("/")) {
+			targetContext = "/"+targetContext;
+		}
 		String url = targetHost + targetContext;
 		try {
 			return new URL(url);

@@ -16,8 +16,14 @@ import java.util.Date;
  */
 public class Cluster {
 	private String name;
+	private String type;
+	private String context;
+	private String protocol;
+	private String port;
 	private String statusMessage;
 	private String lastPoll;
+	private String action;
+	private String initUrl;
 	
 	private ArrayList<Workers> workers = new ArrayList<Workers>(0);
 	private ArrayList<String> hostNames = new ArrayList<String>(0);
@@ -60,6 +66,42 @@ public class Cluster {
 	public void setStatusMessage(String statusMessage) {
 		this.statusMessage = statusMessage;
 	}
+	public String getContext() {
+		return context;
+	}
+	public void setContext(String context) {
+		this.context = context;
+	}
+	public String getInitUrl() {
+		return initUrl;
+	}
+	public void setInitUrl(String initUrl) {
+		this.initUrl = initUrl;
+	}
+	public String getAction() {
+		return action;
+	}
+	public void setAction(String action) {
+		this.action = action;
+	}
+	public String getProtocol() {
+		return protocol;
+	}
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public String getPort() {
+		return port;
+	}
+	public void setPort(String port) {
+		this.port = port;
+	}
 	@Override
 	public String toString() {
 		StringBuilder sbWorkers = new StringBuilder();
@@ -75,9 +117,11 @@ public class Cluster {
 		for (int i = 0; i < workerNames.size(); i++) {
 			sbWorkerNames.append(workerNames.get(i)+",");
 		}
-
-		return "Cluster [name=" + name + ", workers={" + sbWorkers.toString() +"}"
-				+ ", workerNames={" + sbWorkerNames.toString().substring(0, sbWorkerNames.toString().length()-1) + "}"
-				+ ", hostNames={" + sbHostNames.toString().substring(0, sbHostNames.toString().length()-1) + "}]";
+		return "Cluster [name=" + name + ", type=" + type + ", context="
+				+ context + ", protocol=" + protocol + ", port=" + port + ", statusMessage="
+				+ statusMessage + ", lastPoll=" + lastPoll + ", action="
+				+ action + ", initUrl=" + initUrl + ", workers={" + sbWorkers.toString() +"}"
+						+ ", workerNames={" + sbWorkerNames.toString().substring(0, sbWorkerNames.toString().length()-1) + "}"
+						+ ", hostNames={" + sbHostNames.toString().substring(0, sbHostNames.toString().length()-1) + "}]";
 	}
 }

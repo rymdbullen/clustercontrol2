@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<status
+  xmlns:jk="http://tomcat.apache.org">
+<server
+  name="localhost"
+  port="8888"
+/>
+<software
+  web_server="Apache/2.2.11 (Ubuntu) mod_jk/1.2.26 PHP/5.2.6-3ubuntu4.1 with Suhosin-Patch"
+  jk_version="mod_jk/1.2.26"
+/>
+<balancers
+  count="1"
+>
+  <balancer
+    name="lbfootprint"
+    type="lb"
+    sticky_session="True"
+    sticky_session_force="False"
+    retries="2"
+    recover_time="60"
+    max_reply_timeouts="0"
+    method="Request"
+    lock="Optimistic"
+    member_count="2"
+    good="2"
+    degraded="0"
+    bad="0"
+    busy="0"
+    max_busy="0"
+    map_count="2"
+    time_to_maintenance_min="58"
+    time_to_maintenance_max="120"
+  >
+      <member
+        name="footprint1"
+        type="ajp13"
+        host="10.0.2.15"
+        port="8109"
+        address="10.0.2.15:8109"
+        activation="ACT"
+        lbfactor="1"
+        route="footprint1"
+        redirect=""
+        domain=""
+        distance="0"
+        state="OK/IDLE"
+        lbmult="1"
+        lbvalue="0"
+        elected="0"
+        errors="0"
+        client_errors="0"
+        reply_timeouts="0"
+        transferred="0"
+        read="0"
+        busy="0"
+        max_busy="0"
+        time_to_recover_min="0"
+        time_to_recover_max="0"
+      />
+      <member
+        name="footprint2"
+        type="ajp13"
+        host="10.0.2.15"
+        port="8209"
+        address="10.0.2.15:8209"
+        activation="ACT"
+        lbfactor="1"
+        route="footprint2"
+        redirect=""
+        domain=""
+        distance="0"
+        state="OK/IDLE"
+        lbmult="1"
+        lbvalue="0"
+        elected="0"
+        errors="0"
+        client_errors="0"
+        reply_timeouts="0"
+        transferred="0"
+        read="0"
+        busy="0"
+        max_busy="0"
+        time_to_recover_min="0"
+        time_to_recover_max="0"
+      />
+      <map
+        id="1"
+        server="127.0.1.1 [*:80]"
+        uri="/controlpanel-web*"
+        type="Wildchar"
+        source="JkMount"
+      />
+      <map
+        id="2"
+        server="127.0.1.1 [*:80]"
+        uri="/footprint-web*"
+        type="Wildchar"
+        source="JkMount"
+      />
+  </balancer>
+</balancers>
+  <result
+    type="OK"
+    message="Action finished"
+  />
+</status>

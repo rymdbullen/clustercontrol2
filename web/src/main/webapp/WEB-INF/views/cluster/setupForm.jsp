@@ -26,7 +26,7 @@
 						<legend>Cluster Setup</legend>
 						<p>
 							<form:label	id="urlLabel" for="url" path="url" cssErrorClass="error">Url</form:label><br/>
-							<form:input path="url" /><form:errors path="url" />
+							<form:input path="url" value="http://localhost:8080/balancer-manager" /><form:errors path="url" />
 						</p>
 						<p>	
 							<input id="create" type="submit" value="Create" />

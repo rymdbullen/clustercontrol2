@@ -15,7 +15,6 @@ import net.local.clustercontrol.mvc.SetupHost;
 import net.local.clustercontrol.core.logic.IWorkerManager;
 import net.local.clustercontrol.core.logic.WorkerNotFoundException;
 import net.local.clustercontrol.core.logic.impl.ClusterManager;
-import net.local.clustercontrol.core.logic.impl.WorkerManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(value="/cluster")
 public class ClusterController {
 	
-	private static final Logger logger = LoggerFactory.getLogger(WorkerManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(ClusterController.class);
 	
 	//private Cluster _cluster = null;
 	

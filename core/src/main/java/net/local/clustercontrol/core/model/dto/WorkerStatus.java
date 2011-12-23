@@ -12,11 +12,23 @@ package net.local.clustercontrol.core.model.dto;
  *
  */
 public class WorkerStatus {
+	private String name;
 	private String status;
 	private String lastStatus;
 	private String hostName;
 	private String hostPort;
+	private String type;
+	private Integer to;
+	private Integer set;
+	private Integer transferred;
+	private Integer loadFactor;
 	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
 	public String getStatus() {
 		return status;
 	}
@@ -41,8 +53,43 @@ public class WorkerStatus {
 	public void setHostPort(String hostPort) {
 		this.hostPort = hostPort;
 	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public Integer getTo() {
+		return to;
+	}
+	public void setTo(Integer to) {
+		this.to = to;
+	}
+	public Integer getSet() {
+		return set;
+	}
+	public void setSet(Integer set) {
+		this.set = set;
+	}
+	public Integer getTransferred() {
+		return transferred;
+	}
+	public void setTransferred(Integer transferred) {
+		this.transferred = transferred;
+	}
+	public Integer getLoadFactor() {
+		return loadFactor;
+	}
+	public void setLoadFactor(Integer loadFactor) {
+		this.loadFactor = loadFactor;
+	}
 	@Override
 	public String toString() {
-		return "Status [hostName=" + hostName + ", hostPort=" + hostPort + ", status=" + status + ", lastStatus=" + lastStatus + "]";
+		return "WorkerStatus [name=" + name + ", status=" + status
+				+ ", lastStatus=" + lastStatus + ", hostName=" + hostName
+				+ ", hostPort=" + hostPort + ", type=" + type + ", to=" + to
+				+ ", set=" + set + ", transferred=" + transferred
+				+ ", loadFactor=" + loadFactor + "]";
 	}
+	
 }

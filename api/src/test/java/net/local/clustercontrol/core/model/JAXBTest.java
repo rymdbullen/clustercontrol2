@@ -31,8 +31,7 @@ import junit.framework.TestCase;
 
 public class JAXBTest extends TestCase {
 	private static final String JAXB_DOMAIN_NAMESPACE = "net.local.clustercontrol.api.model.xml";
-	//private static Log logger = LogFactory.getLog(JAXBTest.class);
-//	private static final Logger logger = LoggerFactory.getLogger(JAXBTest.class);
+
 	/**
 	 * 
 	 * @throws JAXBException

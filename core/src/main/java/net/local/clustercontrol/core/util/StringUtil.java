@@ -63,7 +63,7 @@ public class StringUtil {
 	 */
 	public static String checkPath(String path) {
 		int lastIndex = path.lastIndexOf("/");
-		if(lastIndex==0) {
+		if(lastIndex<0) {
 			return path;
 		}
 		String context = path.substring(0, lastIndex);

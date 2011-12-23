@@ -23,7 +23,7 @@
 	
 				<!-- header -->
 				<div class="headers">
-					<div id="col1" class="header" style="float: left;">hostname</div>
+					<div id="col1" class="header" style="float: left;">worker</div>
 <c:forEach items="${cluster.hostNames}" var="hostName">
 					<div id="stat" class="header" style="float: left;"><c:out value="${hostName}"/></div>
 </c:forEach>
@@ -38,11 +38,12 @@
 					<div class="status ${status.hostName}-${worker.name}" id="stat"><c:out value="${status.status}"/></div>
 	</c:forEach>
 					<div class="status ${status.hostName}-${worker.name}" id="stat-btn">
- 			        	<input id="${worker.name}-disable" class="${worker.name}-disable" type="button" value="Disable" onclick="confirmAction('disable','${worker.name}')" disabled="disabled" />
+						<input id="${worker.name}-disable" class="${worker.name}-disable" type="button" value="Disable" onclick="confirmAction('disable','${worker.name}')" disabled="disabled" />
 					</div>
 					<div class="status ${status.hostName}-${worker.name}" id="stat-btn">
-			        	<input id="${worker.name}-enable" class="${worker.name}-enable" type="button" value="Enable" onclick="confirmAction('enable','${worker.name}')" disabled="disabled" />
-			        </div>
+						<input id="${worker.name}-enable" class="${worker.name}-enable" type="button" value="Enable" onclick="confirmAction('enable','${worker.name}')" disabled="disabled" />
+					</div>
+					<div style="clear: both;"></div>
 </c:forEach>
 				</div>
 			</div>
@@ -85,7 +86,7 @@
 		<div>TODO</div>
 		<div>
 			<ul>
-				<li>implement interfaces of ClusterManager and WorkerFactory</li>
+				<li>DONE! implement interfaces of ClusterManager and WorkerFactory</li>
 				<li>implement error handling - no worker for url found</li>
 				<li>implement error handling - error reading old worker setup</li>
 				<li>layout - fix two column layout for "alternatives"</li>
@@ -130,9 +131,11 @@
 					
 					$("div.status."+field).html(status.status);
 					
-					if(status.status == "ok") {
+					if(status.status == "Ok") {
 						$("div.status."+field).css("color", "green");
-					} else if(status.status == "nok") {
+					} else if(status.status == "Dis") {
+						$("div.status."+field).css("color", "red");
+					} else if(status.status == "Dis Err") {
 						$("div.status."+field).css("color", "red");
 					} else {
 						$("div.status."+field).css("color", "yellow");

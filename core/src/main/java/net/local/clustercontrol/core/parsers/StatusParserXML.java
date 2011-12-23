@@ -1,15 +1,15 @@
 package net.local.clustercontrol.core.parsers;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.InputStream;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.UnmarshalException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
@@ -25,28 +25,22 @@ public class StatusParserXML extends IStatusParser {
 	private static final Logger logger = LoggerFactory.getLogger(StatusParserXML.class);
 	
 	public StatusParserXML(String body) {
-		init(body);
-	}
-	
-	/**
-	 * 
-	 * @param body
-	 * @return
-	 */
-	private void init(String body) {
+		if(body==null) {
+			logger.warn("Supplied status body is null");
+			return;
+		}
 		Schema mySchema;
 		SchemaFactory sf = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
 	
+		String xsdFilename = "/xsd/jkStatus.xsd";
 		try {
-			URL url = getClass().getResource("/xsd/jkStatus.xsd");
-		    File schemaFile = new File(url.toURI());
-			mySchema = sf.newSchema( schemaFile );
-		} catch( SAXException saxe ){
+			InputStream url = getClass().getResourceAsStream(xsdFilename);		    
+		    StreamSource ss = new StreamSource(url);
+			mySchema = sf.newSchema( ss );
+		} catch( SAXException saxe ) {
 		    // xsd file not correct
-		    mySchema = null;
-		} catch (URISyntaxException e) {
-		    // no schema found at supplied url
-			mySchema = null;
+			logger.warn("Failed to find: "+xsdFilename);
+		    return;
 		}
 		try {
 			JAXBContext jc = JAXBContext.newInstance(Constants.JAXB_DOMAIN_NAMESPACE);
@@ -61,20 +55,10 @@ public class StatusParserXML extends IStatusParser {
 			@SuppressWarnings("unchecked")
 			JAXBElement<JkStatus> status = (JAXBElement<JkStatus>) unmarshaller.unmarshal(byteArrayInputStream);
 			this.jkStatus = status.getValue();
+		} catch (UnmarshalException e) {
+			logger.debug("UnmarshalException: Could not unmarshal file: "+e.getErrorCode()+": "+e.getMessage());
 		} catch (JAXBException e) {
-			logger.error("Could not unmarshal file: "+e.getErrorCode()+": "+e.getMessage());
+			logger.debug("JAXBException: Could not unmarshal file: "+e.getErrorCode()+": "+e.getMessage());
 		}
-	}
-
-	@Override
-	public String getEnableUrl(String workerName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getDisableUrl(String workerName) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }
