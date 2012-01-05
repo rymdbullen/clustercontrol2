@@ -65,9 +65,8 @@ public class WorkerFactory implements IWorkerFactory {
 		return cluster;
 	}
 	/**
-	 * Returns the context of the procided url. Null if context not found.
-	 * @param url the url to get the context from
-	 * @return the context of the procided url. Null if context not found.
+	 * Sets the host details on the provided cluster
+	 * @param cluster
 	 */
 	private void setHostDetails(Cluster cluster) {
 		Pattern contextPattern = Pattern.compile("(http[s]{0,1}?)://(.*?)(:\\d{1,5})(/.*?)/{0,1}");
@@ -82,43 +81,10 @@ public class WorkerFactory implements IWorkerFactory {
 	@Override
 	public boolean performActionOnCluster(Cluster cluster, String workerName, String speed) {
 
-		//cluster.getWorkers().
-		WorkerResponses workerResponses = new WorkerResponses();
-
-		ArrayList<String> uniqueList = new ArrayList<String>();
+		WorkerResponses workerResponses = performAction(cluster, workerName, speed);
 		
-		// FIXME Concurrency problem with cluster.getWorkers():
-		
-		ArrayList<Workers> allWorkers = cluster.getWorkers();
-		for (Workers workers : allWorkers) {
-			ArrayList<WorkerStatus> statuses = workers.getStatuses();
-			for (int hostIdx = 0; hostIdx < statuses.size(); hostIdx++) {
-				WorkerStatus workerStatus = statuses.get(hostIdx);
-				String hostname = workerStatus.getHostName();
-				if(uniqueList.contains(hostname)) {
-					continue;
-				}
-				if(false == cluster.getAction().equals("poll")) {
-					if(cluster.getInitUrl().contains(hostname)) {
-						continue;
-					}
-				}
-				uniqueList.add(hostname);
-				
-				// create url, we have all data in worker status
-				String context = createContext(workerStatus, cluster.getContext(), cluster.getAction(), cluster.getType());
-				String url = cluster.getProtocol()+"://"+hostname+cluster.getPort()+context;
-				
-				// delay
-				delay(hostIdx, speed);
-				logger.debug(""+hostname+":"+workerStatus.getHostPort()+", "+workerStatus.getType()+ ": "+context);
-				workerResponses.getResponseList().add(httpClient.getWorkerResponseForUrl(url));
-			}
-		}
-		if(workerResponses.getResponseList().size()==0) {
-			
-			// TODO what about the current worker statuses
-			
+		if(workerResponses.getResponseList().size() == 0) {			
+			// TODO what about the current worker statuses??
 			logger.debug("No new statuses to update");
 			return true;
 		}
@@ -151,6 +117,46 @@ public class WorkerFactory implements IWorkerFactory {
 	}
 	/**
 	 * 
+	 * @param cluster
+	 * @param workerName
+	 * @param speed
+	 * @return
+	 */
+	private WorkerResponses performAction(Cluster cluster, String workerName, String speed) {
+		WorkerResponses workerResponses = new WorkerResponses();
+
+		// FIXME Concurrency problem with cluster.getWorkers():
+		
+		ArrayList<String> uniqueList = new ArrayList<String>();
+		ArrayList<Workers> allWorkers = cluster.getWorkers();
+		for (Workers worker : allWorkers) {
+			for (int hostIdx = 0; hostIdx < worker.getStatuses().size(); hostIdx++) {
+				WorkerStatus workerStatus = worker.getStatuses().get(hostIdx);
+				String hostname = workerStatus.getHostName();
+				if(uniqueList.contains(hostname)) {
+					continue;
+				}
+				uniqueList.add(hostname);
+				
+				if(workerName != null && false == workerName.equals(worker.getName())) {
+					// perform action on this worker
+					System.out.println("Perform action "+cluster.getAction()+" on workerName:"+workerName+" hostname:"+hostname);
+				}
+				// create url, we have all data in the worker status
+				String context = createContext(workerStatus, cluster.getContext(), cluster.getAction(), cluster.getType(), workerName);
+				String url = cluster.getProtocol()+"://"+hostname+cluster.getPort()+context;
+				
+				delay(hostIdx, speed);
+				
+				logger.debug(""+hostname+":"+workerStatus.getHostPort()+", "+workerStatus.getType()+ ": "+context);
+				workerResponses.getResponseList().add(httpClient.getWorkerResponseForUrl(url));
+			}
+		}
+		uniqueList = null;
+		return workerResponses;
+	}
+	/**
+	 * 
 	 * @param i
 	 * @param speed
 	 */
@@ -168,32 +174,37 @@ public class WorkerFactory implements IWorkerFactory {
 	/**
 	 * 
 	 * @param workerStatus
+	 * @param context
 	 * @param action
 	 * @param type
-	 * @param string 
+	 * @param workerName
 	 * @return
 	 */
-	private String createContext(WorkerStatus workerStatus, String context, String action, String type) {
+	private String createContext(WorkerStatus workerStatus, String context, String action, String type, String workerName) {
 		if(action.equalsIgnoreCase("poll")) {
 			return context;
 		}
-		String lf = ""+workerStatus.getLoadFactor();
-		String ls = ""+workerStatus.getSet();
-		String to = ""+workerStatus.getTo();
-		String name = workerStatus.getName();
 		String actionContext;
-		if(type.equals("XML")) {
+		if(type.equals("XML")) 
+		{
 			// TODO implement xml action context
 			actionContext = "xml-context"+action;
-			return StringUtil.checkPath(actionContext);
-		} else if(type.equals("HTML")) {
-			
-			actionContext = "&lf="+lf+"&ls="+ls+"&wr="+name+"&rr=&dw="+action;
+			return StringUtil.removeTrailingSlash(actionContext);
+		}
+		else if(type.equals("HTML")) 
+		{
+			String lf = ""+workerStatus.getLoadFactor();
+			String ls = ""+workerStatus.getSet();
+			String to = ""+workerStatus.getTo();
+			String name = workerStatus.getName();
+			actionContext = workerStatus.getType() + "&lf="+lf+"&ls="+ls+"&wr="+name+"&rr=&dw="+action;
 			logger.debug(""+lf+" : "+ls+" : "+to+" : "+type);
 			logger.debug("Context: "+actionContext);
 			
-			return StringUtil.checkPath(actionContext);
-		} else {
+			return StringUtil.removeTrailingSlash(actionContext);
+		}
+		else
+		{
 			throw new ControlCommandException("Supplied type is not XML or HTML: "+type);
 		}
 	}
@@ -207,7 +218,7 @@ public class WorkerFactory implements IWorkerFactory {
 		// 1. Try with ajp host
 		StatusParserXML statusParserXML = new StatusParserXML(statusBody); 
 		JkStatus jkStatus = statusParserXML.getStatus();
-		if(jkStatus!=null) {
+		if(jkStatus != null) {
 			cluster.setType("XML");
 			return jkStatus;
 		}
@@ -215,7 +226,7 @@ public class WorkerFactory implements IWorkerFactory {
 		// 2. Try with html host
 		StatusParserHtml statusParserHtml = new StatusParserHtml(statusBody);
 		jkStatus = statusParserHtml.getStatus();
-		if(jkStatus!=null) {
+		if(jkStatus != null) {
 			cluster.setType("HTML");
 			return jkStatus;
 		}
@@ -223,7 +234,7 @@ public class WorkerFactory implements IWorkerFactory {
 		return null;
 	}
 	/**
-	 * Adds status to array and calls updateCluster(Cluster, ArrayList<JkStatus>);
+	 * Converts the statuses from per-host to per worker. transforms the matrix.
 	 * 
 	 * @param cluster
 	 * @param jkStatus
@@ -236,14 +247,12 @@ public class WorkerFactory implements IWorkerFactory {
 
 	/**
 	 * Converts the statuses from per-host to per worker. transforms the matrix.
-	 * @param jkStatuses
 	 * @param cluster
+	 * @param jkStatuses
 	 */
 	void updateCluster(Cluster cluster, ArrayList<JkStatus> jkStatuses) {
 		LinkedHashMap<String, HashMap<String, JkMember>> membersList = new LinkedHashMap<String, HashMap<String, JkMember>>();
 
-		ArrayList<String> uniqueList = new ArrayList<String>();		
-		
 		// convert statuses to cluster object
 		for (JkStatus jkStatus : jkStatuses) {
 			JkBalancer balancer = jkStatus.getBalancers().getBalancer();
@@ -256,7 +265,7 @@ public class WorkerFactory implements IWorkerFactory {
 				
 				String workerName = jkMember.getName();
 				HashMap<String, JkMember> memberList = membersList.get(workerName);
-				if(memberList==null) {
+				if(memberList == null) {
 					// create new member list
 					memberList = new HashMap<String, JkMember>();
 					membersList.put(workerName, memberList);
@@ -267,12 +276,11 @@ public class WorkerFactory implements IWorkerFactory {
 			if(hostPort!=null && hostPort > 0) {
 				hostWithPort = hostWithPort + ":" + hostPort;
 			}
-			if(false == uniqueList.contains(hostWithPort)) {
-				uniqueList.add(hostWithPort);
+			if(false == cluster.getHostNames().contains(hostWithPort)) {
+				cluster.getHostNames().add(hostWithPort);
 			}
 			cluster.setName(jkStatus.getBalancers().getBalancer().getName());
 		}
-		cluster.getHostNames().addAll(uniqueList);
 		
 		// convert to cluster
 		

@@ -80,7 +80,7 @@ public class ClusterManager implements IWorkerManager {
 	public Cluster disable(String workerName, String speed) {
 		if(logger.isTraceEnabled()) {
 			String threadName = Thread.currentThread().getName();
-			logger.trace("Process thread " + threadName + " using Async method");
+			logger.trace("Process thread '" + threadName + "' using Async method");
 		}
 		_cluster.setAction("Disable");
 		boolean isSuccess = workerFactory.performActionOnCluster(_cluster, workerName, speed);

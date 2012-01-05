@@ -61,7 +61,7 @@ public class ManualClusterManagerTest {
 	 * @throws WorkerNotFoundException 
 	 */
 	@Test
-	public void testInit() throws MalformedURLException, WorkerNotFoundException {
+	public void testCycle() throws MalformedURLException, WorkerNotFoundException {
 		logger.debug("Running testInit");
 		String url = Constants.TEST_URL;
 		
@@ -93,7 +93,7 @@ public class ManualClusterManagerTest {
 		assertEquals(1,cluster.getHostNames().size());
 		
 		// disable
-		clusterManager.disable("s1", "medium");
+		clusterManager.enable("s1", "medium");
 		cluster = clusterManager.getCluster();
 		assertEquals("Updated cluster status", cluster.getStatusMessage());
 		assertEquals(2,cluster.getWorkers().size());

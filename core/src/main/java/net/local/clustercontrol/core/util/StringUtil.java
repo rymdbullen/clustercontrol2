@@ -57,16 +57,14 @@ public class StringUtil {
 		return "mime=txt&opt=4";
 	}
 	/**
-	 * Checks and assures that the context not ends with a slash 
+	 * Checks and removes trailing slash character 
 	 * @param path the path to check
-	 * @return a correct context
+	 * @return a non slash trailing context path
 	 */
-	public static String checkPath(String path) {
-		int lastIndex = path.lastIndexOf("/");
-		if(lastIndex<0) {
-			return path;
+	public static String removeTrailingSlash(String path) {
+		if(path.endsWith("/")) {
+			return path.substring(0, path.length()-1);
 		}
-		String context = path.substring(0, lastIndex);
-		return context;
+		return path;
 	}
 }
