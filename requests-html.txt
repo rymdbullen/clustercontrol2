@@ -1,0 +1,55 @@
+All four:
+GET /balancer-manager?lf=1&ls=0&wr=s1&rr=&dw=Enable&w=ajp%3A%2F%2Flocalhost%3A8009&b=cluster&nonce=5210ef6b-5413-4340-b713-e60e31f5dff6 HTTP/1.1
+GET /balancer-manager?lf=1&ls=0&wr=s1&rr=&dw=Disable&w=ajp%3A%2F%2Flocalhost%3A8009&b=cluster&nonce=5210ef6b-5413-4340-b713-e60e31f5dff6 HTTP/1.1
+
+GET /balancer-manager?lf=2&ls=0&wr=s2&rr=&dw=Enable&w=ajp%3A%2F%2Flocalhost%3A8019&b=cluster&nonce=5210ef6b-5413-4340-b713-e60e31f5dff6 HTTP/1.1
+GET /balancer-manager?lf=2&ls=0&wr=s2&rr=&dw=Disable&w=ajp%3A%2F%2Flocalhost%3A8019&b=cluster&nonce=5210ef6b-5413-4340-b713-e60e31f5dff6 HTTP/1.1
+
+
+enable s1
+
+GET /balancer-manager?lf=1&ls=0&wr=s1&rr=&dw=Enable&w=ajp%3A%2F%2Flocalhost%3A8009&b=cluster&nonce=5210ef6b-5413-4340-b713-e60e31f5dff6 HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+User-Agent: Mozilla/5.0 (Windows NT 6.1) AppleWebKit/535.13 (KHTML, like Gecko) Chrome/18.0.970.0 Safari/535.13
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Referer: http://localhost:8080/balancer-manager?lf=1&ls=0&wr=s1&rr=&dw=Disable&w=ajp%3A%2F%2Flocalhost%3A8009&b=cluster&nonce=5210ef6b-5413-4340-b713-e60e31f5dff6
+Accept-Encoding: gzip,deflate,sdch
+Accept-Language: en-US,en;q=0.8,sv;q=0.6,fr-CH;q=0.4,fr;q=0.2
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
+
+disable s1
+GET /balancer-manager?lf=1&ls=0&wr=s1&rr=&dw=Disable&w=ajp%3A%2F%2Flocalhost%3A8009&b=cluster&nonce=5210ef6b-5413-4340-b713-e60e31f5dff6 HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+User-Agent: Mozilla/5.0 (Windows NT 6.1) AppleWebKit/535.13 (KHTML, like Gecko) Chrome/18.0.970.0 Safari/535.13
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Referer: http://localhost:8080/balancer-manager?lf=1&ls=0&wr=s1&rr=&dw=Enable&w=ajp%3A%2F%2Flocalhost%3A8009&b=cluster&nonce=5210ef6b-5413-4340-b713-e60e31f5dff6
+Accept-Encoding: gzip,deflate,sdch
+Accept-Language: en-US,en;q=0.8,sv;q=0.6,fr-CH;q=0.4,fr;q=0.2
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
+
+
+enable s2
+GET /balancer-manager?lf=2&ls=0&wr=s2&rr=&dw=Enable&w=ajp%3A%2F%2Flocalhost%3A8019&b=cluster&nonce=5210ef6b-5413-4340-b713-e60e31f5dff6 HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+User-Agent: Mozilla/5.0 (Windows NT 6.1) AppleWebKit/535.13 (KHTML, like Gecko) Chrome/18.0.970.0 Safari/535.13
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Referer: http://localhost:8080/balancer-manager?lf=2&ls=0&wr=s2&rr=&dw=Disable&w=ajp%3A%2F%2Flocalhost%3A8019&b=cluster&nonce=5210ef6b-5413-4340-b713-e60e31f5dff6
+Accept-Encoding: gzip,deflate,sdch
+Accept-Language: en-US,en;q=0.8,sv;q=0.6,fr-CH;q=0.4,fr;q=0.2
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
+
+
+disable s2
+GET /balancer-manager?lf=2&ls=0&wr=s2&rr=&dw=Disable&w=ajp%3A%2F%2Flocalhost%3A8019&b=cluster&nonce=5210ef6b-5413-4340-b713-e60e31f5dff6 HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+User-Agent: Mozilla/5.0 (Windows NT 6.1) AppleWebKit/535.13 (KHTML, like Gecko) Chrome/18.0.970.0 Safari/535.13
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Referer: http://localhost:8080/balancer-manager?b=cluster&w=ajp://localhost:8019&nonce=5210ef6b-5413-4340-b713-e60e31f5dff6
+Accept-Encoding: gzip,deflate,sdch
+Accept-Language: en-US,en;q=0.8,sv;q=0.6,fr-CH;q=0.4,fr;q=0.2
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
+
