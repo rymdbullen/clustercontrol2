@@ -13,11 +13,17 @@ import net.local.clustercontrol.api.model.xml.JkServer;
 import net.local.clustercontrol.api.model.xml.JkStatus;
 import net.local.clustercontrol.core.logic.ControlCommandException;
 
+/**
+ * Class parsing the following html status 
+ * <td><a href="/balancer-manager?b=cluster&w=ajp://localhost:8009&nonce=3af62151-30da-4ea5-85fc-eb3c7c37d564">ajp://localhost:8009</a></td><td>s1</td><td></td><td>1</td><td>0</td><td>Ok</td><td>0</td><td>  0 </td><td>  0 </td>
+ * 
+ * @author jstenvall
+ */
 public class StatusParserHtml extends IStatusParser {
 	
 	private static final Logger logger = LoggerFactory.getLogger(StatusParserHtml.class);
 	private static final Pattern workerPattern = Pattern.compile("<td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td><td>(.*?)</td>");
-	private static final Pattern workerAddressPattern = Pattern.compile("<a href=\"(.*b=(.*)&w=(.*)&.*)\">(.*)</a>");
+	private static final Pattern workerAddressPattern = Pattern.compile("<a href=\"(.*b=(.*)&(?:w=(.*))&.*)\">(.*)</a>");
 
 	public static final int _1WORKER_URL = 1;
 	public static final int _2ROUTE = 2;
@@ -38,12 +44,11 @@ public class StatusParserHtml extends IStatusParser {
 	
 	/**
 	 * Creates and populates the {@link JkStatus} from the balancer-manager HTML page
+	 * <td><a href="/balancer-manager?b=mycluster&w=ajp://127.0.0.1:8109&nonce=51b485f1-ab7c-42ae-81c3-ee9cc9610b7c">ajp://127.0.0.1:8109</a></td><td>t1</td><td></td><td>1</td><td>0</td><td>Ok</td><td>2</td><td>  0 </td><td>2.0K</td>
 	 * @param body
 	 * @return the {@link JkStatus} from the balancer-manager HTML page
 	 */
 	private void parseJkStatus(String body) {
-		
-//		<td><a href="/balancer-manager?b=mycluster&w=ajp://127.0.0.1:8109&nonce=51b485f1-ab7c-42ae-81c3-ee9cc9610b7c">ajp://127.0.0.1:8109</a></td><td>t1</td><td></td><td>1</td><td>0</td><td>Ok</td><td>2</td><td>  0 </td><td>2.0K</td>
 		
 		// host 
 		JkStatus jkStatus = new JkStatus();
@@ -85,11 +90,12 @@ public class StatusParserHtml extends IStatusParser {
 		String context = null;
 		
 		String workerAddressText = matcher.group(_1WORKER_URL);
+		String workerName = null;
 		Matcher workerAddressMatcher = workerAddressPattern.matcher(workerAddressText);
 		if(workerAddressMatcher.matches()) {
 //if(logger.isTraceEnabled()) { logger.trace("Pattern: \n["+workerAddressPattern.pattern()+"]: \n"+workerAddressText); }	
 			balancerName = workerAddressMatcher.group(2);
-			String workerName = workerAddressMatcher.group(3);
+			workerName = workerAddressMatcher.group(3);
 			String workerAddress = workerAddressMatcher.group(4);
 			int endIndex = workerAddress.lastIndexOf(':');
 			if(endIndex<0) {
@@ -110,7 +116,7 @@ public class StatusParserHtml extends IStatusParser {
 		member.setPort(Integer.valueOf(workerPort));
 		member.setAddress(address); 
 		member.setActivation(matcher.group(_6STATUS));
-		member.setName(matcher.group(_2ROUTE));
+		member.setName(workerName);
 		member.setRoute(matcher.group(_2ROUTE));
 		member.setRedirect(matcher.group(_3ROUTE_REDIR));
 		member.setElected(Integer.valueOf(matcher.group(_7ELECTED).trim()));

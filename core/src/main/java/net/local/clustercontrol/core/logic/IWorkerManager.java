@@ -10,32 +10,32 @@ import net.local.clustercontrol.core.model.dto.Cluster;
  */
 public interface IWorkerManager {
 	/**
-	 * Initializes the WorkerManager with a url. 
+	 * Initializes the WorkerManager with a url a boolean status of the action
 	 * @param url the url to initialize with
 	 * @throws MalformedURLException 
 	 * @throws WorkerNotFoundException 
 	 */
 	boolean init(String url) throws MalformedURLException, WorkerNotFoundException;
 	/**
-	 * Enables the worker for the supplied loadbalancer and returns the list of balancers
+	 * Enables the worker for the supplied loadbalancer and returns a boolean status of the action
 	 * @param worker the worker to enable
 	 * @param speed the speed to enable the worker
 	 * @return list of statuses
 	 */
-	Cluster enable(String worker, String speed);
+	boolean enable(String worker, String speed);
 	/**
-	 * Disables the worker for the supplied loadbalancer and returns the list of balancers
+	 * Disables the worker for the supplied loadbalancer and returns a boolean status of the action
 	 * @param worker the worker to disable
 	 * @param speed the speed to disable the worker
 	 * @return list of statuses
 	 */
-	Cluster disable(String worker, String speed);
+	boolean disable(String worker, String speed);
 	/**
-	 * Stops the worker for the supplied loadbalancer and returns the list of balancers
+	 * Stops the worker for the supplied loadbalancer and returns a boolean status of the action
 	 * @param worker the worker to disable
 	 * @return list of statuses
 	 */
-	Cluster stop(String worker);
+	boolean stop(String worker);
 	/**
 	 * Returns the cluster instance
 	 * @return the cluster instance
@@ -45,5 +45,5 @@ public interface IWorkerManager {
 	 * Polls status from workers
 	 * @return
 	 */
-	Cluster poll();
+	boolean poll();
 }

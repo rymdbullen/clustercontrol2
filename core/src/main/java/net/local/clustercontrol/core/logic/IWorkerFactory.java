@@ -1,20 +1,21 @@
 package net.local.clustercontrol.core.logic;
 
-import net.local.clustercontrol.core.model.dto.Cluster;
+import java.util.HashMap;
+
+import net.local.clustercontrol.api.model.xml.JkStatus;
 
 public interface IWorkerFactory {
 	/**
 	 * Returns 
-	 * @param cluster
-	 * @param workerName 
-	 * @param speed
-	 * @return
-	 */
-	boolean performActionOnCluster(Cluster cluster, String workerName, String speed);
-	/**
-	 * Returns 
 	 * @param url the url to get status for
+	 * @param workerName
+	 * @param action 
+	 * @param speed 
 	 * @return 
 	 */
-	Cluster initCluster(String url);
+	boolean init(String url, String workerName, String action, String speed);
+	
+	HashMap<String, JkStatus> getStatuses();
+	
+	boolean getAllStatuses(String workerName, String action, String speed);
 }

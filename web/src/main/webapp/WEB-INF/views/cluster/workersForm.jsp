@@ -35,13 +35,13 @@
 <c:forEach items="${cluster.workers}" var="worker">
 					<div id="col1" class="hostName"><c:out value="${worker.name}"/></div>
 	<c:forEach items="${worker.statuses}" var="status">
-					<div class="status ${status.hostName}-${worker.name}" id="stat"><c:out value="${status.status}"/></div>
+					<div class="status ${status.hostName}-${worker.id}" id="stat"><c:out value="${status.status}"/></div>
 	</c:forEach>
-					<div class="status ${status.hostName}-${worker.name}" id="stat-btn">
-						<input id="${worker.name}-disable" class="${worker.name}-disable" type="button" value="Disable" onclick="confirmAction('disable','${worker.name}')" disabled="disabled" />
+					<div class="status ${status.hostName}-${worker.id}" id="stat-btn">
+						<input id="${worker.id}-disable" class="${worker.id}-disable" type="button" value="Disable" onclick="confirmAction('disable','${worker.id}','${worker.name}')" disabled="disabled" />
 					</div>
-					<div class="status ${status.hostName}-${worker.name}" id="stat-btn">
-						<input id="${worker.name}-enable" class="${worker.name}-enable" type="button" value="Enable" onclick="confirmAction('enable','${worker.name}')" disabled="disabled" />
+					<div class="status ${status.hostName}-${worker.id}" id="stat-btn">
+						<input id="${worker.id}-enable" class="${worker.id}-enable" type="button" value="Enable" onclick="confirmAction('enable','${worker.id}','${worker.name}')" disabled="disabled" />
 					</div>
 					<div style="clear: both;"></div>
 </c:forEach>
@@ -87,12 +87,18 @@
 		<div>
 			<ul>
 				<li>DONE! implement interfaces of ClusterManager and WorkerFactory</li>
+				<li>DONE! Bug: When only one host disable/enable buttons dont match</li>
+				<li>implement startup initialization of the view</li>
 				<li>implement error handling - no worker for url found</li>
 				<li>implement error handling - error reading old worker setup</li>
 				<li>layout - fix two column layout for "alternatives"</li>
 				<li>layout - flowing layout for "alternatives"</li>
 				<li>sign off</li>
 			</ul>
+			Varför vill jag ha jobbet som ni erbjuder.
+			1. Jag är intresserad av att jobba närmare hemmet. 
+			   Just nu är jag hemifrån 12-13 timmar per dygn. Jag jobbar mer effektivt om jag kan vara med  
+			2.  
 		</div>
 	</body>
 
@@ -121,14 +127,14 @@
 			for (i=0;i < workers.length;i++)
 			{
 				var statuses = workers[i].statuses;
-				var workerName = workers[i].name;
+				var workerName = workers[i].id;
 				var lastStatus = workers[i].status;
 
 				for (j=0;j < statuses.length;j++)
 				{
 					var status = statuses[j];
 					var field = status.hostName+"-"+workerName;
-					
+
 					$("div.status."+field).html(status.status);
 					
 					if(status.status == "Ok") {
@@ -163,7 +169,7 @@
 			if(toggle == 'on') {
     			$('#ctrlautorefreshoff').attr('checked', false);
 	    		$('#actionStatus').html("Started autorefresh");
-	    		triggerId = window.setInterval(pollUpdate, 10000);
+	    		triggerId = window.setInterval(pollUpdate, 30000);
 	    		return triggerId;
 			} else if(toggle == 'off') {
     			$('#ctrlautorefreshon').attr('checked', false);
@@ -171,9 +177,9 @@
 				window.clearInterval(triggerId);
 			}
     	}
-    	function confirmAction(action, workerName) 
+    	function confirmAction(action, workerName, workerDisplayName) 
     	{
-			$('#actionHeader').html("Action: \'" + action + "\' worker \'" + workerName + "\'");
+			$('#actionHeader').html("Action: \'" + action + "\' worker \'" + workerDisplayName + "\'");
     		worker = workerName;
     		performAction = action;
     		

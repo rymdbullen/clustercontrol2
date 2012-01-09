@@ -2,6 +2,11 @@ package net.local.clustercontrol.core.logic.impl;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import net.local.clustercontrol.api.model.xml.JkMember;
+import net.local.clustercontrol.api.model.xml.JkStatus;
 import net.local.clustercontrol.core.logic.IWorkerFactory;
 import net.local.clustercontrol.core.logic.IWorkerManager;
 import net.local.clustercontrol.core.logic.WorkerNotFoundException;
@@ -47,66 +54,77 @@ public class ClusterManager implements IWorkerManager {
 		// initialize new cluster
 		_cluster = new Cluster();
 
-		Cluster cluster = workerFactory.initCluster(url);
-		if(cluster == null) {
+		boolean initOk = workerFactory.init(url, null, "poll", null);
+		if(initOk==false) {
 			_cluster.setStatusMessage("nok");
 			return false;
 		}
+		HashMap<String, JkStatus> statuses = workerFactory.getStatuses();
+		if(statuses == null) {
+			_cluster.setStatusMessage("nok");
+			return false;
+		}
+		updateCluster(statuses);
 		// initialize new cluster
 		_cluster.setStatusMessage("ok");
-		_cluster = cluster;
 	
 		return true;
 	}
 
 	@Override
 	@Async
-	public Cluster enable(String workerName, String speed) {
+	public boolean enable(String workerId, String speed) {
 		if(logger.isTraceEnabled()) {
 			String threadName = Thread.currentThread().getName();
 			logger.trace("Process thread " + threadName + " using Async method");
 		}
-		_cluster.setAction("Enable");
-		boolean isSuccess = workerFactory.performActionOnCluster(_cluster, workerName, speed);
+		String action = "Enable";
+		String workerName = cssValidName(workerId, false);
+		boolean isSuccess = workerFactory.getAllStatuses(workerName, action, speed);
+		updateCluster(workerFactory.getStatuses());
 		if(isSuccess) {
-			_cluster.setStatusMessage("Updated cluster status");
-			return _cluster;			
+			_cluster.setStatusMessage("ok");
+			return true;		
 		}
 		_cluster.setStatusMessage("Failed to update cluster status");
-		return _cluster;
+		return false;
 	}
 	@Override
 	@Async
-	public Cluster disable(String workerName, String speed) {
+	public boolean disable(String workerId, String speed) {
 		if(logger.isTraceEnabled()) {
 			String threadName = Thread.currentThread().getName();
 			logger.trace("Process thread '" + threadName + "' using Async method");
 		}
-		_cluster.setAction("Disable");
-		boolean isSuccess = workerFactory.performActionOnCluster(_cluster, workerName, speed);
+		String action = "Disable";
+		String workerName = cssValidName(workerId, false);
+		boolean isSuccess = workerFactory.getAllStatuses(workerName , action , speed);
 		if(isSuccess) {
-			_cluster.setStatusMessage("Updated cluster status");
-			return _cluster;			
+			updateCluster(workerFactory.getStatuses());
+			_cluster.setStatusMessage("ok");
+			return true;			
 		}
 		_cluster.setStatusMessage("Failed to update cluster status");
-		return _cluster;
+		return false;
 	}
 
 	@Override
 	@Async
-	public Cluster stop(String workerName) {
+	public boolean stop(String workerId) {
 		if(logger.isTraceEnabled()) {
 			String threadName = Thread.currentThread().getName();
 			logger.trace("Process thread " + threadName + " using Async method");
 		}
-		_cluster.setAction("Disable");
-		boolean isSuccess = workerFactory.performActionOnCluster(_cluster, workerName, null);
+		String action = "Disable";
+		String workerName = cssValidName(workerId, false);
+		boolean isSuccess = workerFactory.getAllStatuses(workerName, action, "fast");
 		if(isSuccess) {
-			_cluster.setStatusMessage("Updated cluster status");
-			return _cluster;			
+			updateCluster(workerFactory.getStatuses());
+			_cluster.setStatusMessage("ok");
+			return true;			
 		}
 		_cluster.setStatusMessage("Failed to update cluster status");
-		return _cluster;
+		return false;
 	}
 	
 	@Override
@@ -115,20 +133,109 @@ public class ClusterManager implements IWorkerManager {
 	}
 	
 	@Override
-	public Cluster poll() {
+	public boolean poll() {
 		if(_cluster==null) {
-			return null;
+			return false;
 		}
-		_cluster.setAction("poll");
-		boolean isSuccess = workerFactory.performActionOnCluster(_cluster, null, null);
+		boolean isSuccess = workerFactory.getAllStatuses(null, "poll", null);
 		if(isSuccess) {
-			_cluster.setStatusMessage("Updated cluster status");
-			return _cluster;			
+			_cluster.setStatusMessage("ok");
+			return true;			
 		}
 		_cluster.setStatusMessage("Failed to update cluster status");
-		return _cluster;
+		return false;
 	}
 
+	/**
+	 * Converts the statuses from per-host to per worker. transforms the matrix.
+	 * 
+	 * @param statuses
+	 */
+	private void updateCluster(HashMap<String, JkStatus> statuses) {
+		_cluster.getHostNames().clear();
+		_cluster.getWorkerNames().clear();
+		_cluster.getWorkers().clear();
+		Collection<JkStatus> jkStatuses = statuses.values();
+		LinkedHashMap<String, HashMap<String, JkMember>> membersList = new LinkedHashMap<String, HashMap<String, JkMember>>();
+
+		// convert statuses to cluster object
+		for (JkStatus jkStatus : jkStatuses) {
+			String hostName = jkStatus.getServer().getName();
+			Integer hostPort = jkStatus.getServer().getPort();
+			List<JkMember> members = jkStatus.getBalancers().getBalancer().getMember();
+			
+			for (JkMember jkMember : members) {
+				logger.debug(hostName+": "+hostPort+": "+jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getType());
+				
+				String workerName = jkMember.getName();
+				HashMap<String, JkMember> memberList = membersList.get(workerName);
+				if(memberList == null) {
+					// create new member list
+					memberList = new HashMap<String, JkMember>();
+					membersList.put(workerName, memberList);
+				}
+				memberList.put(hostName, jkMember);
+			}
+			String hostWithPort = hostName;
+			if(hostPort!=null && hostPort > 0) {
+				hostWithPort = hostWithPort + ":" + hostPort;
+			}
+			if(false == _cluster.getHostNames().contains(hostWithPort)) {
+				_cluster.getHostNames().add(hostWithPort);
+			}
+			_cluster.setName(jkStatus.getBalancers().getBalancer().getName());
+		}
+		
+		// convert to cluster
+		Iterator<String> keysIter = membersList.keySet().iterator();
+		while (keysIter.hasNext()) {
+			Workers workers = new Workers();
+			String workerName = keysIter.next();
+			workers.setName(workerName);
+			workers.setId(cssValidName(workerName, true));
+			
+			HashMap<String, JkMember> workerMemberList = membersList.get(workerName);
+			Iterator<String> workerMemberListIter = workerMemberList.keySet().iterator();
+			while (workerMemberListIter.hasNext()) {
+				String hostName = workerMemberListIter.next();
+				JkMember jkMember = workerMemberList.get(hostName);
+				WorkerStatus workerStatus = new WorkerStatus();
+				workerStatus.setHostName(hostName);
+				workerStatus.setHostPort(""+jkMember.getPort());
+				workerStatus.setStatus(jkMember.getActivation().trim());
+				workerStatus.setType(jkMember.getType().trim());
+				workerStatus.setTo(jkMember.getBusy());  // html to
+				workerStatus.setSet(jkMember.getRead()); // html set
+				workerStatus.setTransferred(jkMember.getTransferred());
+				workerStatus.setLoadFactor(jkMember.getLbfactor());
+				workerStatus.setName(jkMember.getName());
+				workers.getStatuses().add(workerStatus);
+			}
+			_cluster.getWorkers().add(workers);
+		}
+		
+		_cluster.getWorkerNames().addAll(membersList.keySet());
+	}
+	private String cssValidName(String name, boolean encode) {
+		String cssValidName = name;
+		String[] replace1 = new String[] {":", "-"};
+		String[] replace2 = new String[] {"/", "_"};
+		ArrayList<String[]> list = new ArrayList<String[]>();
+		list.add(replace1);
+		list.add(replace2);
+		for (String[] replacement : list) 
+		{
+			if(encode) 
+			{
+				cssValidName = cssValidName.replaceAll(replacement[0], replacement[1]); 
+			} 
+			else
+			{
+				cssValidName = cssValidName.replaceAll(replacement[1], replacement[0]);
+			}
+		}
+		return cssValidName;
+	}
 	// ================================================================================
 	// ================================================================================
 	// ================================================================================

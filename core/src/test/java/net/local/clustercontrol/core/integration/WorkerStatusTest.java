@@ -82,8 +82,8 @@ public class WorkerStatusTest extends TestCase {
 		logger.debug("Running testActivateUnmarshall");
 		String workerName = "footprint1";
 		String speed = "medium";
-		Cluster cluster = clusterManager.enable(workerName, speed);
-		cluster.getWorkers();
+		boolean initOk = clusterManager.enable(workerName, speed);
+		
 		ArrayList<JkStatus> workerLists = null;
 		for (int i = 0; i < workerLists.size(); i++) {
 			JkStatus workerList = workerLists.get(i);

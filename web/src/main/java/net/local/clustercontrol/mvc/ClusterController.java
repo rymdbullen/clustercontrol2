@@ -57,25 +57,30 @@ public class ClusterController {
 
 	@RequestMapping(value="/poll", method=RequestMethod.GET)
 	public @ResponseBody Cluster getPoll() {
-		return clusterManager.poll();
+		clusterManager.poll();
+		Cluster cluster = clusterManager.getCluster();
+		return cluster;
 	}
 	
 	@RequestMapping(value="/enable/{id}/{speed}", method=RequestMethod.GET)
 	public @ResponseBody Cluster setEnable(@PathVariable String id, @PathVariable String speed) {
-		return clusterManager.enable(id, speed);
+		clusterManager.enable(id, speed);
+		return clusterManager.getCluster();
 	}
 	
 	@RequestMapping(value="/disable/{id}/{speed}", method=RequestMethod.GET)
 	public @ResponseBody Cluster setDisable(@PathVariable String id, @PathVariable String speed) {
 		if(speed.equals("disable")) {
-			return clusterManager.stop(id);
+			clusterManager.stop(id);
 		}
-		return clusterManager.disable(id, speed);
+		clusterManager.disable(id, speed);
+		return clusterManager.getCluster();
 	}
 
 	@RequestMapping(value="/stop/{id}", method=RequestMethod.GET)
 	public @ResponseBody Cluster setStop(@PathVariable String id) {
-		return clusterManager.stop(id);
+		clusterManager.stop(id);
+		return clusterManager.getCluster();
 	}
 	
 	@RequestMapping(method=RequestMethod.POST)
@@ -96,6 +101,9 @@ public class ClusterController {
 			return Collections.singletonMap("initStatus", "ok");
 		}
 	}
+
+	// internal helpers
+	
 	/**
 	 * 
 	 * @param url
@@ -113,8 +121,6 @@ public class ClusterController {
 		}
 	}
 
-	// internal helpers
-	
 	private Map<String, String> validationMessages(Set<ConstraintViolation<SetupHost>> failures) {
 		Map<String, String> failureMessages = new HashMap<String, String>();
 		for (ConstraintViolation<SetupHost> failure : failures) {

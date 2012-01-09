@@ -39,6 +39,10 @@ import org.xml.sax.SAXException;
 
 public class ManualWorkerFactoryTest {
 
+	@SuppressWarnings("unused")
+	private static final String AJP_127_0_0_1_8109 = "ajp://127.0.0.1:8109";
+	private static final String AJP_127_0_0_1_8209 = "ajp://127.0.0.1:8209";
+
 	private static final String JAXB_DOMAIN_NAMESPACE = "net.local.clustercontrol.api.model.xml";
 
 	private JkStatus jkStatus = null;
@@ -56,6 +60,22 @@ public class ManualWorkerFactoryTest {
             "<td>t2</td><td></td><td>1</td><td>0</td><td>Ok</td><td>1</td><td>  0 </td><td>1.0K</td></tr> </table> <hr /> "+
             "<address>Apache/2.2.11 (Ubuntu) PHP/5.2.6-3ubuntu4.6 with Suhosin-Patch Server at 192.168.10.116 Port 80</address> </body></html>";
 
+	private static final String testUrl = "http://192.168.10.116:8080/balancer-manager";
+	private static final String localhostUrl = "http://localhost:8080/balancer-manager";
+
+	/*
+	 * 
+	 		Worker URL, Route, RouteRedir, Factor, Set, Status, Elected, To, From
+            "<tr> <td><a href=\"/balancer-manager?b=mycluster&w=ajp://127.0.0.1:8109&nonce=51b485f1-ab7c-42ae-81c3-ee9cc9610b7c\">ajp://127.0.0.1:8109</a></td>"+
+                        t1     -           1       0    Ok      2        0   2.0K
+            "<tr> <td><a href=\"/balancer-manager?b=mycluster&w=ajp://127.0.0.1:8209&nonce=51b485f1-ab7c-42ae-81c3-ee9cc9610b7c\">ajp://127.0.0.1:8209</a></td>"+
+                        t2     -           1       0    Ok      1        0   1.0K
+                        
+	 */
+	
+	
+	
+	
 //	Request header
 //	GET /balancer-manager?lf=2&ls=0&wr=&rr=&dw=Disable&w=ajp%3A%2F%2Flocalhost%3A8019&b=cluster&nonce=aaf4843d-0f1c-4542-a8d3-9571d5819a09 HTTP/1.1
 //			Host: localhost:8080
@@ -87,11 +107,100 @@ public class ManualWorkerFactoryTest {
 	}
 
 	@Test
-	public void testGetAllStatuses() {
-		WorkerFactory wf = new WorkerFactory(httpClient);
+	public void testGetAllStatusesPoll() {
+		WorkerFactory workerFactory = new WorkerFactory(httpClient);
 		Cluster cluster = new Cluster();
-		//wf.getAllStatuses(jkStatus, cluster);
+		boolean initOk = workerFactory.getAllStatuses(jkStatus, null, "poll", null);
+		assertEquals("This must work, init must be true", true, initOk);
 		System.out.println(cluster.getStatusMessage());
+	}
+	
+	@Test
+	public void testGetAllStatusesDisable() {
+		WorkerFactory workerFactory = new WorkerFactory(httpClient);
+		Cluster cluster = new Cluster();
+		boolean initOk = workerFactory.getAllStatuses(jkStatus, AJP_127_0_0_1_8209, "Disable", "medium");
+		assertEquals("This must work, init must be true", true, initOk);
+		System.out.println(cluster.getStatusMessage());
+	}
+	
+	@Test
+	public void testCreateContextPoll() {
+		WorkerFactory workerFactory = new WorkerFactory(httpClient);
+		Cluster cluster = new Cluster();
+		String initOk = workerFactory.createContext(jkStatus.getBalancers().getBalancer().getMember().get(0), testUrl, null, "poll");
+		assertEquals("This must work, init must be true", "http://192.168.10.116:8080/balancer-manager", initOk);
+		System.out.println(cluster.getStatusMessage());
+	}
+	
+	@Test
+	public void testCreateContextDisable() {
+		WorkerFactory workerFactory = new WorkerFactory(httpClient);
+		Cluster cluster = new Cluster();
+		String createdContext = workerFactory.createContext(jkStatus.getBalancers().getBalancer().getMember().get(1), testUrl, AJP_127_0_0_1_8209, "Disable");
+		String expected = "/balancer-manager?b=mycluster&w=ajp://127.0.0.1:8209&nonce=51b485f1-ab7c-42ae-81c3-ee9cc9610b7c&lf=1&ls=0&wr=t2&rr=&dw=Disable";
+		assertEquals("This must work, init must be true", expected, createdContext);
+		System.out.println(cluster.getStatusMessage());
+	}
+	
+	@Test
+	public void testNewInitWorkerFactory() {
+		WorkerFactory wf = new WorkerFactory(httpClient);
+		boolean initOk = wf.init(localhostUrl , null, "poll", null);
+		assertEquals("This must work, init must be true", true, initOk);
+		assertEquals("There must be one status", 1, wf.getStatuses().size());
+	}
+	@Test
+	public void testNewInitClusterManager() {
+		WorkerFactory workerFactory = new WorkerFactory(httpClient);
+		ClusterManager clusterManager = new ClusterManager(workerFactory);
+		boolean initOk = clusterManager.init(localhostUrl);
+		assertEquals("This must work, init must be true", true, initOk);
+		
+		assertEquals("There must be one status", 1, workerFactory.getStatuses().size());
+		assertEquals("The init must be ok", "ok", clusterManager.getCluster().getStatusMessage());
+	}
+	@Test
+	public void testNewDisableClusterManager() {
+		WorkerFactory workerFactory = new WorkerFactory(httpClient);
+		ClusterManager clusterManager = new ClusterManager(workerFactory);
+		boolean initOk = clusterManager.init(localhostUrl);
+		assertEquals("This must work, init must be true", true, initOk);
+		
+		initOk = clusterManager.disable("ajp://localhost:8019", "medium");
+		assertEquals("This must work, init must be true", true, initOk);
+		assertEquals("This must work, init must be true", "ok", clusterManager.getCluster().getStatusMessage());
+		
+		assertEquals("There must be one status", 1, workerFactory.getStatuses().size());
+		assertEquals("The init must be ok", "ok", clusterManager.getCluster().getStatusMessage());
+	}
+	@Test
+	public void testNewEnableClusterManager() {
+		WorkerFactory workerFactory = new WorkerFactory(httpClient);
+		ClusterManager clusterManager = new ClusterManager(workerFactory);
+		boolean initOk = clusterManager.init(localhostUrl);
+		assertEquals("This must work, init must be true", true, initOk);
+		
+		initOk = clusterManager.enable("ajp://localhost:8019", "medium");
+		assertEquals("This must work, init must be true", true, initOk);
+		assertEquals("This must work, init must be true", "ok", clusterManager.getCluster().getStatusMessage());
+		
+		assertEquals("There must be one status", 1, workerFactory.getStatuses().size());
+		assertEquals("The init must be ok", "ok", clusterManager.getCluster().getStatusMessage());
+	}
+	@Test
+	public void testNewPollClusterManager() {
+		WorkerFactory workerFactory = new WorkerFactory(httpClient);
+		ClusterManager clusterManager = new ClusterManager(workerFactory);
+		boolean initOk = clusterManager.init(localhostUrl);
+		assertEquals("This must work, init must be true", true, initOk);
+		
+		initOk = clusterManager.poll();
+		assertEquals("This must work, init must be true", true, initOk);
+		assertEquals("This must work, init must be true", "ok", clusterManager.getCluster().getStatusMessage());
+		
+		assertEquals("There must be one status", 1, workerFactory.getStatuses().size());
+		assertEquals("The init must be ok", "ok", clusterManager.getCluster().getStatusMessage());
 	}
 	
 	/**

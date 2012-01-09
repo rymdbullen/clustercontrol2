@@ -175,7 +175,7 @@
 					<jettyEnvXml>${basedir}/jetty-env.xml</jettyEnvXml>
 					<connectors>
 						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-							<port>9090</port>
+							<port>8080</port>
 						</connector>
 					</connectors>
 					<webAppConfig>

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 public class Workers {
 	public String TYPE_XML  = "XML";
 	public String TYPE_HTML = "HTML";
+	private String id;
 	@SuppressWarnings("unused")
 	private String status;
 	private String name;
@@ -48,7 +49,7 @@ public class Workers {
 		String lastStatus = null;
 		boolean sameAsLast = false;
 		
-		for (WorkerStatus workerStatus : statuses) {
+ 		for (WorkerStatus workerStatus : statuses) {
 			String thisStatus = workerStatus.getStatus();
 			if(lastStatus!=null && lastStatus.equalsIgnoreCase(thisStatus)) {
 				sameAsLast = true;
@@ -57,15 +58,21 @@ public class Workers {
 			}
 			lastStatus = thisStatus;
 		}
-		if(!sameAsLast) {
+		if(statuses.size()>1 && !sameAsLast) {
 			return "unknown";
 		}
-		if(lastStatus.equalsIgnoreCase("nok")) {
+		if(lastStatus.equalsIgnoreCase("dis")) {
 			return "allDisabled";
 		} if(lastStatus.equalsIgnoreCase("ok")) {
 			return "allEnabled";
 		}
 		return "unknown";
+	}
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
 	}
 	@Override
 	public String toString() {
