@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * Cluster of tomcats contains arrays of workers. Each worker contains one status for each host.
  * <pre>
  * Cluster
- *        -> Workers
+ *        -> Worker
  *                  -> WorkerStatuses
  * </pre>
  * @author jstenvall

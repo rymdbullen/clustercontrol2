@@ -20,7 +20,7 @@
 			<h1>
 				Setup ClusterControl
 			</h1>
-			<div class="span-12 last">	
+			<div class="span-12 last">
 				<form:form modelAttribute="setupHost" action="cluster" method="post">
 				  	<fieldset>
 						<legend>Cluster Setup</legend>

@@ -134,11 +134,12 @@ public class ClusterManager implements IWorkerManager {
 	
 	@Override
 	public boolean poll() {
-		if(_cluster==null) {
+ 		if(_cluster==null) {
 			return false;
 		}
 		boolean isSuccess = workerFactory.getAllStatuses(null, "poll", null);
 		if(isSuccess) {
+			updateCluster(workerFactory.getStatuses());
 			_cluster.setStatusMessage("ok");
 			return true;			
 		}

@@ -20,91 +20,88 @@
 		<div class="container">
 			<h1>ClusterControl View</h1>
 			<div id="workerstable" class="span-12 last">
-	
-				<!-- header -->
 				<div class="headers">
-					<div id="col1" class="header" style="float: left;">worker</div>
-<c:forEach items="${cluster.hostNames}" var="hostName">
-					<div id="stat" class="header" style="float: left;"><c:out value="${hostName}"/></div>
-</c:forEach>
+					<div id="col1" class="header" style="float: left;">worker</div><c:forEach items="${cluster.hostNames}" var="hostName">
+					<div id="stat" class="header" style="float: left;"><c:out value="${hostName}"/></div></c:forEach>
 				</div>
 				<div style="clear: both;"></div>
 				
 				<!-- statuses -->
-				<div class="workers">
-<c:forEach items="${cluster.workers}" var="worker">
-					<div id="col1" class="hostName"><c:out value="${worker.name}"/></div>
-	<c:forEach items="${worker.statuses}" var="status">
-					<div class="status ${status.hostName}-${worker.id}" id="stat"><c:out value="${status.status}"/></div>
-	</c:forEach>
-					<div class="status ${status.hostName}-${worker.id}" id="stat-btn">
+				<div class="workers"><c:forEach items="${cluster.workers}" var="worker">
+					<div id="col1" class="hostName"><c:out value="${worker.name}"/></div><c:forEach items="${worker.statuses}" var="status">
+					<div class="status status-${worker.id}" id="stat" title="${status.hostName}, ${status.loadFactor}, ${status.transferred}"><c:out value="${status.status}"/></div></c:forEach>
+					<div class="status btn-${worker.id}" id="stat-btn">
 						<input id="${worker.id}-disable" class="${worker.id}-disable" type="button" value="Disable" onclick="confirmAction('disable','${worker.id}','${worker.name}')" disabled="disabled" />
 					</div>
-					<div class="status ${status.hostName}-${worker.id}" id="stat-btn">
+					<div class="status btn-${worker.id}" id="stat-btn">
 						<input id="${worker.id}-enable" class="${worker.id}-enable" type="button" value="Enable" onclick="confirmAction('enable','${worker.id}','${worker.name}')" disabled="disabled" />
 					</div>
-					<div style="clear: both;"></div>
-</c:forEach>
+					<div style="clear: both;"></div></c:forEach>
 				</div>
 			</div>
 			<div id="alternatives">
-				<div>
-					<span class="col1">AutoRefresh</span>
-					On&nbsp;<input type="radio" id="ctrlautorefreshon" value="on" onmouseup="startTimer(this.value);" />
-					Off&nbsp;<input type="radio" id="ctrlautorefreshoff" value="off" onmouseup="startTimer(this.value);" />
-				</div>
-				<div>
-					<span class="col1">Manual Refresh</span><input value="Refresh" type="button" onclick="pollUpdate();" title="Refresh Status"/>
-				</div>
-				<div>
-					<span class="col1">Status:</span>&nbsp;<span id="actionStatus"></span>
-				</div>		
-				<div>
-					<span class="col1">Last Update:</span>&nbsp;<span id="lastPoll"></span>
-				</div>
+				<ul>
+					<li><span class="col1">AutoRefresh</span>
+					On&nbsp;<input type="radio" id="ctrlautorefreshon" name="ctrlautorefreshon" value="on" onmouseup="startTimer(this.value);" />
+					Off&nbsp;<input type="radio" id="ctrlautorefreshoff" name="ctrlautorefreshoff" value="off" onmouseup="startTimer(this.value);" /></li>
+					<li><span class="col1">Manual Refresh</span><input value="Refresh" type="button" onclick="pollUpdate();" title="Refresh Status"/></li>
+					<li><span class="col1">Status:</span>&nbsp;<span id="actionStatus"></span></li>
+					<li><span class="col1">Last Update:</span>&nbsp;<span id="lastPoll"></span></li>
+					<li> <a href="?locale=en_us">us</a> |  <a href="?locale=en_gb">gb</a> | <a href="?locale=es_es">es</a> | <a href="?locale=de_de">de</a> </li>
+				</ul>
 			</div>
 			<div id="mask" style="display: none;"></div>
 			<div id="popup" style="display: none;">
 				<div class="span-10 last">
 					<h3 id="actionHeader">Action:</h3>
 					<div id="speed">
-					<label>Activate: <input type="radio" name="enablerate" value="slow" title="Slow Activation" onmouseup="initiate(this.value);" />(S)low
-					                 <input type="radio" name="enablerate" value="medium" title="Medium Activation" onmouseup="initiate(this.value);" />(M)edium
-					                 <input type="radio" name="enablerate" value="aggressive" title="Fast Activation" onmouseup="initiate(this.value);" />(A)ggressive
-					                 <input type="radio" name="enablerate" value="custom" title="Custom Activation" onmouseup="initiate(this.value);" />(C)ustom
-									&nbsp;&nbsp;&nbsp;Disable: <input type="radio" name="enablerate" value="disable" title="Disable All" onclick="initiate(this.value);" />
-					</label>
+						<form name="dummyForm" method="get" action="" onsubmit="return false;">
+							<fieldset>
+								<legend>Initiate Action:</legend>
+							    <label onmouseup="initiate('slow');"><input type="radio" name="enablerate" value="slow" title="Slow Activation" onmouseup="initiate(this.value);" />(S)low</label><br/>
+							    <label onmouseup="initiate('medium');"><input type="radio" name="enablerate" value="medium" title="Medium Activation" onmouseup="initiate(this.value);" />(M)edium</label><br/>
+							    <label onmouseup="initiate('aggressive');"><input type="radio" name="enablerate" value="aggressive" title="Fast Activation" onmouseup="initiate(this.value);" />(A)ggressive</label><br/>
+							    <label onmouseup="initiate('custom');"><input type="radio" name="enablerate" value="custom" title="Custom Activation" onmouseup="initiate(this.value);" />(C)ustom</label><br/>
+							</fieldset>
+						</form>
 					</div>
-					<a href="#" onclick="closePopup();">Close</a>
+					<span>
+						<input id="initiate-nok" class="" type="button" value="Cancel" onmouseup="cancelAction();" />
+					</span>
+					<span id="speed-buttons" style="display: none;">
+						<input id="initiate-ok" class="" type="button" value="Initiate" onmouseup="performAction2();" />
+					</span>
 				</div>
 			</div>
 			<hr/>
-			<ul>
-				<li> <a href="?locale=en_us">us</a> |  <a href="?locale=en_gb">gb</a> | <a href="?locale=es_es">es</a> | <a href="?locale=de_de">de</a> </li>
-			</ul>
-		</div>
-		<div>TODO</div>
-		<div>
-			<ul>
-				<li>DONE! implement interfaces of ClusterManager and WorkerFactory</li>
-				<li>DONE! Bug: When only one host disable/enable buttons dont match</li>
-				<li>implement startup initialization of the view</li>
-				<li>implement error handling - no worker for url found</li>
-				<li>implement error handling - error reading old worker setup</li>
-				<li>layout - fix two column layout for "alternatives"</li>
-				<li>layout - flowing layout for "alternatives"</li>
-				<li>sign off</li>
-			</ul>
-			Varför vill jag ha jobbet som ni erbjuder.
-			1. Jag är intresserad av att jobba närmare hemmet. 
-			   Just nu är jag hemifrån 12-13 timmar per dygn. Jag jobbar mer effektivt om jag kan vara med  
-			2.  
+			<div>TODO</div>
+			<div>
+				<ul>
+					<li>implement error handling - no worker for url found</li>
+					<li>implement error handling - error reading old worker setup</li>
+					<li>Bug! implement startup initialization of the view</li>
+					<li>layout - fix two column layout for "alternatives"</li>
+					<li>layout - flowing layout for "alternatives"</li>
+					<li>layout - fix layout for body mask</li>
+					<li>clear radio buttons on cancel</li>
+					<li>sign off</li>
+				</ul>
+			</div>
+			<div>DONE</div>
+			<div>
+				<ul>
+					<li>DONE! layout - fix label for radio buttons on body mask</li>
+					<li>DONE! implement interfaces of ClusterManager and WorkerFactory</li>
+					<li>DONE! Bug: When only one host disable/enable buttons dont match</li>
+				</ul>
+			</div>
 		</div>
 	</body>
 
 	<script type="text/javascript">
 	<!--
 		var worker = '';
+		var choosenSpeed = '';
 		var performAction = '';
 		var triggerId = '';
 		$(document).ready(function() {
@@ -121,9 +118,7 @@
 			});
 		}
 		function fieldUpdate(cluster) {
-			var retval = '';
 			var workers = cluster.workers;
-			
 			for (i=0;i < workers.length;i++)
 			{
 				var statuses = workers[i].statuses;
@@ -133,7 +128,7 @@
 				for (j=0;j < statuses.length;j++)
 				{
 					var status = statuses[j];
-					var field = status.hostName+"-"+workerName;
+					var field = "status-"+workerName;
 
 					$("div.status."+field).html(status.status);
 					
@@ -167,11 +162,13 @@
     	function startTimer(toggle)
     	{
 			if(toggle == 'on') {
+    			$('#ctrlautorefreshon').attr('checked', true);
     			$('#ctrlautorefreshoff').attr('checked', false);
 	    		$('#actionStatus').html("Started autorefresh");
 	    		triggerId = window.setInterval(pollUpdate, 30000);
 	    		return triggerId;
 			} else if(toggle == 'off') {
+    			$('#ctrlautorefreshoff').attr('checked', true);
     			$('#ctrlautorefreshon').attr('checked', false);
 	    		$('#actionStatus').html("Stopped autorefresh");
 				window.clearInterval(triggerId);
@@ -187,26 +184,36 @@
     	}
     	function initiate(speed) 
     	{
-    		var text = "\'" + performAction + "\' worker \'" + worker + "\', "+speed + " speed";
-    		if (confirm ("Do you want to "+text+"?")) {
-    			$('#actionStatus').html("Performing " + text);
+			$('#speed-buttons').fadeIn('fast');
+			choosenSpeed = speed
+    		var radioObj = $("#enablerate");
+    		setCheckedValue(radioObj, speed);
+    	}
+    	function performAction2()
+    	{
+    		var text = "\'" + performAction + "\' worker \'" + worker + "\', "+choosenSpeed + " speed";
+   			$('#actionStatus').html("Performing " + text);
 
-            	// perform action on this worker
-     			$.getJSON("cluster/"+performAction+"/" + worker+"/"+speed, function(cluster) {
-    				fieldUpdate(cluster);
-    			});
-    			closePopup();
-    			return;
-    		}
+           	// perform action on this worker
+   			$.getJSON("cluster/"+performAction+"/" + worker+"/"+speed, function(cluster) {
+   				fieldUpdate(cluster);
+   			});
+   			closePopup();
+   			return;
+    	}
+    	function cancelAction() 
+    	{
     		closePopup();
-    		$('#actionStatus').html("Cancelled action " + text);
+    		radioObj = document.forms['dummyForm'].elements['enablerate'];
+    		setCheckedValue(radioObj, '');
+    		$('#speed-buttons').fadeOut('fast');
+    		$('#actionStatus').html("Action Cancelled for " + worker);
     	}
 		function showPopup() {
 			$('body').css('overflow','hidden');
 			$('#popup').fadeIn('fast');
 			$('#mask').fadeIn('fast');
 		}
-		
 		function closePopup() {
 			$('#popup').fadeOut('fast');
 			$('#mask').fadeOut('fast');
@@ -215,6 +222,27 @@
 		}
 		function resetForm() {
 			// reset all variables	
+		}
+
+		// set the radio button with the given value as being checked
+		// do nothing if there are no radio buttons
+		// if the given value does not exist, all the radio buttons
+		// are reset to unchecked
+		function setCheckedValue(radioObj, newValue) {
+			if(!radioObj) {
+				return;
+			}
+			var radioLength = radioObj.length;
+			if(radioLength == undefined) {
+				radioObj.checked = (radioObj.value == newValue.toString());
+				return;
+			}
+			for(var i = 0; i < radioLength; i++) {
+				radioObj[i].checked = false;
+				if(radioObj[i].value == newValue.toString()) {
+					radioObj[i].checked = true;
+				}
+			}
 		}
     --></script>
 	
