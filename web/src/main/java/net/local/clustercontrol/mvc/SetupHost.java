@@ -2,8 +2,11 @@ package net.local.clustercontrol.mvc;
 
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.validator.constraints.NotBlank;
+
 public class SetupHost {
 	@NotNull
+	@NotBlank
 	private String url;
 
 	public String getUrl() {

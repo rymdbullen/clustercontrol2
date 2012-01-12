@@ -95,31 +95,25 @@ public class ClusterController {
 		else
 		{
 			// TODO implement error handling 
-			if(false == init(setupHost.getUrl())) {
-				return errorMessages(failures);
+			try {
+				if(clusterManager.init(setupHost.getUrl())) {
+					return Collections.singletonMap("initStatus", "ok");
+				} else {
+					return Collections.singletonMap("initStatus", "nok");
+				}
+			} catch (MalformedURLException e) {
+				logger.error("Failed to create url from supplied string: "+setupHost.getUrl(), e);
+				errorMessages(failures);
+				return Collections.singletonMap("initStatus", "nok");
+			} catch (WorkerNotFoundException e) {
+				logger.error("Failed to find worker for supplied url: "+setupHost.getUrl(), e);
+				//return errorMessages(failures);
+				return Collections.singletonMap("initStatus", "nok");
 			}
-			return Collections.singletonMap("initStatus", "ok");
 		}
 	}
 
 	// internal helpers
-	
-	/**
-	 * 
-	 * @param url
-	 * @return
-	 */
-	private boolean init(String url) {
-		try {
-			return clusterManager.init(url);
-		} catch (MalformedURLException e) {
-			logger.error("Failed to create url from supplied string: "+url, e);
-			return false;
-		} catch (WorkerNotFoundException e) {
-			logger.error("Failed to find worker for supplied url: "+url, e);
-			return false;
-		}
-	}
 
 	private Map<String, String> validationMessages(Set<ConstraintViolation<SetupHost>> failures) {
 		Map<String, String> failureMessages = new HashMap<String, String>();

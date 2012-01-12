@@ -39,16 +39,14 @@
 					<div style="clear: both;"></div></c:forEach>
 				</div>
 			</div>
-			<div id="alternatives">
-				<ul>
-					<li><span class="col1">AutoRefresh</span>
-					On&nbsp;<input type="radio" id="ctrlautorefreshon" name="ctrlautorefreshon" value="on" onmouseup="startTimer(this.value);" />
-					Off&nbsp;<input type="radio" id="ctrlautorefreshoff" name="ctrlautorefreshoff" value="off" onmouseup="startTimer(this.value);" /></li>
-					<li><span class="col1">Manual Refresh</span><input value="Refresh" type="button" onclick="pollUpdate();" title="Refresh Status"/></li>
-					<li><span class="col1">Status:</span>&nbsp;<span id="actionStatus"></span></li>
-					<li><span class="col1">Last Update:</span>&nbsp;<span id="lastPoll"></span></li>
-					<li> <a href="?locale=en_us">us</a> |  <a href="?locale=en_gb">gb</a> | <a href="?locale=es_es">es</a> | <a href="?locale=de_de">de</a> </li>
-				</ul>
+			<div id="alternatives" class="span-12 last">
+				<div><span class="col1">AutoRefresh</span>
+				On&nbsp;<input type="radio" id="ctrlautorefreshon" name="ctrlautorefreshon" value="on" onmouseup="startTimer(this.value);" />
+				Off&nbsp;<input type="radio" id="ctrlautorefreshoff" name="ctrlautorefreshoff" value="off" onmouseup="startTimer(this.value);" /></div>
+				<div><span class="col1">Manual Refresh</span><input value="Refresh" type="button" onclick="pollUpdate();" title="Refresh Status"/></div>
+				<div><span class="col1">Status:</span><span id="actionStatus">&nbsp;</span></div>
+				<div><span class="col1">Last Update:</span><span id="lastPoll">&nbsp;</span></div>
+				<div><span class="col1">Locale</span> <a href="?locale=en_us">us</a> |  <a href="?locale=en_gb">gb</a> | <a href="?locale=es_es">es</a> | <a href="?locale=de_de">de</a> </div>
 			</div>
 			<div id="mask" style="display: none;"></div>
 			<div id="popup" style="display: none;">
@@ -58,10 +56,10 @@
 						<form name="dummyForm" method="get" action="" onsubmit="return false;">
 							<fieldset>
 								<legend>Initiate Action:</legend>
-							    <label onmouseup="initiate('slow');"><input type="radio" name="enablerate" value="slow" title="Slow Activation" onmouseup="initiate(this.value);" />(S)low</label><br/>
-							    <label onmouseup="initiate('medium');"><input type="radio" name="enablerate" value="medium" title="Medium Activation" onmouseup="initiate(this.value);" />(M)edium</label><br/>
-							    <label onmouseup="initiate('aggressive');"><input type="radio" name="enablerate" value="aggressive" title="Fast Activation" onmouseup="initiate(this.value);" />(A)ggressive</label><br/>
-							    <label onmouseup="initiate('custom');"><input type="radio" name="enablerate" value="custom" title="Custom Activation" onmouseup="initiate(this.value);" />(C)ustom</label><br/>
+							    <label onmouseup="initAction('slow');"><input type="radio" name="enablerate" value="slow" title="Slow Activation" onmouseup="initAction(this.value);" />(S)low</label><br/>
+							    <label onmouseup="initAction('medium');"><input type="radio" name="enablerate" value="medium" title="Medium Activation" onmouseup="initAction(this.value);" />(M)edium</label><br/>
+							    <label onmouseup="initAction('aggressive');"><input type="radio" name="enablerate" value="aggressive" title="Fast Activation" onmouseup="initAction(this.value);" />(A)ggressive</label><br/>
+							    <label onmouseup="initAction('custom');"><input type="radio" name="enablerate" value="custom" title="Custom Activation" onmouseup="initAction(this.value);" />(C)ustom</label><br/>
 							</fieldset>
 						</form>
 					</div>
@@ -69,7 +67,7 @@
 						<input id="initiate-nok" class="" type="button" value="Cancel" onmouseup="cancelAction();" />
 					</span>
 					<span id="speed-buttons" style="display: none;">
-						<input id="initiate-ok" class="" type="button" value="Initiate" onmouseup="performAction2();" />
+						<input id="initiate-ok" class="" type="button" value="Initiate" onmouseup="performAction();" />
 					</span>
 				</div>
 			</div>
@@ -77,19 +75,22 @@
 			<div>TODO</div>
 			<div>
 				<ul>
-					<li>implement error handling - no worker for url found</li>
-					<li>implement error handling - error reading old worker setup</li>
-					<li>Bug! implement startup initialization of the view</li>
-					<li>layout - fix two column layout for "alternatives"</li>
-					<li>layout - flowing layout for "alternatives"</li>
-					<li>layout - fix layout for body mask</li>
-					<li>clear radio buttons on cancel</li>
+					<li>Test: multiple hosts and more than two workers per host</li>
+					<li>mod_jk is not implemented</li>
+					<li>Bug! implement startup initialization of the view, e.g. enable/disable buttons</li>
+					<li>Bug! layout - fix layout for body mask</li>
+					<li>STARTED: implement error handling - error reading old worker setup</li>
 					<li>sign off</li>
 				</ul>
 			</div>
 			<div>DONE</div>
 			<div>
 				<ul>
+					<li>DONE! implement error handling - no worker for url found</li>
+					<li>DONE! Bug! httpclient does not handle 404</li>
+					<li>DONE! layout - fix two column layout for "alternatives"</li>
+					<li>DONE! layout - flowing layout for "alternatives"</li>
+					<li>DONE! clear radio buttons on cancel</li>
 					<li>DONE! layout - fix label for radio buttons on body mask</li>
 					<li>DONE! implement interfaces of ClusterManager and WorkerFactory</li>
 					<li>DONE! Bug: When only one host disable/enable buttons dont match</li>
@@ -102,7 +103,7 @@
 	<!--
 		var worker = '';
 		var choosenSpeed = '';
-		var performAction = '';
+		var actionToPerform = '';
 		var triggerId = '';
 		$(document).ready(function() {
 	        //
@@ -112,7 +113,7 @@
 
 		function pollUpdate() {
 			// reset the actionStatus field
-			$('#actionStatus').html("");
+			$('#actionStatus').html("-");
 			$.getJSON("cluster/poll", { name: $('#name').val() }, function(cluster) {
 				fieldUpdate(cluster);
 			});
@@ -178,27 +179,29 @@
     	{
 			$('#actionHeader').html("Action: \'" + action + "\' worker \'" + workerDisplayName + "\'");
     		worker = workerName;
-    		performAction = action;
+    		actionToPerform = action;
     		
     		showPopup();
     	}
-    	function initiate(speed) 
+    	function initAction(speed) 
     	{
 			$('#speed-buttons').fadeIn('fast');
 			choosenSpeed = speed
     		var radioObj = $("#enablerate");
     		setCheckedValue(radioObj, speed);
     	}
-    	function performAction2()
+    	function performAction()
     	{
-    		var text = "\'" + performAction + "\' worker \'" + worker + "\', "+choosenSpeed + " speed";
+    		var text = "\'" + actionToPerform + "\' worker \'" + worker + "\', "+choosenSpeed + " speed";
    			$('#actionStatus').html("Performing " + text);
 
            	// perform action on this worker
-   			$.getJSON("cluster/"+performAction+"/" + worker+"/"+speed, function(cluster) {
+   			$.getJSON("cluster/"+actionToPerform+"/" + worker+"/"+speed, function(cluster) {
    				fieldUpdate(cluster);
    			});
+   			radioObj = document.forms['dummyForm'].elements['enablerate'];
    			closePopup();
+    		setCheckedValue(radioObj, '');
    			return;
     	}
     	function cancelAction() 

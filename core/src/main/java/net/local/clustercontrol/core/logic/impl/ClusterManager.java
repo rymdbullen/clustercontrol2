@@ -48,7 +48,6 @@ public class ClusterManager implements IWorkerManager {
 		if(_cluster != null && _cluster.getWorkers() != null) {
 			logger.debug("Already initialized: "+ _cluster.getWorkerNames());
 			_cluster.setStatusMessage("Already intialized");
-			
 			return true;
 		}
 		// initialize new cluster
@@ -57,11 +56,13 @@ public class ClusterManager implements IWorkerManager {
 		boolean initOk = workerFactory.init(url, null, "poll", null);
 		if(initOk==false) {
 			_cluster.setStatusMessage("nok");
+			_cluster = null;
 			return false;
 		}
 		HashMap<String, JkStatus> statuses = workerFactory.getStatuses();
 		if(statuses == null) {
 			_cluster.setStatusMessage("nok");
+			_cluster = null;
 			return false;
 		}
 		updateCluster(statuses);

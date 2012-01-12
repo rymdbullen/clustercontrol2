@@ -5,14 +5,15 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -20,10 +21,8 @@ import org.springframework.stereotype.Component;
 import net.local.clustercontrol.api.model.xml.Host;
 import net.local.clustercontrol.api.model.xml.ResponseError;
 import net.local.clustercontrol.api.model.xml.WorkerResponse;
-import net.local.clustercontrol.api.model.xml.WorkerResponses;
 import net.local.clustercontrol.core.http.IHttpClient;
 import net.local.clustercontrol.core.logic.ControlCommandException;
-import net.local.clustercontrol.core.model.dto.Cluster;
 
 @Component
 public class HttpClient implements IHttpClient {
@@ -34,10 +33,6 @@ public class HttpClient implements IHttpClient {
 	public WorkerResponse getWorkerResponseForUrl(String url) {
 		URL targetUrl = createTargetUrl(url);
 		return performActionOnHost(targetUrl);
-	}
-	@Override
-	public WorkerResponses getWorkerResponseForAction(Cluster cluster) {
-		throw new IllegalArgumentException("not implemented");
 	}
 	/**
 	 * Creates the request (GET) and receives a encapsulated response object, ie
@@ -67,12 +62,27 @@ public class HttpClient implements IHttpClient {
 		ResponseError responseError = new ResponseError();
 		try {
 			HttpGet httpget = new HttpGet(url.toExternalForm());
-			ResponseHandler<String> responseHandler = new BasicResponseHandler();
-			responseBody = httpclient.execute(httpget, responseHandler);
+			
+			HttpResponse response = httpclient.execute(httpget);
+			int statusCode = response.getStatusLine().getStatusCode();
+			if(statusCode == 404) {
+				responseError.setMessageKey("");
+				responseError.setMessage(response.getStatusLine().getReasonPhrase());
+				workerResponse.setError(responseError);
+				return workerResponse;
+			} else if(statusCode != 200) {
+				responseError.setMessageKey("");
+				responseError.setMessage(response.getStatusLine().getReasonPhrase());
+				workerResponse.setError(responseError);
+				return workerResponse;
+			}
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				responseBody = EntityUtils.toString(entity);
+			}
+			
 			workerResponse.setBody(responseBody);
 			workerResponse.setHost(url.getHost());
-			responseError.setMessageKey("");
-			responseError.setMessage("");
 		} catch (ClientProtocolException e) {
 			logger.error(e.getClass().getCanonicalName() +" "+e.getMessage()+" "+e.getLocalizedMessage());
 			if(e instanceof HttpResponseException) {
@@ -82,6 +92,7 @@ public class HttpClient implements IHttpClient {
 			}
 			responseError.setMessageKey(e.getClass().getCanonicalName());
 			responseError.setMessage(e.getMessage());
+			workerResponse.setError(responseError);
 		} catch (IOException e) {
 			logger.error(e.getClass() +" "+e.getMessage()+" "+e.getLocalizedMessage());
 			if(e instanceof HttpHostConnectException) {
@@ -91,10 +102,13 @@ public class HttpClient implements IHttpClient {
 			}
 			responseError.setMessageKey(e.getClass().getCanonicalName());
 			responseError.setMessage(e.getMessage());
-		}
-		workerResponse.setError(responseError);
-		// shutdown the client
-		httpclient.getConnectionManager().shutdown();
+			workerResponse.setError(responseError);
+		} finally {
+            // When HttpClient instance is no longer needed,
+            // shut down the connection manager to ensure
+            // immediate deallocation of all system resources
+            httpclient.getConnectionManager().shutdown();
+        }
 		return workerResponse;
 	}
 	

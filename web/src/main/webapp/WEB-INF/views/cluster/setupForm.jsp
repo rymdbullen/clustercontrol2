@@ -17,16 +17,14 @@
 	</head>
 	<body>
 		<div class="container">
-			<h1>
-				Setup ClusterControl
-			</h1>
+			<h1>ClusterControl Setup</h1>
 			<div class="span-12 last">
 				<form:form modelAttribute="setupHost" action="cluster" method="post">
 				  	<fieldset>
 						<legend>Cluster Setup</legend>
 						<p>
 							<form:label	id="urlLabel" for="url" path="url" cssErrorClass="error">Url</form:label><br/>
-							<form:input path="url" value="http://localhost:8080/balancer-manager" /><form:errors path="url" />
+							<form:input path="url" value="http://localhost:8080/balancer-manager" /><form:errors path="url" /><div id="status"></div>
 						</p>
 						<p>	
 							<input id="create" type="submit" value="Create" />
@@ -58,70 +56,19 @@
 
 	<script type="text/javascript">	
 		$(document).ready(function() {
-			// check name availability on focus lost
-			$('#name').blur(function() {
-				if ($('#name').val()) {	
-					checkAvailability();
-				}
-			});
-/* 			$.getJSON("cluster/1", function(cluster) {
-				var retval = '';
-				var retval2 = '';
-				for (i=0;i < cluster.length;i++)
-				{
-					var th = cluster[i];
-					var workers = th.workers;
-					retval += th.hostName+ ': ' + th.url + '\n';
-					for (j=0;j < workers.length;j++) 
-					{
-						var worker = workers[j];
-						retval += ' workerName:'+worker.workerName;
-						retval += ' status    :'+worker.status;
-						retval += ' lastStatus:'+worker.lastStatus + '\n';
-					}
-				}
-				alert("retval="+retval);
-				$("#url2").val(retval);
-			});
-			$('body').css('overflow','hidden');
-			$('#popup').fadeIn('fast');
-			$('#mask').fadeIn('fast');
- */			
-			$("#account").submit(function() {
-				var account = $(this).serializeObject();
-				$.postJSON("account", account, function(data) {
-					$("#assignedId").val(data.id);
-					showPopup();
-				});
-				return false;				
-			});
-
  			$("#setupHost").submit(function() {
 				var cluster = $(this).serializeObject();
 				$.postJSON("cluster", cluster, function(data) {
-					//$("#url").val(data.initStatus);
-
 					if (data.initStatus == 'ok') {
-//						alert(data.initStatus);
+						$('#status').html("ok");
 						location.reload(true);
-					//	$.getJSON("cluster", { url: $('#url').val() }, function() {
-					//	});
-					//	
+					} else if (data.initStatus == 'nok') {
+						$('#status').html("Failed to initialize with url");
 					}
 				});
 				return false;
 			});
  		});
-
-		function checkAvailability() {
-			$.getJSON("account/availability", { name: $('#name').val() }, function(availability) {
-				if (availability.available) {
-					fieldValidated("name", { valid : true });
-				} else {
-					fieldValidated("name", { valid : false, message : $('#name').val() + " is not available, try " + availability.suggestions });
-				}
-			});
-		}
 
 		function fieldValidated(field, result) {
 			if (result.valid) {
@@ -137,25 +84,6 @@
 				}
 				$('#create').attr("disabled", true);					
 			}			
-		}
-
-		function showPopup() {
-			$.getJSON("account/" + $("#assignedId").val(), function(account) {
-				$("#confirmedName").val(account.name);
-				$("#confirmedBalance").val(account.balance);
-				$("#confirmedEquityAllocation").val(account.equityAllocation);
-				$("#confirmedRenewalDate").val(account.renewalDate);
-			});			
-			$('body').css('overflow','hidden');
-			$('#popup').fadeIn('fast');
-			$('#mask').fadeIn('fast');
-		}
-		
-		function closePopup() {
-			$('#popup').fadeOut('fast');
-			$('#mask').fadeOut('fast');
-			$('body').css('overflow','auto');
-			resetForm();
 		}
 
 		function resetForm() {
