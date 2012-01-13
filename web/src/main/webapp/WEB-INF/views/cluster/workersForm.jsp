@@ -19,7 +19,17 @@
 	<body>
 		<div class="container">
 			<h1>ClusterControl View</h1>
+			<c:choose>
+			<c:when test="${cluster.hostNames == 1}">
 			<div id="workerstable" class="span-12 last">
+			</c:when>
+			<c:when test="${cluster.hostNames > 1}">
+			<div id="workerstable" class="span-13 last">
+			</c:when>
+			<c:otherwise>
+			<div id="workerstable" class="span-12 last">
+			</c:otherwise>
+			</c:choose>
 				<div class="headers">
 					<div id="col1" class="header" style="float: left;">worker</div><c:forEach items="${cluster.hostNames}" var="hostName">
 					<div id="stat" class="header" style="float: left;"><c:out value="${hostName}"/></div></c:forEach>
@@ -167,7 +177,7 @@
     			$('#ctrlautorefreshon').attr('checked', true);
     			$('#ctrlautorefreshoff').attr('checked', false);
 	    		$('#actionStatus').html("Started autorefresh");
-	    		triggerId = window.setInterval(pollUpdate, 30000);
+	    		triggerId = window.setInterval(pollUpdate, 60000);
 	    		return triggerId;
 			} else if(toggle == 'off') {
     			$('#ctrlautorefreshoff').attr('checked', true);
