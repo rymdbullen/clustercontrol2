@@ -60,6 +60,7 @@ public class ManualWorkerFactoryTest {
             "<td>t2</td><td></td><td>1</td><td>0</td><td>Ok</td><td>1</td><td>  0 </td><td>1.0K</td></tr> </table> <hr /> "+
             "<address>Apache/2.2.11 (Ubuntu) PHP/5.2.6-3ubuntu4.6 with Suhosin-Patch Server at 192.168.10.116 Port 80</address> </body></html>";
 
+	@SuppressWarnings("unused")
 	private static final String testUrl = "http://192.168.10.116:8080/balancer-manager";
 	private static final String localhostUrl = "http://localhost:8080/balancer-manager";
 
@@ -128,7 +129,7 @@ public class ManualWorkerFactoryTest {
 	public void testCreateContextPoll() {
 		WorkerFactory workerFactory = new WorkerFactory(httpClient);
 		Cluster cluster = new Cluster();
-		String initOk = workerFactory.createContext(jkStatus.getBalancers().getBalancer().getMember().get(0), testUrl, null, "poll");
+		String initOk = workerFactory.createUrl(jkStatus.getBalancers().getBalancer().getMember().get(0), null, "poll");
 		assertEquals("This must work, init must be true", "http://192.168.10.116:8080/balancer-manager", initOk);
 		System.out.println(cluster.getStatusMessage());
 	}
@@ -137,7 +138,7 @@ public class ManualWorkerFactoryTest {
 	public void testCreateContextDisable() {
 		WorkerFactory workerFactory = new WorkerFactory(httpClient);
 		Cluster cluster = new Cluster();
-		String createdContext = workerFactory.createContext(jkStatus.getBalancers().getBalancer().getMember().get(1), testUrl, AJP_127_0_0_1_8209, "Disable");
+		String createdContext = workerFactory.createUrl(jkStatus.getBalancers().getBalancer().getMember().get(1), AJP_127_0_0_1_8209, "Disable");
 		String expected = "/balancer-manager?b=mycluster&w=ajp://127.0.0.1:8209&nonce=51b485f1-ab7c-42ae-81c3-ee9cc9610b7c&lf=1&ls=0&wr=t2&rr=&dw=Disable";
 		assertEquals("This must work, init must be true", expected, createdContext);
 		System.out.println(cluster.getStatusMessage());

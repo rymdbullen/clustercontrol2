@@ -15,9 +15,11 @@ public class WorkerStatus {
 	private String name;
 	private String status;
 	private String lastStatus;
+	private String id;
 	private String hostName;
 	private String hostPort;
 	private String type;
+	private String route;
 	private Integer to;
 	private Integer set;
 	private Integer transferred;
@@ -40,6 +42,12 @@ public class WorkerStatus {
 	}
 	public void setLastStatus(String lastStatus) {
 		this.lastStatus = lastStatus;
+	}
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
 	}
 	public String getHostName() {
 		return hostName;
@@ -83,13 +91,19 @@ public class WorkerStatus {
 	public void setLoadFactor(Integer loadFactor) {
 		this.loadFactor = loadFactor;
 	}
+	public String getRoute() {
+		return route;
+	}
+	public void setRoute(String route) {
+		this.route = route;
+	}
 	@Override
 	public String toString() {
-		return "WorkerStatus [name=" + name + ", status=" + status
+		return "WorkerStatus [id="+id+", name=" + name + ", status=" + status
 				+ ", lastStatus=" + lastStatus + ", hostName=" + hostName
 				+ ", hostPort=" + hostPort + ", type=" + type + ", to=" + to
 				+ ", set=" + set + ", transferred=" + transferred
-				+ ", loadFactor=" + loadFactor + "]";
+				+ ", loadFactor=" + loadFactor + ", route"+ route + "]";
 	}
 	
 }

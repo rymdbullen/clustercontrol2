@@ -1,6 +1,5 @@
 package net.local.clustercontrol.core.logic.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
@@ -29,16 +28,20 @@ import net.local.clustercontrol.core.parsers.StatusParserXML;
 @Component
 public class WorkerFactory implements IWorkerFactory {
 
+	private static final Logger logger = LoggerFactory.getLogger(WorkerFactory.class);
+
 	private static final String REPLACEMENT = "@@replacement@@";
 //	private static final String SPEED_MEDIUM = "medium";
 //	private static final String SPEED_SLOW = "slow";
 //	private static final String SPEED_FAST = "fast";
 
-	private static final Logger logger = LoggerFactory.getLogger(WorkerFactory.class);
 	
+	/** the http client that performs the http get */
 	private IHttpClient httpClient;
-	private String url;
-	private HashMap<String, JkStatus> statuses = new HashMap<String, JkStatus>();
+	/** the initial url, hostname replaced with placeholder */
+	private String _url;
+	/** Contains the current view of all hosts statuses, one status per host */ 
+	private HashMap<String, JkStatus> _statuses;
 	
 	@Autowired
 	public WorkerFactory(HttpClient httpClient) {
@@ -47,71 +50,78 @@ public class WorkerFactory implements IWorkerFactory {
 
 	@Override
 	public HashMap<String, JkStatus> getStatuses() {
-		return statuses;
+		return _statuses;
 	}
 
 	public void setStatuses(HashMap<String, JkStatus> statuses) {
-		this.statuses = statuses;
+		this._statuses = statuses;
 	}
 	@Override
 	public boolean init(String url, String workerName, String action, String speed) {
+		logger.info("Initializing with url: "+url);
+		
 		JkStatus jkStatus = getStatusForUrl(url);
-		if(jkStatus == null) {
-			return false;
-		}
-		statuses.put(jkStatus.getServer().getName(), jkStatus);
-		this.url = url.replaceAll(jkStatus.getServer().getName(), REPLACEMENT);
-		getAllStatuses(jkStatus, workerName, action, speed);
-		return true;
+		
+		this._url = url.replaceAll(jkStatus.getServer().getName(), REPLACEMENT);
+		return getAllStatuses(jkStatus, workerName, action, speed);
 	}
 	@Override
 	public boolean getAllStatuses(String workerName, String action, String speed) {
-		if(statuses == null || statuses.size() == 0) {
+		if(_statuses == null || _statuses.size() == 0) {
 			throw new IllegalArgumentException("Cluster statuses not initialized");
 		}
-		JkStatus jkStatus = statuses.get(statuses.keySet().iterator().next());
-		getAllStatuses(jkStatus, workerName, action, speed);
-		return true;
+		JkStatus jkStatus = _statuses.get(_statuses.keySet().iterator().next());
+		return getAllStatuses(jkStatus, workerName, action, speed);
 	}
+	/**
+	 * 
+	 * @param jkStatus
+	 * @param workerName
+	 * @param action
+	 * @param speed
+	 * @return
+	 */
 	public boolean getAllStatuses(JkStatus jkStatus, String workerName, String action, String speed) {
-		// create all urls
-		String hostName = jkStatus.getServer().getName();
-		Integer hostPort = jkStatus.getServer().getPort();
+		String initialHostName = jkStatus.getServer().getName();
+		Integer initialHostPort = jkStatus.getServer().getPort();
 		int memberCount = jkStatus.getBalancers().getBalancer().getMemberCount();
-		ArrayList<String> uniqueList = new ArrayList<String>();
+//		ArrayList<String> uniqueList = new ArrayList<String>();
+//		if("poll".equals(action)) {
+//			uniqueList.add(hostName);
+//		}
 		for (int i = 0; i < memberCount; i++) {
 			JkMember jkMember = jkStatus.getBalancers().getBalancer().getMember().get(i);
-			if(logger.isDebugEnabled()) { logger.debug(hostName+": "+hostPort+": "+jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getType()); }
+			if(logger.isDebugEnabled()) { logger.debug(""+action+": "+initialHostName+": "+initialHostPort+": "+jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getType()); }
 			
-			if(false == "poll".equals(action) && false == jkMember.getName().equals(workerName)) {
-				if(logger.isTraceEnabled()) { logger.trace("Dont touch this worker: "+jkMember.getName()+ " when we really want "+workerName); }
+			if("poll".equals(action) && _statuses.containsKey(jkMember.getHost())) {
 				continue;
 			}
-			if(uniqueList.contains(jkMember.getHost())) {
-				continue;
-			}
-			uniqueList.add(jkMember.getHost());
-			String newUrl = createContext(jkMember, url, workerName, action);
+//			uniqueList.add(jkMember.getHost());
+			String newUrl = createUrl(jkMember, workerName, action);
 			
 			delay(i, speed);
 			
-			JkStatus thisJkStatus = getStatusForUrl(newUrl);
-			if(thisJkStatus == null) {
-				continue;
-			}
-			statuses.put(jkStatus.getServer().getName(), thisJkStatus);
+			getStatusForUrl(newUrl);
 		}
-		if(logger.isTraceEnabled() && statuses.size()==1) {
-			logger.trace("No more hosts found except the initial: "+hostName);
+		if(logger.isTraceEnabled() && _statuses.size()==1) {
+			logger.trace("No more hosts found except the initial: "+initialHostName);
 		}
 		return true;
 	}
-	
-	String createContext(JkMember jkMember, String url, String workerName, String action) {
-		String newUrl = url.replaceAll(REPLACEMENT, jkMember.getHost());
+	/**
+	 * Creates a complete url for the wanted action
+	 * @param jkMember
+	 * @param workerName
+	 * @param action
+	 * @return
+	 */
+	String createUrl(JkMember jkMember, String workerName, String action) {
+		String newUrl = _url.replaceAll(REPLACEMENT, jkMember.getHost());
 		if(action.equals("poll")) {
 			return newUrl;
 		}
+		
+		// FIXME this is only for proxy_balancer_ajp
 		String lf = ""+jkMember.getLbfactor();
 		String ls = ""+jkMember.getRead();  //member.setRead(Integer.valueOf(matcher.group(_5SET).trim()));
 		String to = ""+jkMember.getBusy();  //member.setBusy(Integer.valueOf(matcher.group(_8TO).trim()));
@@ -119,7 +129,6 @@ public class WorkerFactory implements IWorkerFactory {
 		String actionContext = "&lf="+lf+"&ls="+ls+"&wr="+wr+"&rr=&dw="+action;
 		if(logger.isTraceEnabled()) { logger.trace(""+lf+" : "+ls+" : "+to+" : "+jkMember.getType()); }
 		if(logger.isDebugEnabled()) { logger.debug("Context: "+actionContext); }
-logger.debug("Context: "+actionContext);
 		
 		String newContext = getContext(jkMember);
 		
@@ -138,7 +147,6 @@ logger.debug("Context: "+actionContext);
 	}
 
 	private JkStatus getStatusForUrl(String url) {
-		//logger.info("Initializing with url: "+url);
 		if(false==url.startsWith("http")) {
 			url = "http://"+url;
 		}
@@ -149,6 +157,15 @@ logger.debug("Context: "+actionContext);
 		if(jkStatus	== null) {
 			return null;
 		}
+		if(_statuses == null) {
+			_statuses = new HashMap<String, JkStatus>();
+		} else {
+			if(_statuses.containsKey(jkStatus.getServer().getName())) {
+				_statuses.remove(jkStatus.getServer().getName());
+			}
+		}
+		this._statuses.put(jkStatus.getServer().getName(), jkStatus);
+
 		return jkStatus;
 	}
 	/**
@@ -175,11 +192,14 @@ logger.debug("Context: "+actionContext);
 		return null;
 	}
 	/**
-	 * 
+	 * Delays the current thread
 	 * @param i
 	 * @param speed
 	 */
 	private void delay(int i, String speed) {
+		if(speed==null) {
+			return;
+		}
 		int millis = 3000;
     	try {
 			long incrementalMillis = millis*i;

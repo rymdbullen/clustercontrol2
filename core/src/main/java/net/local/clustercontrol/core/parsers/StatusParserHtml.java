@@ -129,7 +129,7 @@ public class StatusParserHtml extends IStatusParser {
 		member.setTransferred(txInt);
 		member.setType(context);
 		
-		if(logger.isTraceEnabled()) { logger.trace("Parsed: host: "+member.getHost()+"; address: "+member.getAddress()+"; name: "+member.getName()+"; port: "+member.getPort()+ "; read: "+member.getRead()+ "; route: "+member.getRoute()+ "; redirect: "+member.getRedirect()+ "; elected: "+member.getElected()+ "; state: "+member.getState()+ "; busy: "+member.getBusy()+ ", context: "+context); }
+		if(logger.isDebugEnabled()) { logger.debug("Parsed: host: "+member.getHost()+"; address: "+member.getAddress()+"; name: "+member.getName()+"; port: "+member.getPort()+ "; read: "+member.getRead()+ "; route: "+member.getRoute()+ "; redirect: "+member.getRedirect()+ "; elected: "+member.getElected()+ "; state: "+member.getState()+ "; busy: "+member.getBusy()+ ", context: "+context); }
 		
 		jkBalancer.getMember().add(member);
 		jkBalancer.setName(balancerName);

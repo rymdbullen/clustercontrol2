@@ -29,7 +29,7 @@
 				<!-- statuses -->
 				<div class="workers"><c:forEach items="${cluster.workers}" var="worker">
 					<div id="col1" class="hostName"><c:out value="${worker.name}"/></div><c:forEach items="${worker.statuses}" var="status">
-					<div class="status status-${worker.id}" id="stat" title="${status.hostName}, ${status.loadFactor}, ${status.transferred}"><c:out value="${status.status}"/></div></c:forEach>
+					<div class="status status-${status.id}" id="stat" title="${status.hostName}, ${status.route}, ${status.loadFactor}, ${status.transferred}"><c:out value="${status.status}"/></div></c:forEach>
 					<div class="status btn-${worker.id}" id="stat-btn">
 						<input id="${worker.id}-disable" class="${worker.id}-disable" type="button" value="Disable" onclick="confirmAction('disable','${worker.id}','${worker.name}')" disabled="disabled" />
 					</div>
@@ -120,19 +120,20 @@
 		}
 		function fieldUpdate(cluster) {
 			var workers = cluster.workers;
+//alert('workers.length='+workers.length);
 			for (i=0;i < workers.length;i++)
 			{
 				var statuses = workers[i].statuses;
 				var workerName = workers[i].id;
 				var lastStatus = workers[i].status;
-
+//alert('statuses.length='+statuses.length);
 				for (j=0;j < statuses.length;j++)
 				{
 					var status = statuses[j];
-					var field = "status-"+workerName;
-
+					var field = "status-"+status.id;
+//if(j==1 && i==1) { alert(field); }
 					$("div.status."+field).html(status.status);
-					
+//if(j==1 && i==1) { alert( $("div.status."+field).html()+" "+status.status); }
 					if(status.status == "Ok") {
 						$("div.status."+field).css("color", "green");
 					} else if(status.status == "Dis") {

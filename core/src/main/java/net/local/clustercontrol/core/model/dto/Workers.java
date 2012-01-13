@@ -15,11 +15,11 @@ import java.util.ArrayList;
 public class Workers {
 	public String TYPE_XML  = "XML";
 	public String TYPE_HTML = "HTML";
-	private String id;
 	@SuppressWarnings("unused")
 	private String status;
 	private String name;
 	private String type;
+	private String id;
 	
 	/** all workers with same name, ie not per host */
 	private ArrayList<WorkerStatus> statuses = new ArrayList<WorkerStatus>();
@@ -81,6 +81,6 @@ public class Workers {
 			WorkerStatus status = statuses.get(i);
 			sbWorkers.append(status.toString()+"\n");
 		}
-		return "Workers [name=" + name + ", statuses={" + statuses + "}]";
+		return "Workers [name=" + name + ", id=" + id + ", statuses={" + statuses + "}]";
 	}
 }

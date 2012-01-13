@@ -3,8 +3,11 @@
  */
 package net.local.clustercontrol.core.integration;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 
+import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +24,7 @@ import junit.framework.TestCase;
  * @author admin
  *
  */
-public class WorkerStatusTest extends TestCase {
+public class WorkerStatusTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(WorkerStatusTest.class);
 
@@ -32,9 +35,8 @@ public class WorkerStatusTest extends TestCase {
 //	@Autowired
 //	private IHttpClient httpClient;
 	
-	@Override
+	@Before
 	protected void setUp() throws Exception {
-		super.setUp();
 		logger.debug("==================================================");
 		logger.debug("Running tests against: "+Constants.TEST_URL);
 		clusterManager.init(Constants.TEST_URL);

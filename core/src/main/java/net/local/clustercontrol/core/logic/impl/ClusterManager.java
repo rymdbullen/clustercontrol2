@@ -50,26 +50,20 @@ public class ClusterManager implements IWorkerManager {
 			_cluster.setStatusMessage("Already intialized");
 			return true;
 		}
-		// initialize new cluster
-		_cluster = new Cluster();
 
 		boolean initOk = workerFactory.init(url, null, "poll", null);
-		if(initOk==false) {
-			_cluster.setStatusMessage("nok");
-			_cluster = null;
-			return false;
+		if(initOk) {
+			if(workerFactory.getStatuses() != null) {
+				// initialize new cluster
+				_cluster = new Cluster();
+				updateCluster();
+				_cluster.setStatusMessage("ok");
+			
+				return true;
+			}
 		}
-		HashMap<String, JkStatus> statuses = workerFactory.getStatuses();
-		if(statuses == null) {
-			_cluster.setStatusMessage("nok");
-			_cluster = null;
-			return false;
-		}
-		updateCluster(statuses);
-		// initialize new cluster
-		_cluster.setStatusMessage("ok");
-	
-		return true;
+		_cluster = null;
+		return false;
 	}
 
 	@Override
@@ -82,14 +76,15 @@ public class ClusterManager implements IWorkerManager {
 		String action = "Enable";
 		String workerName = cssValidName(workerId, false);
 		boolean isSuccess = workerFactory.getAllStatuses(workerName, action, speed);
-		updateCluster(workerFactory.getStatuses());
 		if(isSuccess) {
+			updateCluster();
 			_cluster.setStatusMessage("ok");
 			return true;		
 		}
 		_cluster.setStatusMessage("Failed to update cluster status");
 		return false;
 	}
+	
 	@Override
 	@Async
 	public boolean disable(String workerId, String speed) {
@@ -101,7 +96,7 @@ public class ClusterManager implements IWorkerManager {
 		String workerName = cssValidName(workerId, false);
 		boolean isSuccess = workerFactory.getAllStatuses(workerName , action , speed);
 		if(isSuccess) {
-			updateCluster(workerFactory.getStatuses());
+			updateCluster();
 			_cluster.setStatusMessage("ok");
 			return true;			
 		}
@@ -120,7 +115,7 @@ public class ClusterManager implements IWorkerManager {
 		String workerName = cssValidName(workerId, false);
 		boolean isSuccess = workerFactory.getAllStatuses(workerName, action, "fast");
 		if(isSuccess) {
-			updateCluster(workerFactory.getStatuses());
+			updateCluster();
 			_cluster.setStatusMessage("ok");
 			return true;			
 		}
@@ -140,7 +135,7 @@ public class ClusterManager implements IWorkerManager {
 		}
 		boolean isSuccess = workerFactory.getAllStatuses(null, "poll", null);
 		if(isSuccess) {
-			updateCluster(workerFactory.getStatuses());
+			updateCluster();
 			_cluster.setStatusMessage("ok");
 			return true;			
 		}
@@ -153,7 +148,8 @@ public class ClusterManager implements IWorkerManager {
 	 * 
 	 * @param statuses
 	 */
-	private void updateCluster(HashMap<String, JkStatus> statuses) {
+	private void updateCluster() {
+		HashMap<String, JkStatus> statuses = workerFactory.getStatuses(); 
 		_cluster.getHostNames().clear();
 		_cluster.getWorkerNames().clear();
 		_cluster.getWorkers().clear();
@@ -167,7 +163,7 @@ public class ClusterManager implements IWorkerManager {
 			List<JkMember> members = jkStatus.getBalancers().getBalancer().getMember();
 			
 			for (JkMember jkMember : members) {
-				logger.debug(hostName+": "+hostPort+": "+jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getType());
+				logger.debug("Adding jkMember: "+hostName+": "+hostPort+": "+jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getType());
 				
 				String workerName = jkMember.getName();
 				HashMap<String, JkMember> memberList = membersList.get(workerName);
@@ -179,7 +175,7 @@ public class ClusterManager implements IWorkerManager {
 				memberList.put(hostName, jkMember);
 			}
 			String hostWithPort = hostName;
-			if(hostPort!=null && hostPort > 0) {
+			if(hostPort!=null && hostPort > 0 && hostPort != 80) {
 				hostWithPort = hostWithPort + ":" + hostPort;
 			}
 			if(false == _cluster.getHostNames().contains(hostWithPort)) {
@@ -196,11 +192,11 @@ public class ClusterManager implements IWorkerManager {
 			workers.setName(workerName);
 			workers.setId(cssValidName(workerName, true));
 			
-			HashMap<String, JkMember> workerMemberList = membersList.get(workerName);
-			Iterator<String> workerMemberListIter = workerMemberList.keySet().iterator();
+			HashMap<String, JkMember> jkMembersList = membersList.get(workerName);
+			Iterator<String> workerMemberListIter = jkMembersList.keySet().iterator();
 			while (workerMemberListIter.hasNext()) {
 				String hostName = workerMemberListIter.next();
-				JkMember jkMember = workerMemberList.get(hostName);
+				JkMember jkMember = jkMembersList.get(hostName);
 				WorkerStatus workerStatus = new WorkerStatus();
 				workerStatus.setHostName(hostName);
 				workerStatus.setHostPort(""+jkMember.getPort());
@@ -208,9 +204,11 @@ public class ClusterManager implements IWorkerManager {
 				workerStatus.setType(jkMember.getType().trim());
 				workerStatus.setTo(jkMember.getBusy());  // html to
 				workerStatus.setSet(jkMember.getRead()); // html set
+				workerStatus.setRoute(jkMember.getRoute()); // html set
 				workerStatus.setTransferred(jkMember.getTransferred());
 				workerStatus.setLoadFactor(jkMember.getLbfactor());
 				workerStatus.setName(jkMember.getName());
+				workerStatus.setId(cssValidName(hostName, true)+"-"+cssValidName(workerName, true));
 				workers.getStatuses().add(workerStatus);
 			}
 			_cluster.getWorkers().add(workers);
@@ -220,11 +218,15 @@ public class ClusterManager implements IWorkerManager {
 	}
 	private String cssValidName(String name, boolean encode) {
 		String cssValidName = name;
-		String[] replace1 = new String[] {":", "-"};
-		String[] replace2 = new String[] {"/", "_"};
+		String[] replace0 = new String[] {"://", "_-_"};
+		String[] replace1 = new String[] {"\\.", "_"};
+		String[] replace2 = new String[] {":", "-"};
+		String[] replace3 = new String[] {"/", "_"};
 		ArrayList<String[]> list = new ArrayList<String[]>();
+		list.add(replace0);
 		list.add(replace1);
 		list.add(replace2);
+		list.add(replace3);
 		for (String[] replacement : list) 
 		{
 			if(encode) 
@@ -238,56 +240,4 @@ public class ClusterManager implements IWorkerManager {
 		}
 		return cssValidName;
 	}
-	// ================================================================================
-	// ================================================================================
-	// ================================================================================
-	
-	@SuppressWarnings("unused")
-	private Cluster populate() {
-		Workers workers1 = new Workers();
-		workers1.setName("workerName1");
-		ArrayList<WorkerStatus> workerStatusList1 = new ArrayList<WorkerStatus>();
-		WorkerStatus workerStatus11 = setWorkerStatus("wsHost1");
-		WorkerStatus workerStatus12 = setWorkerStatus("wsHost2");
-		workerStatusList1.add(workerStatus11);
-		workerStatusList1.add(workerStatus12);
-		workers1.setStatuses(workerStatusList1);
-		
-		ArrayList<WorkerStatus> workerStatusList2 = new ArrayList<WorkerStatus>();
-		WorkerStatus workerStatus21 = setWorkerStatus("wsHost1");
-		WorkerStatus workerStatus22 = setWorkerStatus("wsHost2");
-		workerStatusList2.add(workerStatus21);
-		workerStatusList2.add(workerStatus22);
-		
-		Workers workers2 = new Workers();
-		workers2.setName("workerName2");
-		workers2.setStatuses(workerStatusList2);
-		
-		ArrayList<Workers> workersList = new ArrayList<Workers>();
-		workersList.add(workers1);
-		workersList.add(workers2);
-		
-		Cluster cluster = new Cluster();
-		cluster.setWorkers(workersList);
-		//cluster.setWorkerHosts(list);
-		ArrayList<String> names = new ArrayList<String>();
-		names.add(workerStatus11.getHostName());
-		names.add(workerStatus21.getHostName());
-		cluster.setHostNames(names);
-		
-		return cluster;
-	}
-
-	private WorkerStatus setWorkerStatus(String hostName) {
-		WorkerStatus status = new WorkerStatus();
-		status.setHostName(hostName);
-		if(Math.random() < 0.5d) {
-			status.setLastStatus("nok");
-			status.setStatus("ok");
-		} else {
-			status.setLastStatus("ok");
-			status.setStatus("nok");			
-		}
-		return status;
-	}	
 }
