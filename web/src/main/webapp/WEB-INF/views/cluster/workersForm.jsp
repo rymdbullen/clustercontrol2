@@ -1,11 +1,12 @@
 <%@ page session="false" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
 <html>
 	<head>
-		<title>ClusterControl View</title>
+		<title>ClusterControl</title>
 		<link rel="stylesheet" href="<c:url value="/resources/blueprint/screen.css" />" type="text/css" media="screen, projection">
 		<link rel="stylesheet" href="<c:url value="/resources/blueprint/print.css" />" type="text/css" media="print">
 		<link rel="stylesheet" href="<c:url value="/resources/cc.css" />" type="text/css" media="screen, projection">
@@ -18,12 +19,12 @@
 	</head>
 	<body>
 		<div class="container">
-			<h1>ClusterControl View</h1>
+			<h1>ClusterControl</h1>
 			<c:choose>
-			<c:when test="${cluster.hostNames == 1}">
+			<c:when test="${fn:length(cluster.hostNames) == 1}">
 			<div id="workerstable" class="span-12 last">
 			</c:when>
-			<c:when test="${cluster.hostNames > 1}">
+			<c:when test="${fn:length(cluster.hostNames) > 1}">
 			<div id="workerstable" class="span-13 last">
 			</c:when>
 			<c:otherwise>
@@ -87,6 +88,7 @@
 				<ul>
 					<li>Test: multiple hosts and more than two workers per host</li>
 					<li>mod_jk is not implemented</li>
+					<li>Bug! when initializing with ip and there is a equivalent name in hosts</li>
 					<li>Bug! implement startup initialization of the view, e.g. enable/disable buttons</li>
 					<li>Bug! layout - fix layout for body mask</li>
 					<li>STARTED: implement error handling - error reading old worker setup</li>
@@ -177,7 +179,7 @@
     			$('#ctrlautorefreshon').attr('checked', true);
     			$('#ctrlautorefreshoff').attr('checked', false);
 	    		$('#actionStatus').html("Started autorefresh");
-	    		triggerId = window.setInterval(pollUpdate, 60000);
+	    		triggerId = window.setInterval(pollUpdate, 30000);
 	    		return triggerId;
 			} else if(toggle == 'off') {
     			$('#ctrlautorefreshoff').attr('checked', true);

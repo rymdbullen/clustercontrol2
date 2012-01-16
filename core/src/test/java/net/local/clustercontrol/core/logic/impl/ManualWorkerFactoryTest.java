@@ -107,29 +107,29 @@ public class ManualWorkerFactoryTest {
 		httpClient = new HttpClient();
 	}
 
-	@Test
-	public void testGetAllStatusesPoll() {
-		WorkerFactory workerFactory = new WorkerFactory(httpClient);
-		Cluster cluster = new Cluster();
-		boolean initOk = workerFactory.getAllStatuses(jkStatus, null, "poll", null);
-		assertEquals("This must work, init must be true", true, initOk);
-		System.out.println(cluster.getStatusMessage());
-	}
-	
-	@Test
-	public void testGetAllStatusesDisable() {
-		WorkerFactory workerFactory = new WorkerFactory(httpClient);
-		Cluster cluster = new Cluster();
-		boolean initOk = workerFactory.getAllStatuses(jkStatus, AJP_127_0_0_1_8209, "Disable", "medium");
-		assertEquals("This must work, init must be true", true, initOk);
-		System.out.println(cluster.getStatusMessage());
-	}
+//	@Test
+//	public void testGetAllStatusesPoll() {
+//		WorkerFactory workerFactory = new WorkerFactory(httpClient);
+//		Cluster cluster = new Cluster();
+//		boolean initOk = workerFactory.getAllStatuses(jkStatus, null, "poll", null);
+//		assertEquals("This must work, init must be true", true, initOk);
+//		System.out.println(cluster.getStatusMessage());
+//	}
+//	
+//	@Test
+//	public void testGetAllStatusesDisable() {
+//		WorkerFactory workerFactory = new WorkerFactory(httpClient);
+//		Cluster cluster = new Cluster();
+//		boolean initOk = workerFactory.getAllStatuses(jkStatus, AJP_127_0_0_1_8209, "Disable", "medium");
+//		assertEquals("This must work, init must be true", true, initOk);
+//		System.out.println(cluster.getStatusMessage());
+//	}
 	
 	@Test
 	public void testCreateContextPoll() {
 		WorkerFactory workerFactory = new WorkerFactory(httpClient);
 		Cluster cluster = new Cluster();
-		String initOk = workerFactory.createUrl(jkStatus.getBalancers().getBalancer().getMember().get(0), null, "poll");
+		String initOk = workerFactory.createUrl(jkStatus.getBalancers().getBalancer().getMember().get(0), null, null, "poll");
 		assertEquals("This must work, init must be true", "http://192.168.10.116:8080/balancer-manager", initOk);
 		System.out.println(cluster.getStatusMessage());
 	}
@@ -138,7 +138,7 @@ public class ManualWorkerFactoryTest {
 	public void testCreateContextDisable() {
 		WorkerFactory workerFactory = new WorkerFactory(httpClient);
 		Cluster cluster = new Cluster();
-		String createdContext = workerFactory.createUrl(jkStatus.getBalancers().getBalancer().getMember().get(1), AJP_127_0_0_1_8209, "Disable");
+		String createdContext = workerFactory.createUrl(jkStatus.getBalancers().getBalancer().getMember().get(1), "host", AJP_127_0_0_1_8209, "Disable");
 		String expected = "/balancer-manager?b=mycluster&w=ajp://127.0.0.1:8209&nonce=51b485f1-ab7c-42ae-81c3-ee9cc9610b7c&lf=1&ls=0&wr=t2&rr=&dw=Disable";
 		assertEquals("This must work, init must be true", expected, createdContext);
 		System.out.println(cluster.getStatusMessage());

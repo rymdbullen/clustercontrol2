@@ -107,9 +107,9 @@ public class StatusParserHtml extends IStatusParser {
 				address = workerAddress.substring(beginIndex+3, endIndex);
 			}
 			context = workerAddressMatcher.group(1);
-			if(logger.isTraceEnabled()) { logger.trace("Parsed: balancerName: "+balancerName+"; address: "+address+"; workerName: "+workerName+"; workerPort:"+workerPort + ", context: "+context); }            		
+			if(logger.isTraceEnabled()) { logger.trace("Parsed: balancerName: "+balancerName+", address: "+address+", workerName: "+workerName+", workerPort:"+workerPort + ", context: "+context); }            		
 		} else {
-			throw new IllegalArgumentException("Failed to parse balancer name and address using pattern: "+workerAddressPattern.pattern());
+			throw new IllegalArgumentException("Failed to find balancer name and address using pattern: "+workerAddressPattern.pattern());
 		}
 		
 		member.setHost(address);
@@ -129,7 +129,7 @@ public class StatusParserHtml extends IStatusParser {
 		member.setTransferred(txInt);
 		member.setType(context);
 		
-		if(logger.isDebugEnabled()) { logger.debug("Parsed: host: "+member.getHost()+"; address: "+member.getAddress()+"; name: "+member.getName()+"; port: "+member.getPort()+ "; read: "+member.getRead()+ "; route: "+member.getRoute()+ "; redirect: "+member.getRedirect()+ "; elected: "+member.getElected()+ "; state: "+member.getState()+ "; busy: "+member.getBusy()+ ", context: "+context); }
+		if(logger.isDebugEnabled()) { logger.debug("Parsed: host: "+member.getHost()+", address: "+member.getAddress()+", name: "+member.getName()+", port: "+member.getPort()+ ", read: "+member.getRead()+ "; route: "+member.getRoute()+ "; redirect: "+member.getRedirect()+ "; elected: "+member.getElected()+ "; state: "+member.getState()+ "; busy: "+member.getBusy()+ ", context: "+context); }
 		
 		jkBalancer.getMember().add(member);
 		jkBalancer.setName(balancerName);
@@ -146,6 +146,7 @@ public class StatusParserHtml extends IStatusParser {
         	JkServer jkServer = new JkServer();
         	jkServer.setName(matcher.group(1));
         	jkServer.setPort(Integer.parseInt(matcher.group(2)));
+        	if(logger.isDebugEnabled()) { logger.debug("Parsed: server: "+jkServer.getName()+", port: "+jkServer.getPort()); }
         	return jkServer;
 		}
 		if(logger.isTraceEnabled()) {

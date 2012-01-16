@@ -1,6 +1,10 @@
 package net.local.clustercontrol.core.logic.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +28,7 @@ import net.local.clustercontrol.core.parsers.StatusParserXML;
  * 
  * GET /balancer-manager?lf=2&ls=0&wr=s2&rr=&dw=Enable&w=ajp://localhost:8019&b=cluster&nonce=5210ef6b-5413-4340-b713-e60e31f5dff6 HTTP/1.1
  * GET /balancer-manager?lf=2&ls=0&wr=s2&rr=&dw=Disable&w=ajp://localhost:8019&b=cluster&nonce=5210ef6b-5413-4340-b713-e60e31f5dff6 HTTP/1.1
+ * 
  */
 @Component
 public class WorkerFactory implements IWorkerFactory {
@@ -42,10 +47,23 @@ public class WorkerFactory implements IWorkerFactory {
 	private String _url;
 	/** Contains the current view of all hosts statuses, one status per host */ 
 	private HashMap<String, JkStatus> _statuses;
-	
+
+	/**
+	 * Constructor with autowired http client
+	 * @param httpClient
+	 */
 	@Autowired
 	public WorkerFactory(HttpClient httpClient) {
 		this.httpClient = httpClient;
+	}
+	/**
+	 * Constructor
+	 * @param httpClient
+	 * @param url
+	 */
+	public WorkerFactory(HttpClient httpClient, String url) {
+		this._url = url;
+		_statuses = new HashMap<String, JkStatus>(); 
 	}
 
 	@Override
@@ -63,50 +81,117 @@ public class WorkerFactory implements IWorkerFactory {
 		JkStatus jkStatus = getStatusForUrl(url);
 		
 		this._url = url.replaceAll(jkStatus.getServer().getName(), REPLACEMENT);
-		return getAllStatuses(jkStatus, workerName, action, speed);
+		
+		ArrayList<String> urls = initUrlsFromJkStatus(jkStatus);
+		
+		return getAllStatuses(urls, null);
+	}
+	/**
+	 * 
+	 * @param jkStatus
+	 * @return
+	 */
+	ArrayList<String> initUrlsFromJkStatus(JkStatus jkStatus) {
+		int memberCount = jkStatus.getBalancers().getBalancer().getMemberCount();
+		HashSet<String> set = new HashSet<String>();
+		for (int i = 0; i < memberCount; i++) {
+			JkMember jkMember = jkStatus.getBalancers().getBalancer().getMember().get(i);
+			if(jkStatus.getServer().getName().equals(jkMember.getHost())) {
+				// this host is alreaady taken care of
+System.out.println(""+jkStatus.getServer().getName());
+				continue;
+			}
+
+			String url = _url.replaceAll(REPLACEMENT, jkMember.getHost());
+			
+			set.add(url);
+		}
+		return new ArrayList<String>(set);
 	}
 	@Override
 	public boolean getAllStatuses(String workerName, String action, String speed) {
 		if(_statuses == null || _statuses.size() == 0) {
 			throw new IllegalArgumentException("Cluster statuses not initialized");
 		}
-		JkStatus jkStatus = _statuses.get(_statuses.keySet().iterator().next());
-		return getAllStatuses(jkStatus, workerName, action, speed);
+		
+		ArrayList<String> urls = createUrls(workerName, action);
+		return getAllStatuses(urls, speed);
+	}
+	/**
+	 * 
+	 * @param urls
+	 * @param speed
+	 * @return
+	 */
+	private boolean getAllStatuses(ArrayList<String> urls, String speed) {
+		for (int i = 0; i < urls.size(); i++) {
+			String url = urls.get(i);
+			delay(i, speed);
+			getStatusForUrl(url);
+		}
+		return true;
 	}
 	/**
 	 * 
 	 * @param jkStatus
 	 * @param workerName
 	 * @param action
-	 * @param speed
 	 * @return
 	 */
-	public boolean getAllStatuses(JkStatus jkStatus, String workerName, String action, String speed) {
+	ArrayList<String> createUrls(String workerName, String action) {
+		ArrayList<String> urls = new ArrayList<String>();
+		for (String host : _statuses.keySet()) {
+			JkStatus jkStatus = _statuses.get(host);
+			if(action.equals("poll")) {
+				return initUrlsFromJkStatus(jkStatus);
+			}
+			urls.add(createUrl(jkStatus, workerName, action));
+		}
+		
+		return urls;
+	}
+	/**
+	 * 
+	 * @param jkStatus
+	 * @param workerName
+	 * @param action
+	 * @return
+	 */
+	String createUrl(JkStatus jkStatus, String workerName, String action) {
+		
+//		funkar inte, det blir inte bra med att ta alla url:ar från en JkStatus
+//		varje JkStatus har sin egen identitet: nonce=57badbdb-e0bf-4cf2-8ad3-375a2ebeaca9
+//		
+//		loopa över _statuses för att få reda på vilka url:ar jag skall använda.
+		
+		
 		String initialHostName = jkStatus.getServer().getName();
 		Integer initialHostPort = jkStatus.getServer().getPort();
 		int memberCount = jkStatus.getBalancers().getBalancer().getMemberCount();
-//		ArrayList<String> uniqueList = new ArrayList<String>();
-//		if("poll".equals(action)) {
-//			uniqueList.add(hostName);
-//		}
 		for (int i = 0; i < memberCount; i++) {
 			JkMember jkMember = jkStatus.getBalancers().getBalancer().getMember().get(i);
-			if(logger.isDebugEnabled()) { logger.debug(""+action+": "+initialHostName+": "+initialHostPort+": "+jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getType()); }
+			if(logger.isTraceEnabled()) { logger.trace(""+action+": "+initialHostName+": "+initialHostPort+": "+jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getType()); }
 			
-			if("poll".equals(action) && _statuses.containsKey(jkMember.getHost())) {
+//			System.out.println("matching host "+initialHostName+" : "+initialHostName.equals(jkMember.getHost())+", : "+jkMember.getHost()+
+//			                   "\nmatching workername : "+jkMember.getName().equals(workerName) + ", :"+jkMember.getName());
+			
+			System.out.println(jkMember.getName()+", "+ initialHostName);
+			System.out.println(workerName+", "+jkMember.getHost());
+			
+			if(false == jkMember.getName().equals(workerName)) {
 				continue;
 			}
-//			uniqueList.add(jkMember.getHost());
-			String newUrl = createUrl(jkMember, workerName, action);
-			
-			delay(i, speed);
-			
-			getStatusForUrl(newUrl);
+//			if(false == initialHostName.equals(jkMember.getHost())) {
+//				continue;
+//			}
+			String newUrl = createUrl(jkMember, initialHostName, workerName, action);
+			if(logger.isDebugEnabled()) { logger.debug(newUrl); }
+			return newUrl;
 		}
-		if(logger.isTraceEnabled() && _statuses.size()==1) {
-			logger.trace("No more hosts found except the initial: "+initialHostName);
+		if(workerName !=null) {
+			throw new IllegalArgumentException("Failed to find url for worker: "+workerName);
 		}
-		return true;
+		return null;
 	}
 	/**
 	 * Creates a complete url for the wanted action
@@ -115,8 +200,8 @@ public class WorkerFactory implements IWorkerFactory {
 	 * @param action
 	 * @return
 	 */
-	String createUrl(JkMember jkMember, String workerName, String action) {
-		String newUrl = _url.replaceAll(REPLACEMENT, jkMember.getHost());
+	String createUrl(JkMember jkMember, String host, String workerName, String action) {
+		String newUrl = _url.replaceAll(REPLACEMENT, host);
 		if(action.equals("poll")) {
 			return newUrl;
 		}
@@ -132,16 +217,25 @@ public class WorkerFactory implements IWorkerFactory {
 		
 		String newContext = getContext(jkMember);
 		
+		if(workerName.indexOf('/') > 0 || 
+				workerName.indexOf(':') > 0) {
+			try {
+				workerName = URLEncoder.encode(workerName,"UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				logger.error(workerName, e);
+			}
+		}
+		
 		String context = newContext.replaceAll(REPLACEMENT, workerName);
-		newUrl = newUrl+context  + actionContext; 
+		newUrl = newUrl + "?" + actionContext + "&" + context; 
 		return newUrl;
 	}
 
 	private String getContext(JkMember jkMember) {
 		String context = jkMember.getType().replaceAll(jkMember.getName(), REPLACEMENT);
 		int beginIndex = context.indexOf("?");
-		if(beginIndex>0) {
-			return context.substring(beginIndex);
+		if(beginIndex > 0) {
+			return context.substring(beginIndex+1);
 		}
 		return null;
 	}
@@ -164,7 +258,7 @@ public class WorkerFactory implements IWorkerFactory {
 				_statuses.remove(jkStatus.getServer().getName());
 			}
 		}
-		this._statuses.put(jkStatus.getServer().getName(), jkStatus);
+		_statuses.put(jkStatus.getServer().getName(), jkStatus);
 
 		return jkStatus;
 	}
