@@ -98,7 +98,6 @@ public class WorkerFactory implements IWorkerFactory {
 			JkMember jkMember = jkStatus.getBalancers().getBalancer().getMember().get(i);
 			if(jkStatus.getServer().getName().equals(jkMember.getHost())) {
 				// this host is alreaady taken care of
-System.out.println(""+jkStatus.getServer().getName());
 				continue;
 			}
 
@@ -159,12 +158,6 @@ System.out.println(""+jkStatus.getServer().getName());
 	 */
 	String createUrl(JkStatus jkStatus, String workerName, String action) {
 		
-//		funkar inte, det blir inte bra med att ta alla url:ar från en JkStatus
-//		varje JkStatus har sin egen identitet: nonce=57badbdb-e0bf-4cf2-8ad3-375a2ebeaca9
-//		
-//		loopa över _statuses för att få reda på vilka url:ar jag skall använda.
-		
-		
 		String initialHostName = jkStatus.getServer().getName();
 		Integer initialHostPort = jkStatus.getServer().getPort();
 		int memberCount = jkStatus.getBalancers().getBalancer().getMemberCount();
@@ -172,18 +165,10 @@ System.out.println(""+jkStatus.getServer().getName());
 			JkMember jkMember = jkStatus.getBalancers().getBalancer().getMember().get(i);
 			if(logger.isTraceEnabled()) { logger.trace(""+action+": "+initialHostName+": "+initialHostPort+": "+jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getType()); }
 			
-//			System.out.println("matching host "+initialHostName+" : "+initialHostName.equals(jkMember.getHost())+", : "+jkMember.getHost()+
-//			                   "\nmatching workername : "+jkMember.getName().equals(workerName) + ", :"+jkMember.getName());
-			
-			System.out.println(jkMember.getName()+", "+ initialHostName);
-			System.out.println(workerName+", "+jkMember.getHost());
-			
 			if(false == jkMember.getName().equals(workerName)) {
 				continue;
 			}
-//			if(false == initialHostName.equals(jkMember.getHost())) {
-//				continue;
-//			}
+			
 			String newUrl = createUrl(jkMember, initialHostName, workerName, action);
 			if(logger.isDebugEnabled()) { logger.debug(newUrl); }
 			return newUrl;
