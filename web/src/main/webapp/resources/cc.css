@@ -41,3 +41,11 @@
 #lastPoll {
 		width:50px;
 	}
+	
+.status-Ok {
+		color:green
+	}
+	
+.status-Dis {
+		color:red
+	}

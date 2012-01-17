@@ -20,32 +20,23 @@
 	<body>
 		<div class="container">
 			<h1>ClusterControl</h1>
-			<c:choose>
-			<c:when test="${fn:length(cluster.hostNames) == 1}">
-			<div id="workerstable" class="span-12 last">
-			</c:when>
-			<c:when test="${fn:length(cluster.hostNames) > 1}">
-			<div id="workerstable" class="span-13 last">
-			</c:when>
-			<c:otherwise>
-			<div id="workerstable" class="span-12 last">
-			</c:otherwise>
-			</c:choose>
+			<div id="workerstable" class="span-1${fn:length(cluster.hostNames) + 1} last">
 				<div class="headers">
-					<div id="col1" class="header" style="float: left;">worker</div><c:forEach items="${cluster.hostNames}" var="hostName">
+					<div id="col1" class="header" style="float: left;text-align: right">Hosts:&nbsp;</div><c:forEach items="${cluster.hostNames}" var="hostName">
 					<div id="stat" class="header" style="float: left;"><c:out value="${hostName}"/></div></c:forEach>
+					<div id="col1" class="header" style="float: left;">Workers:</div>
 				</div>
 				<div style="clear: both;"></div>
 				
 				<!-- statuses -->
 				<div class="workers"><c:forEach items="${cluster.workers}" var="worker">
 					<div id="col1" class="hostName"><c:out value="${worker.name}"/></div><c:forEach items="${worker.statuses}" var="status">
-					<div class="status status-${status.id}" id="stat" title="${status.hostName}, ${status.route}, ${status.loadFactor}, ${status.transferred}"><c:out value="${status.status}"/></div></c:forEach>
+					<div class="status status-${status.id} status-${status.status}" id="stat" title="${status.hostName}, ${status.route}, ${status.loadFactor}, ${status.transferred}"><c:out value="${status.status}"/></div></c:forEach>
 					<div class="status btn-${worker.id}" id="stat-btn">
-						<input id="${worker.id}-disable" class="${worker.id}-disable" type="button" value="Disable" onclick="confirmAction('disable','${worker.id}','${worker.name}')" disabled="disabled" />
+						<input id="${worker.id}-disable" class="${worker.id}-disable" type="button" value="Disable" onclick="confirmAction('disable','${worker.id}','${worker.name}')" disabled />
 					</div>
 					<div class="status btn-${worker.id}" id="stat-btn">
-						<input id="${worker.id}-enable" class="${worker.id}-enable" type="button" value="Enable" onclick="confirmAction('enable','${worker.id}','${worker.name}')" disabled="disabled" />
+						<input id="${worker.id}-enable" class="${worker.id}-enable" type="button" value="Enable" onclick="confirmAction('enable','${worker.id}','${worker.name}')" disabled />
 					</div>
 					<div style="clear: both;"></div></c:forEach>
 				</div>
@@ -86,18 +77,18 @@
 			<div>TODO</div>
 			<div>
 				<ul>
-					<li>Test: multiple hosts and more than two workers per host</li>
-					<li>mod_jk is not implemented</li>
+					<li>Feature! mod_jk is not implemented</li>
 					<li>Bug! when initializing with ip and there is a equivalent name in hosts</li>
-					<li>Bug! implement startup initialization of the view, e.g. enable/disable buttons</li>
 					<li>Bug! layout - fix layout for body mask</li>
-					<li>STARTED: implement error handling - error reading old worker setup</li>
+					<li>STARTED: Feature; implement error handling - error reading old worker setup</li>
 					<li>sign off</li>
 				</ul>
 			</div>
 			<div>DONE</div>
 			<div>
 				<ul>
+					<li>DONE! Bug! implement startup initialization of the view, e.g. enable/disable buttons</li>
+					<li>DONE! Test: multiple hosts and more than two workers per host</li>
 					<li>DONE! implement error handling - no worker for url found</li>
 					<li>DONE! Bug! httpclient does not handle 404</li>
 					<li>DONE! layout - fix two column layout for "alternatives"</li>
@@ -132,20 +123,16 @@
 		}
 		function fieldUpdate(cluster) {
 			var workers = cluster.workers;
-//alert('workers.length='+workers.length);
 			for (i=0;i < workers.length;i++)
 			{
 				var statuses = workers[i].statuses;
 				var workerName = workers[i].id;
 				var lastStatus = workers[i].status;
-//alert('statuses.length='+statuses.length);
 				for (j=0;j < statuses.length;j++)
 				{
 					var status = statuses[j];
 					var field = "status-"+status.id;
-//if(j==1 && i==1) { alert(field); }
 					$("div.status."+field).html(status.status);
-//if(j==1 && i==1) { alert( $("div.status."+field).html()+" "+status.status); }
 					if(status.status == "Ok") {
 						$("div.status."+field).css("color", "green");
 					} else if(status.status == "Dis") {
@@ -212,16 +199,12 @@
    			$.getJSON("cluster/"+actionToPerform+"/" + worker+"/"+speed, function(cluster) {
    				fieldUpdate(cluster);
    			});
-   			radioObj = document.forms['dummyForm'].elements['enablerate'];
    			closePopup();
-    		setCheckedValue(radioObj, '');
    			return;
     	}
     	function cancelAction() 
     	{
     		closePopup();
-    		radioObj = document.forms['dummyForm'].elements['enablerate'];
-    		setCheckedValue(radioObj, '');
     		$('#speed-buttons').fadeOut('fast');
     		$('#actionStatus').html("Action Cancelled for " + worker);
     	}
@@ -238,6 +221,8 @@
 		}
 		function resetForm() {
 			// reset all variables	
+    		radioObj = document.forms['dummyForm'].elements['enablerate'];
+    		setCheckedValue(radioObj, '');
 		}
 
 		// set the radio button with the given value as being checked
