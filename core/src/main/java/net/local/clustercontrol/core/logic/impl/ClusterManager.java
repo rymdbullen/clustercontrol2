@@ -2,7 +2,6 @@ package net.local.clustercontrol.core.logic.impl;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -56,7 +55,7 @@ public class ClusterManager implements IWorkerManager {
 			if(workerFactory.getStatuses() != null) {
 				// initialize new cluster
 				_cluster = new Cluster();
-				updateCluster();
+				updateCluster(statusListPerWorker());
 				_cluster.setStatusMessage("ok");
 			
 				return true;
@@ -69,57 +68,34 @@ public class ClusterManager implements IWorkerManager {
 	@Override
 	@Async
 	public boolean enable(String workerId, String speed) {
-		if(logger.isTraceEnabled()) {
-			String threadName = Thread.currentThread().getName();
-			logger.trace("Process thread " + threadName + " using Async method");
-		}
-		String action = "Enable";
-		String workerName = cssValidName(workerId, false);
-		boolean isSuccess = workerFactory.getAllStatuses(workerName, action, speed);
-		if(isSuccess) {
-			updateCluster();
-			_cluster.setStatusMessage("ok");
-			return true;		
-		}
-		_cluster.setStatusMessage("Failed to update cluster status");
-		return false;
+		return action("Enable", workerId, speed);
 	}
 	
 	@Override
 	@Async
 	public boolean disable(String workerId, String speed) {
-		if(logger.isTraceEnabled()) {
-			String threadName = Thread.currentThread().getName();
-			logger.trace("Process thread '" + threadName + "' using Async method");
-		}
-		String action = "Disable";
-		String workerName = cssValidName(workerId, false);
-		boolean isSuccess = workerFactory.getAllStatuses(workerName , action , speed);
-		if(isSuccess) {
-			updateCluster();
-			_cluster.setStatusMessage("ok");
-			return true;			
-		}
-		_cluster.setStatusMessage("Failed to update cluster status");
-		return false;
+		return action("Disable", workerId, speed);
 	}
 
 	@Override
 	@Async
 	public boolean stop(String workerId) {
+		return action("Stop", workerId, null);
+	}
+	
+	boolean action(String action, String workerId, String speed) {
 		if(logger.isTraceEnabled()) {
 			String threadName = Thread.currentThread().getName();
 			logger.trace("Process thread " + threadName + " using Async method");
 		}
-		String action = "Disable";
 		String workerName = cssValidName(workerId, false);
-		boolean isSuccess = workerFactory.getAllStatuses(workerName, action, "fast");
+		boolean isSuccess = workerFactory.getAllStatuses(workerName, action, speed);
 		if(isSuccess) {
-			updateCluster();
+			updateCluster(statusListPerWorker());
 			_cluster.setStatusMessage("ok");
-			return true;			
+			return true;		
 		}
-		_cluster.setStatusMessage("Failed to update cluster status");
+		_cluster.setStatusMessage("Failed to perform action '"+action+"', update cluster status");
 		return false;
 	}
 	
@@ -135,7 +111,7 @@ public class ClusterManager implements IWorkerManager {
 		}
 		boolean isSuccess = workerFactory.getAllStatuses(null, "poll", null);
 		if(isSuccess) {
-			updateCluster();
+			updateCluster(statusListPerWorker());
 			_cluster.setStatusMessage("ok");
 			return true;			
 		}
@@ -148,16 +124,13 @@ public class ClusterManager implements IWorkerManager {
 	 * 
 	 * @param statuses
 	 */
-	private void updateCluster() {
-		HashMap<String, JkStatus> statuses = workerFactory.getStatuses(); 
+	private LinkedHashMap<String, HashMap<String, JkMember>> statusListPerWorker() {		
 		_cluster.getHostNames().clear();
 		_cluster.getWorkerNames().clear();
 		_cluster.getWorkers().clear();
-		Collection<JkStatus> jkStatuses = statuses.values();
 		LinkedHashMap<String, HashMap<String, JkMember>> membersList = new LinkedHashMap<String, HashMap<String, JkMember>>();
-
 		// convert statuses to cluster object
-		for (JkStatus jkStatus : jkStatuses) {
+		for (JkStatus jkStatus : workerFactory.getStatuses().values()) {
 			String hostName = jkStatus.getServer().getName();
 			Integer hostPort = jkStatus.getServer().getPort();
 			List<JkMember> members = jkStatus.getBalancers().getBalancer().getMember();
@@ -183,7 +156,14 @@ public class ClusterManager implements IWorkerManager {
 			}
 			_cluster.setName(jkStatus.getBalancers().getBalancer().getName());
 		}
-		
+		return membersList;
+	}
+	/**
+	 * Converts the statuses from per-host to per worker. transforms the matrix.
+	 * 
+	 * @param statuses
+	 */
+	private void updateCluster(LinkedHashMap<String, HashMap<String, JkMember>> membersList) {
 		// convert to cluster
 		Iterator<String> keysIter = membersList.keySet().iterator();
 		while (keysIter.hasNext()) {

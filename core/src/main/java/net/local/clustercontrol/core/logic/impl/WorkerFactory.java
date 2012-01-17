@@ -1,7 +1,11 @@
 package net.local.clustercontrol.core.logic.impl;
 
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -228,6 +232,17 @@ public class WorkerFactory implements IWorkerFactory {
 	private JkStatus getStatusForUrl(String url) {
 		if(false==url.startsWith("http")) {
 			url = "http://"+url;
+		}
+		
+		try {
+			URL properUrl = new URL(url);
+			// Get IP Address
+			String workerAddress = InetAddress.getByName(properUrl.getHost()).getHostAddress();
+			if(logger.isDebugEnabled()) { logger.debug("properUrl.getHost(): " + properUrl.getHost() + " ip: " +workerAddress); }
+		} catch (MalformedURLException e) {
+			logger.error("Failed to create URL for: "+url);
+		} catch (UnknownHostException e) {
+			logger.error("Failed to get inet address for: "+url);
 		}
 		
 		WorkerResponse workerResponse = httpClient.getWorkerResponseForUrl(url);
