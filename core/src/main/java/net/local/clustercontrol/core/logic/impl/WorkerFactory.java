@@ -23,7 +23,7 @@ import net.local.clustercontrol.core.http.impl.HttpClient;
 import net.local.clustercontrol.core.logic.ControlCommandException;
 import net.local.clustercontrol.core.logic.IWorkerFactory;
 import net.local.clustercontrol.core.parsers.StatusParserHtml;
-import net.local.clustercontrol.core.parsers.StatusParserXML;
+import net.local.clustercontrol.core.parsers.StatusParserXml;
 
 /**
  * All four:
@@ -74,21 +74,36 @@ public class WorkerFactory implements IWorkerFactory {
 	public HashMap<String, JkStatus> getStatuses() {
 		return _statuses;
 	}
-
-	public void setStatuses(HashMap<String, JkStatus> statuses) {
-		this._statuses = statuses;
-	}
+	
 	@Override
-	public boolean init(String url, String workerName, String action, String speed) {
+	public boolean init(String url) throws MalformedURLException, UnknownHostException {
+		return init(url, null, "poll", null);
+	}
+	
+	@Override
+	public boolean init(String url, String workerName, String action, String speed) throws MalformedURLException, UnknownHostException {
 		logger.info("Initializing with url: "+url);
 		
-		JkStatus jkStatus = getStatusForUrl(url);
+		WorkerResponse response = getStatusForUrl(url);
+		if(response.getError()!=null) {
+			logger.error(response.getError().getMessage());
+			
+		}
+		JkStatus jkStatus = getJkStatus(response);
 		
+		if(jkStatus==null) {
+			return false;
+		}
 		this._url = url.replaceAll(jkStatus.getServer().getName(), REPLACEMENT);
 		
 		ArrayList<String> urls = initUrlsFromJkStatus(jkStatus);
 		
 		return getAllStatuses(urls, null);
+	}
+	@Override
+	public boolean performAction(String workerName, String action, String speed) throws MalformedURLException, UnknownHostException {
+		ArrayList<String> urls = createUrls(workerName, action);
+		return getAllStatuses(urls, speed);
 	}
 	/**
 	 * 
@@ -111,26 +126,23 @@ public class WorkerFactory implements IWorkerFactory {
 		}
 		return new ArrayList<String>(set);
 	}
-	@Override
-	public boolean getAllStatuses(String workerName, String action, String speed) {
-		if(_statuses == null || _statuses.size() == 0) {
-			throw new IllegalArgumentException("Cluster statuses not initialized");
-		}
-		
-		ArrayList<String> urls = createUrls(workerName, action);
-		return getAllStatuses(urls, speed);
-	}
 	/**
 	 * 
 	 * @param urls
 	 * @param speed
 	 * @return
+	 * @throws UnknownHostException 
+	 * @throws MalformedURLException 
 	 */
-	private boolean getAllStatuses(ArrayList<String> urls, String speed) {
+	private boolean getAllStatuses(ArrayList<String> urls, String speed) throws MalformedURLException, UnknownHostException {
 		for (int i = 0; i < urls.size(); i++) {
 			String url = urls.get(i);
 			delay(i, speed);
-			getStatusForUrl(url);
+			WorkerResponse response = getStatusForUrl(url);
+			if(response.getError()!=null) {
+				logger.error(response.getError().getMessage());
+			}
+			getJkStatus(response);
 		}
 		return true;
 	}
@@ -142,6 +154,10 @@ public class WorkerFactory implements IWorkerFactory {
 	 * @return
 	 */
 	ArrayList<String> createUrls(String workerName, String action) {
+		if(_statuses == null || _statuses.size() == 0) {
+			throw new IllegalArgumentException("Cluster statuses not initialized");
+		}
+		
 		ArrayList<String> urls = new ArrayList<String>();
 		for (String host : _statuses.keySet()) {
 			JkStatus jkStatus = _statuses.get(host);
@@ -229,24 +245,18 @@ public class WorkerFactory implements IWorkerFactory {
 		return null;
 	}
 
-	private JkStatus getStatusForUrl(String url) {
+	private WorkerResponse getStatusForUrl(String url) throws MalformedURLException, UnknownHostException {
 		if(false==url.startsWith("http")) {
 			url = "http://"+url;
 		}
 		
-		try {
-			URL properUrl = new URL(url);
-			// Get IP Address
-			String workerAddress = InetAddress.getByName(properUrl.getHost()).getHostAddress();
-			if(logger.isDebugEnabled()) { logger.debug("properUrl.getHost(): " + properUrl.getHost() + " ip: " +workerAddress); }
-		} catch (MalformedURLException e) {
-			logger.error("Failed to create URL for: "+url);
-		} catch (UnknownHostException e) {
-			logger.error("Failed to get inet address for: "+url);
-		}
-		
-		WorkerResponse workerResponse = httpClient.getWorkerResponseForUrl(url);
-		
+		URL properUrl = new URL(url);
+		String workerAddress = InetAddress.getByName(properUrl.getHost()).getHostAddress();
+		if(logger.isDebugEnabled()) { logger.debug("properUrl.getHost(): " + properUrl.getHost() + " ip: " +workerAddress); }
+
+		return httpClient.getWorkerResponseForUrl(url);
+	}
+	private JkStatus getJkStatus(WorkerResponse workerResponse) {
 		JkStatus jkStatus = parseWorkerStatus(workerResponse.getBody());
 		if(jkStatus	== null) {
 			return null;
@@ -262,6 +272,7 @@ public class WorkerFactory implements IWorkerFactory {
 
 		return jkStatus;
 	}
+
 	/**
 	 * 
 	 * @param statusBody
@@ -270,8 +281,8 @@ public class WorkerFactory implements IWorkerFactory {
 	private JkStatus parseWorkerStatus(String statusBody) {
 		
 		// 1. Try with ajp host
-		StatusParserXML statusParserXML = new StatusParserXML(statusBody); 
-		JkStatus jkStatus = statusParserXML.getStatus();
+		StatusParserXml statusParserXml = new StatusParserXml(statusBody); 
+		JkStatus jkStatus = statusParserXml.getStatus();
 		if(jkStatus != null) {
 			return jkStatus;
 		}

@@ -1,5 +1,7 @@
 package net.local.clustercontrol.core.logic;
 
+import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 
 import net.local.clustercontrol.api.model.xml.JkStatus;
@@ -12,10 +14,14 @@ public interface IWorkerFactory {
 	 * @param action 
 	 * @param speed 
 	 * @return 
+	 * @throws UnknownHostException 
+	 * @throws MalformedURLException 
 	 */
-	boolean init(String url, String workerName, String action, String speed);
+	boolean init(String url, String workerName, String action, String speed) throws MalformedURLException, UnknownHostException;
+	boolean init(String url) throws MalformedURLException, UnknownHostException;
 	
 	HashMap<String, JkStatus> getStatuses();
 	
-	boolean getAllStatuses(String workerName, String action, String speed);
+	boolean performAction(String workerName, String action, String speed) throws MalformedURLException, UnknownHostException;
+
 }

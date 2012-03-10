@@ -1,7 +1,5 @@
 package net.local.clustercontrol.mvc;
 
-import java.net.MalformedURLException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -12,8 +10,7 @@ import javax.validation.Validator;
 
 import net.local.clustercontrol.core.model.dto.Cluster;
 import net.local.clustercontrol.mvc.SetupHost;
-import net.local.clustercontrol.core.logic.IWorkerManager;
-import net.local.clustercontrol.core.logic.WorkerNotFoundException;
+import net.local.clustercontrol.core.logic.IClusterManager;
 import net.local.clustercontrol.core.logic.impl.ClusterManager;
 
 import org.slf4j.Logger;
@@ -31,12 +28,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(value="/cluster")
 public class ClusterController {
 	
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(ClusterController.class);
 	
-	//private Cluster _cluster = null;
-	
 	private Validator validator;
-	private IWorkerManager clusterManager;
+	private IClusterManager clusterManager;
 	
 	@Autowired
 	public ClusterController(Validator validator, ClusterManager clusterManager) {
@@ -56,20 +52,20 @@ public class ClusterController {
 	}
 
 	@RequestMapping(value="/poll", method=RequestMethod.GET)
-	public @ResponseBody Cluster getPoll() {
+	public @ResponseBody Cluster handlePoll() {
 		clusterManager.poll();
 		Cluster cluster = clusterManager.getCluster();
 		return cluster;
 	}
 	
 	@RequestMapping(value="/enable/{id}/{speed}", method=RequestMethod.GET)
-	public @ResponseBody Cluster setEnable(@PathVariable String id, @PathVariable String speed) {
+	public @ResponseBody Cluster handleEnable(@PathVariable String id, @PathVariable String speed) {
 		clusterManager.enable(id, speed);
 		return clusterManager.getCluster();
 	}
 	
 	@RequestMapping(value="/disable/{id}/{speed}", method=RequestMethod.GET)
-	public @ResponseBody Cluster setDisable(@PathVariable String id, @PathVariable String speed) {
+	public @ResponseBody Cluster handleDisable(@PathVariable String id, @PathVariable String speed) {
 		if(speed.equals("disable")) {
 			clusterManager.stop(id);
 		}
@@ -78,13 +74,13 @@ public class ClusterController {
 	}
 
 	@RequestMapping(value="/stop/{id}", method=RequestMethod.GET)
-	public @ResponseBody Cluster setStop(@PathVariable String id) {
+	public @ResponseBody Cluster handleStop(@PathVariable String id) {
 		clusterManager.stop(id);
 		return clusterManager.getCluster();
 	}
 	
 	@RequestMapping(method=RequestMethod.POST)
-	public @ResponseBody Map<String, ? extends Object> create(@RequestBody SetupHost setupHost, HttpServletResponse response, Model model) {
+	public @ResponseBody Map<String, ? extends Object> handleSetup(@RequestBody SetupHost setupHost, HttpServletResponse response, Model model) {
 		Set<ConstraintViolation<SetupHost>> failures = validator.validate(setupHost);
 		model.addAttribute(setupHost);
 		if (!failures.isEmpty())
@@ -94,22 +90,22 @@ public class ClusterController {
 		}
 		else
 		{
+			return clusterManager.init(setupHost.getUrl());
 			// TODO implement error handling 
-			try {
-				if(clusterManager.init(setupHost.getUrl())) {
-					return Collections.singletonMap("initStatus", "ok");
-				} else {
-					return Collections.singletonMap("initStatus", "nok");
-				}
-			} catch (MalformedURLException e) {
-				logger.error("Failed to create url from supplied string: "+setupHost.getUrl(), e);
-				errorMessages(failures);
-				return Collections.singletonMap("initStatus", "nok");
-			} catch (WorkerNotFoundException e) {
-				logger.error("Failed to find worker for supplied url: "+setupHost.getUrl(), e);
-				//return errorMessages(failures);
-				return Collections.singletonMap("initStatus", "nok");
-			}
+//			try {
+//					return Collections.singletonMap("initStatus", "ok");
+//				} else {
+//					return Collections.singletonMap("initStatus", "nok");
+//				}
+//			} catch (MalformedURLException e) {
+//				logger.error("Failed to create url from supplied string: "+setupHost.getUrl(), e);
+//				errorMessages(failures);
+//				return Collections.singletonMap("initStatus", "nok");
+//			} catch (WorkerNotFoundException e) {
+//				logger.error("Failed to find worker for supplied url: "+setupHost.getUrl(), e);
+//				//return errorMessages(failures);
+//				return Collections.singletonMap("initStatus", "nok");
+//			}
 		}
 	}
 
@@ -122,11 +118,11 @@ public class ClusterController {
 		}
 		return failureMessages;
 	}
-	private Map<String, String> errorMessages(Set<ConstraintViolation<SetupHost>> failures) {
-		Map<String, String> errorMessages = new HashMap<String, String>();
-		for (ConstraintViolation<SetupHost> failure : failures) {
-			errorMessages.put(failure.getPropertyPath().toString(), failure.getMessage());
-		}
-		return errorMessages;
-	}
+//	private Map<String, String> errorMessages(Set<ConstraintViolation<SetupHost>> failures) {
+//		Map<String, String> errorMessages = new HashMap<String, String>();
+//		for (ConstraintViolation<SetupHost> failure : failures) {
+//			errorMessages.put(failure.getPropertyPath().toString(), failure.getMessage());
+//		}
+//		return errorMessages;
+//	}
 }

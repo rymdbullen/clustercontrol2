@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.http.client.HttpResponseException;
@@ -65,8 +66,8 @@ public class ManualClusterManagerTest {
 		logger.debug("Running testInit");
 		String url = Constants.TEST_URL;
 		
-		boolean response = clusterManager.init(url);
-		assertEquals(true, response);
+		Map<String, String> response = clusterManager.init(url);
+		assertEquals("ok", response.get("initStatus"));
 		
 		Cluster cluster = clusterManager.getCluster();
 		assertEquals(true, cluster.getStatusMessage() == null);
@@ -107,8 +108,8 @@ public class ManualClusterManagerTest {
 	@Test
 	public void testBadInit() throws MalformedURLException {
 		logger.debug("Running testInit");
-		boolean init = clusterManager.init("http://192.168.10.115/jkger");
-		assertFalse("Init must not succeed", init);
+		Map<String, String> response = clusterManager.init("http://192.168.10.115/jkger");
+		assertEquals("nok", response.get("initStatus"));
 		String message = clusterManager.getCluster().getStatusMessage();
 		assertNotNull(message);
 		assertEquals("nok", message);

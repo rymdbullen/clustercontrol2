@@ -16,8 +16,8 @@ import net.local.clustercontrol.core.configuration.Constants;
 import net.local.clustercontrol.api.model.xml.JkBalancer;
 import net.local.clustercontrol.api.model.xml.JkMember;
 import net.local.clustercontrol.api.model.xml.JkStatus;
-import net.local.clustercontrol.core.logic.IWorkerManager;
-import net.local.clustercontrol.core.parsers.StatusParserXML;
+import net.local.clustercontrol.core.logic.IClusterManager;
+import net.local.clustercontrol.core.parsers.StatusParserXml;
 import junit.framework.TestCase;
 
 /**
@@ -29,7 +29,7 @@ public class WorkerStatusTest {
 	private static final Logger logger = LoggerFactory.getLogger(WorkerStatusTest.class);
 
 	@Autowired
-	private IWorkerManager clusterManager;
+	private IClusterManager clusterManager;
 //	@Autowired
 //	private IWorkerFactory workerFactory;
 //	@Autowired
@@ -43,7 +43,7 @@ public class WorkerStatusTest {
 	}
 
 	/**
-	 * Test method for {@link StatusParserXML.avegagroup.clustercontrol.util.WorkerStatusXML#unmarshal(java.lang.String)}.
+	 * Test method for {@link StatusParserXml.avegagroup.clustercontrol.util.WorkerStatusXML#unmarshal(java.lang.String)}.
 	 */
 	public void testActivateUnmarshall() {
 		logger.debug("Running testActivateUnmarshall");
@@ -65,7 +65,7 @@ public class WorkerStatusTest {
 		}
 	}
 	/**
-	 * Test method for {@link StatusParserXML.avegagroup.clustercontrol.util.WorkerStatusXML#unmarshal(java.lang.String)}.
+	 * Test method for {@link StatusParserXml.avegagroup.clustercontrol.util.WorkerStatusXML#unmarshal(java.lang.String)}.
 	 */
 	public void testDisableUnmarshall() {
 		logger.debug("Running testDisableUnmarshall");

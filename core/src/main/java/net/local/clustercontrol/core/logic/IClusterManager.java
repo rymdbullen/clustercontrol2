@@ -1,6 +1,7 @@
 package net.local.clustercontrol.core.logic;
 
 import java.net.MalformedURLException;
+import java.util.Map;
 
 import net.local.clustercontrol.core.model.dto.Cluster;
 
@@ -8,14 +9,14 @@ import net.local.clustercontrol.core.model.dto.Cluster;
  * @author jstenvall
  *
  */
-public interface IWorkerManager {
+public interface IClusterManager {
 	/**
 	 * Initializes the WorkerManager with a url a boolean status of the action
 	 * @param url the url to initialize with
 	 * @throws MalformedURLException 
 	 * @throws WorkerNotFoundException 
 	 */
-	boolean init(String url) throws MalformedURLException, WorkerNotFoundException;
+	Map<String, String> init(String url);
 	/**
 	 * Enables the worker for the supplied loadbalancer and returns a boolean status of the action
 	 * @param worker the worker to enable

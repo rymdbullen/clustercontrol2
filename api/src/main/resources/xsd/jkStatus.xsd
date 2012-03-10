@@ -133,7 +133,7 @@
 		<xsd:attribute name="errors" type="xsd:int" />
 		<xsd:attribute name="client_errors" type="xsd:int" />
 		<xsd:attribute name="reply_timeouts" type="xsd:int" />
-		<xsd:attribute name="transferred" type="xsd:int" />
+		<xsd:attribute name="transferred" type="xsd:string" />
 		<xsd:attribute name="read" type="xsd:int" />
 		<xsd:attribute name="busy" type="xsd:int" />
 		<xsd:attribute name="max_busy" type="xsd:int" />

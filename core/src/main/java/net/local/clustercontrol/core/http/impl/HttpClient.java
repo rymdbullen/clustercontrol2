@@ -9,9 +9,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpRequestRetryHandler;
-import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -43,6 +41,8 @@ public class HttpClient implements IHttpClient {
 	 * @param parameters
 	 *            the parameters to execute
 	 * @return the response, ie html body
+	 * @throws IOException 
+	 * @throws ClientProtocolException 
 	 * @throws MalformedURLException 
 	 * @throws URISyntaxException 
 	 */
@@ -84,28 +84,27 @@ public class HttpClient implements IHttpClient {
 			workerResponse.setBody(responseBody);
 			workerResponse.setHost(url.getHost());
 		} catch (ClientProtocolException e) {
-			logger.error(e.getClass().getCanonicalName() +" "+e.getMessage()+" "+e.getLocalizedMessage());
-			if(e instanceof HttpResponseException) {
-				logger.error("Failed to get response for: "+url.getHost()+", "+url.getPort()+", "+url.getPath());
-			} else {
-				logger.error("ClientProtocolException: Failed to connect to host: "+url.getHost()+", "+url.getPort());
-			}
+//			logger.error(e.getClass().getCanonicalName() +" "+e.getMessage()+" "+e.getLocalizedMessage());
+//			if(e instanceof HttpResponseException) {
+//				logger.error("Failed to get response for: "+url.getHost()+", "+url.getPort()+", "+url.getPath());
+//			} else {
+//				logger.error("ClientProtocolException: Failed to connect to host: "+url.getHost()+", "+url.getPort());
+//			}
 			responseError.setMessageKey(e.getClass().getCanonicalName());
-			responseError.setMessage(e.getMessage());
+			responseError.setMessage("Failed to connect to host: "+url.getHost()+": "+e.getMessage());
 			workerResponse.setError(responseError);
 		} catch (IOException e) {
-			logger.error(e.getClass() +" "+e.getMessage()+" "+e.getLocalizedMessage());
-			if(e instanceof HttpHostConnectException) {
-				logger.error("Failed to connect to host: "+url.getHost()+", "+url.getPort());
-			} else {
-				logger.error("IOException: Failed to connect to host: "+url.getHost()+", "+url.getPort());
-			}
+//			logger.error(e.getClass() +" "+e.getMessage()+" "+e.getLocalizedMessage());
+//			if(e instanceof HttpHostConnectException) {
+//				logger.error("Failed to connect to host: "+url.getHost()+", "+url.getPort());
+//			} else {
+//				logger.error("IOException: Failed to connect to host: "+url.getHost()+", "+url.getPort());
+//			}
 			responseError.setMessageKey(e.getClass().getCanonicalName());
-			responseError.setMessage(e.getMessage());
+			responseError.setMessage("Failed to connect to host: "+url.getHost()+": "+e.getMessage());
 			workerResponse.setError(responseError);
 		} finally {
-            // When HttpClient instance is no longer needed,
-            // shut down the connection manager to ensure
+            // When HttpClient instance is no longer needed, shut down the connection manager to ensure
             // immediate deallocation of all system resources
             httpclient.getConnectionManager().shutdown();
         }

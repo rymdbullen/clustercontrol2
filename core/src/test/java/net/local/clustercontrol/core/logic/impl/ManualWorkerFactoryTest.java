@@ -5,8 +5,11 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.xml.XMLConstants;
@@ -145,7 +148,7 @@ public class ManualWorkerFactoryTest {
 	}
 	
 	@Test
-	public void testNewInitWorkerFactory() {
+	public void testNewInitWorkerFactory() throws MalformedURLException, UnknownHostException {
 		WorkerFactory wf = new WorkerFactory(httpClient);
 		boolean initOk = wf.init(localhostUrl , null, "poll", null);
 		assertEquals("This must work, init must be true", true, initOk);
@@ -155,8 +158,8 @@ public class ManualWorkerFactoryTest {
 	public void testNewInitClusterManager() {
 		WorkerFactory workerFactory = new WorkerFactory(httpClient);
 		ClusterManager clusterManager = new ClusterManager(workerFactory);
-		boolean initOk = clusterManager.init(localhostUrl);
-		assertEquals("This must work, init must be true", true, initOk);
+		Map<String, String> response = clusterManager.init(localhostUrl);
+		assertEquals("This must work, init must be 'ok'", "ok", response.get("initStatus"));
 		
 		assertEquals("There must be one status", 1, workerFactory.getStatuses().size());
 		assertEquals("The init must be ok", "ok", clusterManager.getCluster().getStatusMessage());
@@ -165,10 +168,10 @@ public class ManualWorkerFactoryTest {
 	public void testNewDisableClusterManager() {
 		WorkerFactory workerFactory = new WorkerFactory(httpClient);
 		ClusterManager clusterManager = new ClusterManager(workerFactory);
-		boolean initOk = clusterManager.init(localhostUrl);
-		assertEquals("This must work, init must be true", true, initOk);
+		Map<String, String> response = clusterManager.init(localhostUrl);
+		assertEquals("This must work, init must be 'ok'", "ok", response.get("initStatus"));
 		
-		initOk = clusterManager.disable("ajp://localhost:8019", "medium");
+		boolean initOk = clusterManager.disable("ajp://localhost:8019", "medium");
 		assertEquals("This must work, init must be true", true, initOk);
 		assertEquals("This must work, init must be true", "ok", clusterManager.getCluster().getStatusMessage());
 		
@@ -179,10 +182,10 @@ public class ManualWorkerFactoryTest {
 	public void testNewEnableClusterManager() {
 		WorkerFactory workerFactory = new WorkerFactory(httpClient);
 		ClusterManager clusterManager = new ClusterManager(workerFactory);
-		boolean initOk = clusterManager.init(localhostUrl);
-		assertEquals("This must work, init must be true", true, initOk);
+		Map<String, String> response = clusterManager.init(localhostUrl);
+		assertEquals("This must work, init must be 'ok'", "ok", response.get("initStatus"));
 		
-		initOk = clusterManager.enable("ajp://localhost:8019", "medium");
+		boolean initOk = clusterManager.enable("ajp://localhost:8019", "medium");
 		assertEquals("This must work, init must be true", true, initOk);
 		assertEquals("This must work, init must be true", "ok", clusterManager.getCluster().getStatusMessage());
 		
@@ -193,10 +196,10 @@ public class ManualWorkerFactoryTest {
 	public void testNewPollClusterManager() {
 		WorkerFactory workerFactory = new WorkerFactory(httpClient);
 		ClusterManager clusterManager = new ClusterManager(workerFactory);
-		boolean initOk = clusterManager.init(localhostUrl);
-		assertEquals("This must work, init must be true", true, initOk);
+		Map<String, String> response = clusterManager.init(localhostUrl);
+		assertEquals("This must work, init must be 'ok'", "ok", response);
 		
-		initOk = clusterManager.poll();
+		boolean initOk = clusterManager.poll();
 		assertEquals("This must work, init must be true", true, initOk);
 		assertEquals("This must work, init must be true", "ok", clusterManager.getCluster().getStatusMessage());
 		

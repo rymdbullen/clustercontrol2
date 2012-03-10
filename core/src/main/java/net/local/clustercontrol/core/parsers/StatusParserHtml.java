@@ -115,19 +115,19 @@ public class StatusParserHtml extends IStatusParser {
 		member.setHost(address);
 		member.setPort(Integer.valueOf(workerPort));
 		member.setAddress(address); 
-		member.setActivation(matcher.group(_6STATUS));
+		member.setActivation(matcher.group(_6STATUS).trim());
 		member.setName(workerName);
-		member.setRoute(matcher.group(_2ROUTE));
-		member.setRedirect(matcher.group(_3ROUTE_REDIR));
+		member.setRoute(matcher.group(_2ROUTE).trim());
+		member.setRedirect(matcher.group(_3ROUTE_REDIR).trim());
 		member.setElected(Integer.valueOf(matcher.group(_7ELECTED).trim()));
-		member.setState(matcher.group(_6STATUS));
+		member.setState(matcher.group(_6STATUS).trim());
 		member.setRead(Integer.valueOf(matcher.group(_5SET).trim()));
 		member.setBusy(Integer.valueOf(matcher.group(_8TO).trim()));
-		member.setLbfactor(Integer.valueOf(matcher.group(_4FACTOR)));
+		member.setLbfactor(Integer.valueOf(matcher.group(_4FACTOR).trim()));
 		float txFloat = Float.valueOf(matcher.group(_9FROM).replace('K', ' ').trim());
 		int txInt = Math.round(txFloat);
 		member.setTransferred(txInt);
-		member.setType(context);
+		member.setType(context.trim());
 		
 		if(logger.isDebugEnabled()) { logger.debug("Parsed: host: "+member.getHost()+", address: "+member.getAddress()+", name: "+member.getName()+", port: "+member.getPort()+ ", read: "+member.getRead()+ "; route: "+member.getRoute()+ "; redirect: "+member.getRedirect()+ "; elected: "+member.getElected()+ "; state: "+member.getState()+ "; busy: "+member.getBusy()+ ", context: "+context); }
 		

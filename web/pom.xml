@@ -6,26 +6,26 @@
         <groupId>net.local.clustercontrol</groupId>
         <artifactId>clustercontrol-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
+		<relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>net.local.clustercontrol</groupId>
-	<artifactId>clustercontrol-web</artifactId>
+	<artifactId>clustercontrol-web-webmvc</artifactId>
 	<packaging>war</packaging>
-	<name>ClusterControl 2 - WEB</name>
+	<name>ClusterControl 2 - WEB Spring webmvc</name>
 	<description>WEB - ClusterControl2 for Tomcat AJP Clusters</description>
 
 	<dependencies>
+		<dependency>
+			<groupId>net.local.clustercontrol</groupId>
+			<artifactId>clustercontrol-core</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+
 		<!--  Spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 			<version>${org.springframework-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>net.local.clustercontrol</groupId>
-			<artifactId>clustercontrol-core</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<!--  JSR 303 with Hibernate Validator -->
@@ -72,30 +72,6 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>jstl</artifactId>
 			<version>1.2</version>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.16</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.mail</groupId>
-					<artifactId>mail</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.jms</groupId>
-					<artifactId>jms</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.jdmk</groupId>
-					<artifactId>jmxtools</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.jmx</groupId>
-					<artifactId>jmxri</artifactId>
-				</exclusion>
-			</exclusions>
-			<scope>provided</scope>
 		</dependency>
 		
 		<!-- test -->
@@ -159,7 +135,6 @@
 				<artifactId>tomcat-maven-plugin</artifactId>
 				<version>1.1</version>
 				<configuration>
-					<warSourceDirectory>${basedir}/war/src</warSourceDirectory>
 					<path>/</path>
 				</configuration>
 			</plugin>

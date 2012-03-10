@@ -1,11 +1,13 @@
 package net.local.clustercontrol.core.logic.impl;
 
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,18 +18,20 @@ import org.springframework.stereotype.Service;
 import net.local.clustercontrol.api.model.xml.JkMember;
 import net.local.clustercontrol.api.model.xml.JkStatus;
 import net.local.clustercontrol.core.logic.IWorkerFactory;
-import net.local.clustercontrol.core.logic.IWorkerManager;
-import net.local.clustercontrol.core.logic.WorkerNotFoundException;
+import net.local.clustercontrol.core.logic.IClusterManager;
+import net.local.clustercontrol.core.logic.IWorkerHandler;
+import net.local.clustercontrol.core.logic.IWorkerHandlerFactory;
 import net.local.clustercontrol.core.model.dto.Cluster;
 import net.local.clustercontrol.core.model.dto.WorkerStatus;
 import net.local.clustercontrol.core.model.dto.Workers;
 
 @Service
-public class ClusterManager implements IWorkerManager {
+public class ClusterManager implements IClusterManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(ClusterManager.class);
 
 	private IWorkerFactory workerFactory;
+	@Autowired IWorkerHandlerFactory workerHandlerFactory;
 
 	private Cluster _cluster;
 
@@ -35,34 +39,57 @@ public class ClusterManager implements IWorkerManager {
 	public ClusterManager(WorkerFactory workerFactory) {
 		this.workerFactory = workerFactory;
 	}
+
 	
 	/**
 	 * Initializes the ClusterManager with a url.
 	 * @param url the url to initialize with
-	 * @throws MalformedURLException
-	 * @throws WorkerNotFoundException
 	 */
 	@Override
-	public boolean init(String url) {
+	public Map<String, String> init(String url) {
+		
+		// new
+//		IWorkerHandler handler = workerHandlerFactory.getHandler(url);
+//		
+//		handler.handlePoll();
+		
+		
+		
+		Map<String, String> statusMessages = new HashMap<String, String>();
 		if(_cluster != null && _cluster.getWorkers() != null) {
-			logger.debug("Already initialized: "+ _cluster.getWorkerNames());
-			_cluster.setStatusMessage("Already intialized");
-			return true;
-		}
-
-		boolean initOk = workerFactory.init(url, null, "poll", null);
-		if(initOk) {
-			if(workerFactory.getStatuses() != null) {
-				// initialize new cluster
-				_cluster = new Cluster();
-				updateCluster(statusListPerWorker());
-				_cluster.setStatusMessage("ok");
+			if(logger.isDebugEnabled()) { logger.debug("Already initialized: "+ _cluster.getWorkerNames()); }
 			
-				return true;
-			}
+			statusMessages.put("initStatus", "ok");
+			statusMessages.put("initStatusMessage", "Cluster already intialized");
+			
+			return statusMessages;
 		}
-		_cluster = null;
-		return false;
+		
+		// TODO Create ClusterInitalizationException(initStatus, initStatusMessage);
+		//      This exception will set initStatus and initStatusMessage in json form
+		
+		try {
+			workerFactory.init(url);
+			if(workerFactory.getStatuses() != null) {
+				statusMessages.put("initStatus", "ok");
+				LinkedHashMap<String, HashMap<String, JkMember>> statusListPerWorker = statusListPerWorker();
+				updateCluster(statusListPerWorker);
+				return statusMessages;
+			}
+		} catch (MalformedURLException e) {
+			statusMessages.put("initStatus", "nok");
+			statusMessages.put("initStatusMessage", "Failed to initialize using URL: "+url);
+			logger.error("Failed to create URL for: "+url);
+			return statusMessages;
+		} catch (UnknownHostException e) {
+			statusMessages.put("initStatus", "nok");
+			statusMessages.put("initStatusMessage", "Failed to get inet address using URL: "+url);
+			logger.error("Failed to get inet address for: "+url);
+			return statusMessages;
+		}
+		statusMessages.put("initStatus", "nok");
+		statusMessages.put("initStatusMessage", "Failed to initialize cluster using URL: "+url);
+		return statusMessages;
 	}
 
 	@Override
@@ -89,13 +116,16 @@ public class ClusterManager implements IWorkerManager {
 			logger.trace("Process thread " + threadName + " using Async method");
 		}
 		String workerName = cssValidName(workerId, false);
-		boolean isSuccess = workerFactory.getAllStatuses(workerName, action, speed);
-		if(isSuccess) {
+		try {
+			workerFactory.performAction(workerName, action, speed);
 			updateCluster(statusListPerWorker());
 			_cluster.setStatusMessage("ok");
-			return true;		
+			return true;
+		} catch (MalformedURLException e) {
+			_cluster.setStatusMessage("Failed to perform action="+action+", workerId="+workerId+", speed="+speed+", update cluster status");
+		} catch (UnknownHostException e) {
+			_cluster.setStatusMessage("Failed to perform action="+action+", workerId="+workerId+", speed="+speed+", update cluster status");
 		}
-		_cluster.setStatusMessage("Failed to perform action '"+action+"', update cluster status");
 		return false;
 	}
 	
@@ -106,30 +136,30 @@ public class ClusterManager implements IWorkerManager {
 	
 	@Override
 	public boolean poll() {
- 		if(_cluster==null) {
-			return false;
-		}
-		boolean isSuccess = workerFactory.getAllStatuses(null, "poll", null);
-		if(isSuccess) {
-			updateCluster(statusListPerWorker());
-			_cluster.setStatusMessage("ok");
-			return true;			
-		}
-		_cluster.setStatusMessage("Failed to update cluster status");
-		return false;
+		return action("poll", null, null);
+// 		if(_cluster==null) {
+//			return false;
+//		}
+//		boolean isSuccess = workerFactory.performAction(null, "poll", null);
+//		if(isSuccess) {
+//			updateCluster(statusListPerWorker());
+//			_cluster.setStatusMessage("ok");
+//			return true;
+//		}
+//		_cluster.setStatusMessage("Failed to update cluster status");
+//		return false;
 	}
 
 	/**
-	 * Converts the statuses from per-host to per worker. transforms the matrix.
-	 * 
-	 * @param statuses
+	 * Converts the statuses from per-host to per-worker. transforms the matrix.
 	 */
-	private LinkedHashMap<String, HashMap<String, JkMember>> statusListPerWorker() {		
-		_cluster.getHostNames().clear();
-		_cluster.getWorkerNames().clear();
-		_cluster.getWorkers().clear();
+	private LinkedHashMap<String, HashMap<String, JkMember>> statusListPerWorker() {
+		_cluster = new Cluster();
+//		_cluster.getHostNames().clear();
+//		_cluster.getWorkerNames().clear();
+//		_cluster.getWorkers().clear();
+		
 		LinkedHashMap<String, HashMap<String, JkMember>> membersList = new LinkedHashMap<String, HashMap<String, JkMember>>();
-		// convert statuses to cluster object
 		for (JkStatus jkStatus : workerFactory.getStatuses().values()) {
 			String hostName = jkStatus.getServer().getName();
 			Integer hostPort = jkStatus.getServer().getPort();
@@ -164,6 +194,8 @@ public class ClusterManager implements IWorkerManager {
 	 * @param statuses
 	 */
 	private void updateCluster(LinkedHashMap<String, HashMap<String, JkMember>> membersList) {
+		// initialize new cluster
+		_cluster = new Cluster();
 		// convert to cluster
 		Iterator<String> keysIter = membersList.keySet().iterator();
 		while (keysIter.hasNext()) {
@@ -180,8 +212,8 @@ public class ClusterManager implements IWorkerManager {
 				WorkerStatus workerStatus = new WorkerStatus();
 				workerStatus.setHostName(hostName);
 				workerStatus.setHostPort(""+jkMember.getPort());
-				workerStatus.setStatus(jkMember.getActivation().trim());
-				workerStatus.setType(jkMember.getType().trim());
+				workerStatus.setStatus(jkMember.getActivation());
+				workerStatus.setType(jkMember.getType());
 				workerStatus.setTo(jkMember.getBusy());  // html to
 				workerStatus.setSet(jkMember.getRead()); // html set
 				workerStatus.setRoute(jkMember.getRoute()); // html set
