@@ -9,6 +9,9 @@
 	default-lazy-init="true">
 
 	<bean id="propertyConfigurer"
-		class="com.pictet.apps.livecycle.miu.config.EnvironmentAwarePropertyConfigurer"/>
-
+		class="net.local.clustercontrol.core.configuration.EnvironmentAwarePropertyConfigurer"/>
+		
+	<context:component-scan base-package="net.local.clustercontrol"/>
+	<context:spring-configured/>
+	
 </beans>

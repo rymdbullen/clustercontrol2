@@ -9,7 +9,7 @@ import net.local.clustercontrol.api.model.xml.JkStatus;
 public interface IWorkerFactory {
 	/**
 	 * Returns 
-	 * @param url the url to get status for
+	 * @param body the body to get status for
 	 * @param workerName
 	 * @param action 
 	 * @param speed 

@@ -11,8 +11,8 @@ import net.local.clustercontrol.core.model.dto.Cluster;
  */
 public interface IClusterManager {
 	/**
-	 * Initializes the WorkerManager with a url a boolean status of the action
-	 * @param url the url to initialize with
+	 * Initializes the WorkerManager with a body a boolean status of the action
+	 * @param body the body to initialize with
 	 * @throws MalformedURLException 
 	 * @throws WorkerNotFoundException 
 	 */
@@ -21,20 +21,20 @@ public interface IClusterManager {
 	 * Enables the worker for the supplied loadbalancer and returns a boolean status of the action
 	 * @param worker the worker to enable
 	 * @param speed the speed to enable the worker
-	 * @return list of statuses
+	 * @return list of perHostStatuses
 	 */
 	boolean enable(String worker, String speed);
 	/**
 	 * Disables the worker for the supplied loadbalancer and returns a boolean status of the action
 	 * @param worker the worker to disable
 	 * @param speed the speed to disable the worker
-	 * @return list of statuses
+	 * @return list of perHostStatuses
 	 */
 	boolean disable(String worker, String speed);
 	/**
 	 * Stops the worker for the supplied loadbalancer and returns a boolean status of the action
 	 * @param worker the worker to disable
-	 * @return list of statuses
+	 * @return list of perHostStatuses
 	 */
 	boolean stop(String worker);
 	/**

@@ -15,7 +15,7 @@ import java.util.ResourceBundle;
  * @since 1.0
  */
 @ContextConfiguration(locations = {
-		"classpath:/META-INF/spring/applicationContext.xml"
+		"classpath:applicationContext.xml"
 })
 public abstract class AbstractBaseTestCase extends AbstractJUnit4SpringContextTests {
 		

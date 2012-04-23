@@ -110,8 +110,8 @@ public class WorkerStatusHtml2Test {
 		WorkerFactory wf = new WorkerFactory(null, url);
 		ArrayList<String> newUrls = wf.initUrlsFromJkStatus(jkStatus);
 		
-		assertEquals("Must create the other host url: ", 1, newUrls.size());
-		assertEquals("Must create the second url from status", "http://172.18.151.174/balancer-manager", newUrls.get(0));
+		assertEquals("Must create the other host body: ", 1, newUrls.size());
+		assertEquals("Must create the second body from status", "http://172.18.151.174/balancer-manager", newUrls.get(0));
 	}
 	@Test
 	public void getHostTest() {

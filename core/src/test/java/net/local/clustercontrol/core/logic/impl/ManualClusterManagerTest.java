@@ -17,9 +17,10 @@ import org.apache.http.client.HttpResponseException;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import net.local.clustercontrol.core.configuration.Constants;
-import net.local.clustercontrol.core.http.impl.HttpClient;
+import net.local.clustercontrol.core.http.impl.AbstractBaseTestCase;
 import net.local.clustercontrol.core.logic.WorkerNotFoundException;
 import net.local.clustercontrol.core.logic.impl.ClusterManager;
 import net.local.clustercontrol.core.model.dto.Cluster;
@@ -29,10 +30,11 @@ import net.local.clustercontrol.core.model.dto.Workers;
 /**
  * @author admin
  */
-public class ManualClusterManagerTest {
+public class ManualClusterManagerTest extends AbstractBaseTestCase {
 
 	private static final Logger logger = LoggerFactory.getLogger(ManualClusterManagerTest.class);
 
+	@Autowired
 	private ClusterManager clusterManager;
 
 	@BeforeClass
@@ -51,9 +53,9 @@ public class ManualClusterManagerTest {
 	
 	@Before
 	public void before() {
-		HttpClient httpClient = new HttpClient();
-		WorkerFactory workerFactory = new WorkerFactory(httpClient);
-		clusterManager = new ClusterManager(workerFactory);
+		//HttpClient httpClient = new HttpClient();
+		//WorkerFactory workerFactory = new WorkerFactory(httpClient);
+		//clusterManager = new ClusterManager(workerFactory, null);
 	}	
 	
 	/**
@@ -82,7 +84,7 @@ public class ManualClusterManagerTest {
 			for (WorkerStatus workerStatus : statuses) {
 				logger.debug("Found: worker: "+worker.getName()+" on "+workerStatus.getHostName()+": "+workerStatus.getStatus());
 			}
-			assertTrue("Number of statuses for one host must be 1", statuses.size()==1);
+			assertTrue("Number of perHostStatuses for one host must be 1", statuses.size()==1);
 		}
 		
 		// poll

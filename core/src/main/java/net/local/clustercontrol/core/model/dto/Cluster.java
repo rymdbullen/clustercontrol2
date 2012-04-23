@@ -120,7 +120,7 @@ public class Cluster {
 		return "Cluster [name=" + name + ", type=" + type + ", context="
 				+ context + ", protocol=" + protocol + ", port=" + port + ", statusMessage="
 				+ statusMessage + ", lastPoll=" + lastPoll + ", action="
-				+ action + ", initUrl=" + initUrl + ", workers={" + sbWorkers.toString() +"}"
+				+ action + ", body=" + initUrl + ", workers={" + sbWorkers.toString() +"}"
 						+ ", workerNames={" + sbWorkerNames.toString().substring(0, sbWorkerNames.toString().length()-1) + "}"
 						+ ", hostNames={" + sbHostNames.toString().substring(0, sbHostNames.toString().length()-1) + "}]";
 	}

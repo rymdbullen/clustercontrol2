@@ -31,82 +31,50 @@ public class ClusterManager implements IClusterManager {
 	private static final Logger logger = LoggerFactory.getLogger(ClusterManager.class);
 
 	private IWorkerFactory workerFactory;
-	@Autowired IWorkerHandlerFactory workerHandlerFactory;
+	private IWorkerHandlerFactory workerHandlerFactory;
 
 	private Cluster _cluster;
+	private IWorkerHandler handler;
 
 	@Autowired
-	public ClusterManager(WorkerFactory workerFactory) {
+	public ClusterManager(IWorkerFactory workerFactory, IWorkerHandlerFactory workerHandlerFactory) {
 		this.workerFactory = workerFactory;
+		this.workerHandlerFactory = workerHandlerFactory;
 	}
 
 	
 	/**
-	 * Initializes the ClusterManager with a url.
+	 * Initializes the ClusterManager with a body.
 	 * @param url the url to initialize with
 	 */
 	@Override
 	public Map<String, String> init(String url) {
-		
-		// new
-//		IWorkerHandler handler = workerHandlerFactory.getHandler(url);
-//		
-//		handler.handlePoll();
-		
-		
-		
-		Map<String, String> statusMessages = new HashMap<String, String>();
-		if(_cluster != null && _cluster.getWorkers() != null) {
-			if(logger.isDebugEnabled()) { logger.debug("Already initialized: "+ _cluster.getWorkerNames()); }
-			
-			statusMessages.put("initStatus", "ok");
-			statusMessages.put("initStatusMessage", "Cluster already intialized");
-			
-			return statusMessages;
+
+		// get handler only if none exists previously
+		if(handler == null) {
+			handler = workerHandlerFactory.getHandler(url);
 		}
-		
-		// TODO Create ClusterInitalizationException(initStatus, initStatusMessage);
-		//      This exception will set initStatus and initStatusMessage in json form
-		
-		try {
-			workerFactory.init(url);
-			if(workerFactory.getStatuses() != null) {
-				statusMessages.put("initStatus", "ok");
-				LinkedHashMap<String, HashMap<String, JkMember>> statusListPerWorker = statusListPerWorker();
-				updateCluster(statusListPerWorker);
-				return statusMessages;
-			}
-		} catch (MalformedURLException e) {
-			statusMessages.put("initStatus", "nok");
-			statusMessages.put("initStatusMessage", "Failed to initialize using URL: "+url);
-			logger.error("Failed to create URL for: "+url);
-			return statusMessages;
-		} catch (UnknownHostException e) {
-			statusMessages.put("initStatus", "nok");
-			statusMessages.put("initStatusMessage", "Failed to get inet address using URL: "+url);
-			logger.error("Failed to get inet address for: "+url);
-			return statusMessages;
-		}
-		statusMessages.put("initStatus", "nok");
-		statusMessages.put("initStatusMessage", "Failed to initialize cluster using URL: "+url);
-		return statusMessages;
+		return handler.getStatus();
 	}
 
 	@Override
 	@Async
 	public boolean enable(String workerId, String speed) {
+		//handler.handleStart(workerId);
 		return action("Enable", workerId, speed);
 	}
 	
 	@Override
 	@Async
 	public boolean disable(String workerId, String speed) {
+		//handler.handleStop(workerId);
 		return action("Disable", workerId, speed);
 	}
 
 	@Override
 	@Async
 	public boolean stop(String workerId) {
+		//handler.handleStop(workerId);
 		return action("Stop", workerId, null);
 	}
 	
@@ -136,6 +104,8 @@ public class ClusterManager implements IClusterManager {
 	
 	@Override
 	public boolean poll() {
+		handler.handlePoll();
+		
 		return action("poll", null, null);
 // 		if(_cluster==null) {
 //			return false;
@@ -151,13 +121,10 @@ public class ClusterManager implements IClusterManager {
 	}
 
 	/**
-	 * Converts the statuses from per-host to per-worker. transforms the matrix.
+	 * Converts the perHostStatuses from per-host to per-worker. transforms the matrix.
 	 */
 	private LinkedHashMap<String, HashMap<String, JkMember>> statusListPerWorker() {
 		_cluster = new Cluster();
-//		_cluster.getHostNames().clear();
-//		_cluster.getWorkerNames().clear();
-//		_cluster.getWorkers().clear();
 		
 		LinkedHashMap<String, HashMap<String, JkMember>> membersList = new LinkedHashMap<String, HashMap<String, JkMember>>();
 		for (JkStatus jkStatus : workerFactory.getStatuses().values()) {
@@ -189,9 +156,9 @@ public class ClusterManager implements IClusterManager {
 		return membersList;
 	}
 	/**
-	 * Converts the statuses from per-host to per worker. transforms the matrix.
+	 * Converts the perHostStatuses from per-host to per worker. transforms the matrix.
 	 * 
-	 * @param statuses
+	 * @param perHostStatuses
 	 */
 	private void updateCluster(LinkedHashMap<String, HashMap<String, JkMember>> membersList) {
 		// initialize new cluster

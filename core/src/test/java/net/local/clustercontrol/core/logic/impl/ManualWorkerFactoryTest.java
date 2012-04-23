@@ -157,7 +157,7 @@ public class ManualWorkerFactoryTest {
 	@Test
 	public void testNewInitClusterManager() {
 		WorkerFactory workerFactory = new WorkerFactory(httpClient);
-		ClusterManager clusterManager = new ClusterManager(workerFactory);
+		ClusterManager clusterManager = new ClusterManager(workerFactory, null);
 		Map<String, String> response = clusterManager.init(localhostUrl);
 		assertEquals("This must work, init must be 'ok'", "ok", response.get("initStatus"));
 		
@@ -167,7 +167,7 @@ public class ManualWorkerFactoryTest {
 	@Test
 	public void testNewDisableClusterManager() {
 		WorkerFactory workerFactory = new WorkerFactory(httpClient);
-		ClusterManager clusterManager = new ClusterManager(workerFactory);
+		ClusterManager clusterManager = new ClusterManager(workerFactory, null);
 		Map<String, String> response = clusterManager.init(localhostUrl);
 		assertEquals("This must work, init must be 'ok'", "ok", response.get("initStatus"));
 		
@@ -181,7 +181,7 @@ public class ManualWorkerFactoryTest {
 	@Test
 	public void testNewEnableClusterManager() {
 		WorkerFactory workerFactory = new WorkerFactory(httpClient);
-		ClusterManager clusterManager = new ClusterManager(workerFactory);
+		ClusterManager clusterManager = new ClusterManager(workerFactory, null);
 		Map<String, String> response = clusterManager.init(localhostUrl);
 		assertEquals("This must work, init must be 'ok'", "ok", response.get("initStatus"));
 		
@@ -195,7 +195,7 @@ public class ManualWorkerFactoryTest {
 	@Test
 	public void testNewPollClusterManager() {
 		WorkerFactory workerFactory = new WorkerFactory(httpClient);
-		ClusterManager clusterManager = new ClusterManager(workerFactory);
+		ClusterManager clusterManager = new ClusterManager(workerFactory, null);
 		Map<String, String> response = clusterManager.init(localhostUrl);
 		assertEquals("This must work, init must be 'ok'", "ok", response);
 		

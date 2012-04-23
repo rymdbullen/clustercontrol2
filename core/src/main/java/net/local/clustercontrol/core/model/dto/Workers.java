@@ -81,6 +81,6 @@ public class Workers {
 			WorkerStatus status = statuses.get(i);
 			sbWorkers.append(status.toString()+"\n");
 		}
-		return "Workers [name=" + name + ", id=" + id + ", statuses={" + statuses + "}]";
+		return "Workers [name=" + name + ", id=" + id + ", perHostStatuses={" + statuses + "}]";
 	}
 }

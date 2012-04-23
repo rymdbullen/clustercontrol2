@@ -7,7 +7,7 @@ import org.junit.Test;
 import net.local.clustercontrol.core.parsers.StatusParserHtml;
 import net.local.clustercontrol.api.model.xml.JkStatus;
 
-public class WorkerStatusHtmlTest {
+public class StatusParserHtmlTest {
 	
 	private String body = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\"> <html><head><title>Balancer Manager</title></head>" +
 	                      "<body><h1>Load Balancer Manager for 192.168.10.116</h1>  <dl><dt>Server Version: Apache/2.2.11 (Ubuntu) PHP/5.2.6-3ubuntu4.6 with Suhosin-Patch</dt>" +

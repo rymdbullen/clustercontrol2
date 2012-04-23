@@ -86,9 +86,9 @@ public class HttpClient implements IHttpClient {
 		} catch (ClientProtocolException e) {
 //			logger.error(e.getClass().getCanonicalName() +" "+e.getMessage()+" "+e.getLocalizedMessage());
 //			if(e instanceof HttpResponseException) {
-//				logger.error("Failed to get response for: "+url.getHost()+", "+url.getPort()+", "+url.getPath());
+//				logger.error("Failed to get response for: "+body.getHost()+", "+body.getPort()+", "+body.getPath());
 //			} else {
-//				logger.error("ClientProtocolException: Failed to connect to host: "+url.getHost()+", "+url.getPort());
+//				logger.error("ClientProtocolException: Failed to connect to host: "+body.getHost()+", "+body.getPort());
 //			}
 			responseError.setMessageKey(e.getClass().getCanonicalName());
 			responseError.setMessage("Failed to connect to host: "+url.getHost()+": "+e.getMessage());
@@ -96,9 +96,9 @@ public class HttpClient implements IHttpClient {
 		} catch (IOException e) {
 //			logger.error(e.getClass() +" "+e.getMessage()+" "+e.getLocalizedMessage());
 //			if(e instanceof HttpHostConnectException) {
-//				logger.error("Failed to connect to host: "+url.getHost()+", "+url.getPort());
+//				logger.error("Failed to connect to host: "+body.getHost()+", "+body.getPort());
 //			} else {
-//				logger.error("IOException: Failed to connect to host: "+url.getHost()+", "+url.getPort());
+//				logger.error("IOException: Failed to connect to host: "+body.getHost()+", "+body.getPort());
 //			}
 			responseError.setMessageKey(e.getClass().getCanonicalName());
 			responseError.setMessage("Failed to connect to host: "+url.getHost()+": "+e.getMessage());
@@ -112,24 +112,24 @@ public class HttpClient implements IHttpClient {
 	}
 	
 	/**
-	 * Creates the target url to execute by the http client
+	 * Creates the target body to execute by the http client
 	 * @param host the host with all info about the target, ie ipaddress, port, context
-	 * @param parameters the control parameters, added as url parameters 
-	 * @return the target url to execute by the http client
+	 * @param parameters the control parameters, added as body parameters 
+	 * @return the target body to execute by the http client
 	 */
 	URL createTargetUrl(String url) {
 		try {
 			return new URL(url);
 		} catch (MalformedURLException e) {
-			throw new ControlCommandException("Failed to execute url: "+url);
+			throw new ControlCommandException("Failed to execute body: "+url);
 		}
 		
 	}
 	/**
-	 * Creates the target url to execute by the http client
+	 * Creates the target body to execute by the http client
 	 * @param host the host with all info about the target, ie ipaddress, port, context
-	 * @param parameters the control parameters, added as url parameters 
-	 * @return the target url to execute by the http client
+	 * @param parameters the control parameters, added as body parameters 
+	 * @return the target body to execute by the http client
 	 */
 	URL createTargetUrl(Host host) {
 		Integer port = host.getPort();
@@ -147,7 +147,7 @@ public class HttpClient implements IHttpClient {
 		try {
 			return new URL(url);
 		} catch (MalformedURLException e) {
-			throw new ControlCommandException("Failed to execute url: "+url);
+			throw new ControlCommandException("Failed to execute body: "+url);
 		}
 	}
 }

@@ -47,9 +47,9 @@ public class WorkerFactory implements IWorkerFactory {
 	
 	/** the http client that performs the http get */
 	private IHttpClient httpClient;
-	/** the initial url, hostname replaced with placeholder */
+	/** the initial body, hostname replaced with placeholder */
 	private String _url;
-	/** Contains the current view of all hosts statuses, one status per host */ 
+	/** Contains the current view of all hosts perHostStatuses, one status per host */ 
 	private HashMap<String, JkStatus> _statuses;
 
 	/**
@@ -63,7 +63,7 @@ public class WorkerFactory implements IWorkerFactory {
 	/**
 	 * Constructor
 	 * @param httpClient
-	 * @param url
+	 * @param body
 	 */
 	public WorkerFactory(HttpClient httpClient, String url) {
 		this._url = url;
@@ -82,7 +82,7 @@ public class WorkerFactory implements IWorkerFactory {
 	
 	@Override
 	public boolean init(String url, String workerName, String action, String speed) throws MalformedURLException, UnknownHostException {
-		logger.info("Initializing with url: "+url);
+		logger.info("Initializing with body: "+url);
 		
 		WorkerResponse response = getStatusForUrl(url);
 		if(response.getError()!=null) {
@@ -116,7 +116,7 @@ public class WorkerFactory implements IWorkerFactory {
 		for (int i = 0; i < memberCount; i++) {
 			JkMember jkMember = jkStatus.getBalancers().getBalancer().getMember().get(i);
 			if(jkStatus.getServer().getName().equals(jkMember.getHost())) {
-				// this host is alreaady taken care of
+				// this host is already taken care of
 				continue;
 			}
 
@@ -155,7 +155,7 @@ public class WorkerFactory implements IWorkerFactory {
 	 */
 	ArrayList<String> createUrls(String workerName, String action) {
 		if(_statuses == null || _statuses.size() == 0) {
-			throw new IllegalArgumentException("Cluster statuses not initialized");
+			throw new IllegalArgumentException("Cluster perHostStatuses not initialized");
 		}
 		
 		ArrayList<String> urls = new ArrayList<String>();
@@ -194,12 +194,12 @@ public class WorkerFactory implements IWorkerFactory {
 			return newUrl;
 		}
 		if(workerName !=null) {
-			throw new IllegalArgumentException("Failed to find url for worker: "+workerName);
+			throw new IllegalArgumentException("Failed to find body for worker: "+workerName);
 		}
 		return null;
 	}
 	/**
-	 * Creates a complete url for the wanted action
+	 * Creates a complete body for the wanted action
 	 * @param jkMember
 	 * @param workerName
 	 * @param action

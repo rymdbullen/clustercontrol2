@@ -12,9 +12,7 @@
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
 
 	<!-- Scans the classpath of this application for @Components to deploy as beans -->
-	<context:component-scan base-package="net.local.clustercontrol.mvc" />
-	<context:component-scan base-package="net.local.clustercontrol.core.logic.impl" />
-	<context:component-scan base-package="net.local.clustercontrol.core.http.impl" />
+	<context:component-scan base-package="net.local.clustercontrol" />
 
 	<!-- Configures the @Controller programming model -->
 	<mvc:annotation-driven />
