@@ -34,21 +34,29 @@ public class StatusParserHtml extends IStatusParser {
 	public static final int _7ELECTED = 7;
 	public static final int _8TO = 8;
 	public static final int _9FROM = 9;
-	
-	public StatusParserHtml(String body) {
+	private String body;
+	private String url;
+
+	/**
+	 * Constructor
+	 * @param body the body to parse
+	 * @param url the url that gave this body
+	 */
+	public StatusParserHtml(String body, String url) {
 		if(body==null) {
 			return;
 		}
-		parseJkStatus(body);
+		this.body = body;
+		this.url = url;
+		parseJkStatus();
 	}
 	
 	/**
 	 * Creates and populates the {@link JkStatus} from the balancer-manager HTML page
 	 * <td><a href="/balancer-manager?b=mycluster&w=ajp://127.0.0.1:8109&nonce=51b485f1-ab7c-42ae-81c3-ee9cc9610b7c">ajp://127.0.0.1:8109</a></td><td>t1</td><td></td><td>1</td><td>0</td><td>Ok</td><td>2</td><td>  0 </td><td>2.0K</td>
-	 * @param body
 	 * @return the {@link JkStatus} from the balancer-manager HTML page
 	 */
-	private void parseJkStatus(String body) {
+	private void parseJkStatus() {
 		
 		// host 
 		JkStatus jkStatus = new JkStatus();
@@ -107,7 +115,8 @@ public class StatusParserHtml extends IStatusParser {
 			if(beginIndex>0) {
 				address = workerAddress.substring(beginIndex+3, endIndex);
 			}
-			context = workerAddressMatcher.group(1);
+			// add the url that gave body that we are parsing now
+			context = url + workerAddressMatcher.group(1);
 			if(logger.isTraceEnabled()) { logger.trace("Parsed: balancerName: "+balancerName+", address: "+address+", workerName: "+workerName+", workerPort:"+workerPort + ", context: "+context); }            		
 		} else {
 			throw new IllegalArgumentException("Failed to find balancer name and address using pattern: "+workerAddressPattern.pattern());

@@ -35,13 +35,12 @@ public interface IWorkerHandler {
 
 	/**
 	 * Creates the action url for each server in cluster
-	 * @param url the base url
 	 * @param action the action to perform
 	 * @param jkMember the jkMember to get data from to construct the url
 	 * @param workerId the worker id to handle
 	 * @return the action url for each server in cluster
 	 */
-	String createUrl(String url, String action, JkMember jkMember, String workerId);
+	String createUrl(String action, JkMember jkMember, String workerId);
 
 	/**
 	 * Returns the latest status message
@@ -54,5 +53,12 @@ public interface IWorkerHandler {
 	 * @return all the statuses for all servers in cluster
 	 */
 	Map<String, JkStatus> getStatuses();
+
+	/**
+	 * 
+	 * @param url
+	 * @param context
+	 */
+	void handleUrl(String url, String context);
 	
 }

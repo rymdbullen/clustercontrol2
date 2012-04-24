@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import net.local.clustercontrol.api.model.xml.JkStatus;
-import net.local.clustercontrol.core.logic.impl.ClusterManager;
 import net.local.clustercontrol.core.model.dto.Cluster;
 import net.local.clustercontrol.core.model.dto.Workers;
 import net.local.clustercontrol.core.parsers.StatusParserHtml;
@@ -29,6 +28,8 @@ public class ClusterControllerTest {
             "<td>t2</td><td></td><td>1</td><td>0</td><td>Ok</td><td>1</td><td>  0 </td><td>1.0K</td></tr> </table> <hr /> "+
             "<address>Apache/2.2.11 (Ubuntu) PHP/5.2.6-3ubuntu4.6 with Suhosin-Patch Server at 192.168.10.116 Port 80</address> </body></html>";
 
+	private String url = "http://192.168.10.116/balancer-manager";
+	
 	@BeforeClass
 	public static void setUp() throws Exception {
 		Properties props = new Properties();
@@ -41,8 +42,8 @@ public class ClusterControllerTest {
 	}
 	@Test
 	public void convertTest() {
-		JkStatus jkStatus = (new StatusParserHtml(body)).getStatus();
-		JkStatus jkStatus2 = (new StatusParserHtml(body)).getStatus();
+		JkStatus jkStatus = (new StatusParserHtml(body, url)).getStatus();
+		JkStatus jkStatus2 = (new StatusParserHtml(body, url)).getStatus();
 		String server = jkStatus2.getServer().getName();
 		server = server.substring(0, server.length()-1) + "7";
 		jkStatus2.getServer().setName(server);

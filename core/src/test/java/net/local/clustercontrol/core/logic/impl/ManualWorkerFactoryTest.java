@@ -63,8 +63,7 @@ public class ManualWorkerFactoryTest {
             "<td>t2</td><td></td><td>1</td><td>0</td><td>Ok</td><td>1</td><td>  0 </td><td>1.0K</td></tr> </table> <hr /> "+
             "<address>Apache/2.2.11 (Ubuntu) PHP/5.2.6-3ubuntu4.6 with Suhosin-Patch Server at 192.168.10.116 Port 80</address> </body></html>";
 
-	@SuppressWarnings("unused")
-	private static final String testUrl = "http://192.168.10.116:8080/balancer-manager";
+	private static final String url = "http://192.168.10.116/balancer-manager";
 	private static final String localhostUrl = "http://localhost:8080/balancer-manager";
 
 	/*
@@ -106,7 +105,7 @@ public class ManualWorkerFactoryTest {
 	}
 	@Before
 	public void before() {
-		jkStatus = (new StatusParserHtml(body)).getStatus();
+		jkStatus = (new StatusParserHtml(body, url)).getStatus();
 		httpClient = new HttpClient();
 	}
 

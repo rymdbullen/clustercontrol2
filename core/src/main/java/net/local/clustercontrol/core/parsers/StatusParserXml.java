@@ -24,7 +24,7 @@ public class StatusParserXml extends IStatusParser {
 	
 	private static final Logger logger = LoggerFactory.getLogger(StatusParserXml.class);
 	
-	public StatusParserXml(String body) {
+	public StatusParserXml(String body, String url) {
 		if(body==null) {
 			logger.warn("Supplied status body is null");
 			return;
@@ -34,8 +34,8 @@ public class StatusParserXml extends IStatusParser {
 	
 		String xsdFilename = "/xsd/jkStatus.xsd";
 		try {
-			InputStream url = getClass().getResourceAsStream(xsdFilename);		    
-		    StreamSource ss = new StreamSource(url);
+			InputStream xsdFile = getClass().getResourceAsStream(xsdFilename);		    
+		    StreamSource ss = new StreamSource(xsdFile);
 			mySchema = sf.newSchema( ss );
 		} catch( SAXException saxe ) {
 		    // xsd file not correct

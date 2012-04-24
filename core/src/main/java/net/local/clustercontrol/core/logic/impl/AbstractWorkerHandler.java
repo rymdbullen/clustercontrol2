@@ -2,7 +2,9 @@ package net.local.clustercontrol.core.logic.impl;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +26,7 @@ public abstract class AbstractWorkerHandler implements IWorkerHandler {
 	IHttpClient httpClient;
 	String initUrl;
 	HashSet<String> urls = new HashSet<String>();
-	Map<String, JkStatus> statusesPerHost = null;
+	ConcurrentHashMap<String, JkStatus> statusesPerHost = null;
 	Map<String, String> statusMessages = new HashMap<String, String>();
 	
 	public AbstractWorkerHandler(IHttpClient httpClient, String body, String initUrl) {
@@ -43,7 +45,7 @@ public abstract class AbstractWorkerHandler implements IWorkerHandler {
 		}
 		
 		// Init the jkStatus container
-		statusesPerHost = new HashMap<String, JkStatus>(1);
+		statusesPerHost = new ConcurrentHashMap<String, JkStatus>(1);
 		
 		statusesPerHost.put(initUrl, parser.getStatus());
 		getInitUrls();
@@ -75,6 +77,27 @@ public abstract class AbstractWorkerHandler implements IWorkerHandler {
 
 	Map<String, JkStatus> getStatusesPerHost() {
 		return statusesPerHost;
+	}
+	
+	protected void action(String workerId, String speed, String action) {
+		for (JkStatus status : statusesPerHost.values()) {
+			List<JkMember> members = status.getBalancers().getBalancer().getMember();
+			for (JkMember member : members) {
+				if(!member.getName().equals(workerId)) {
+					continue;
+				}
+				// we want this one
+				String contextUrl = createUrl(action, member, workerId);
+				
+				for (String url : urls)
+				{
+					if(!url.contains(status.getServer().getName())) {
+						continue;
+					}
+					handleUrl(url, contextUrl);
+				} 
+			}
+		}		
 	}
 	
 	protected void getBody(String url) {

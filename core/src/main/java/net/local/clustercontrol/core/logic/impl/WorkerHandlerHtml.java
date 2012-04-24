@@ -1,10 +1,6 @@
 package net.local.clustercontrol.core.logic.impl;
 
-import java.util.Iterator;
-import java.util.List;
-
 import net.local.clustercontrol.api.model.xml.JkMember;
-import net.local.clustercontrol.api.model.xml.JkStatus;
 import net.local.clustercontrol.core.http.IHttpClient;
 import net.local.clustercontrol.core.logic.IWorkerHandler;
 import net.local.clustercontrol.core.parsers.IStatusParser;
@@ -26,8 +22,8 @@ public class WorkerHandlerHtml extends AbstractWorkerHandler implements IWorkerH
 	private static final Logger logger = LoggerFactory.getLogger(WorkerHandlerHtml.class);
 	private static final String type = "html";
 
-	public WorkerHandlerHtml(IHttpClient httpClient, String body, String initUrl) {
-		super(httpClient, body, initUrl);
+	public WorkerHandlerHtml(IHttpClient httpClient, String body, String url) {
+		super(httpClient, body, url);
 	}
 
 	@Override
@@ -38,105 +34,63 @@ public class WorkerHandlerHtml extends AbstractWorkerHandler implements IWorkerH
 	@Override
 	public IStatusParser handleInit() {
 		// parse body
-		return new StatusParserHtml(this.body);
+		return new StatusParserHtml(this.body, this.initUrl);
 	}
 
 	@Override
 	public void handlePoll() {
-		for (String url : urls) {
-			getBody(url);
-			StatusParserHtml status = new StatusParserHtml(body);
-			boolean notInit = false;
-			if(notInit && statusesPerHost.get(url) != null) {
-				if(logger.isTraceEnabled()) logger.trace("url already added: "+url);
-				continue;
-			}
-			statusesPerHost.put(url, status.getStatus());
+		for (String url : this.urls) {
+			handleUrl(url, "");
 		}
 	}
 
 	@Override
+	public void handleUrl(String url, String context) {
+		getBody(url+context);
+		StatusParserHtml status = new StatusParserHtml(this.body, url);
+		statusesPerHost.put(url, status.getStatus());
+	}
+
+	@Override
 	public void handleStart(String workerId, String speed) {
-		String action = "start";
-		Iterator<String> urls = statusesPerHost.keySet().iterator();
-		while (urls.hasNext()) {
-			String url = (String) urls.next();
-			String host = "";
-			// create url for this workerId
-			JkMember jkMember = getMember(statusesPerHost.get(url), workerId, host);
-			url = createUrl(url, action, jkMember, workerId);
-			getBody(url);
-			if(body != null && body.trim().length() > 0) {
-				if(logger.isTraceEnabled()) logger.trace("url already added: "+url);				
-			}
-		}
-		handlePoll();
+		String action = "Enable";
+		action(workerId, speed, action);
 	}
 	
 	@Override
 	public void handleStop(String workerId, String speed) {
 		if(speed==null) {
+			// stop-fastest-possible case
 			
 		}
-		for (JkStatus status : statusesPerHost.values()) {
-			System.out.println(status.getBalancers().getBalancer().getMemberCount());
-			List<JkMember> members = status.getBalancers().getBalancer().getMember();
-			for (JkMember member : members) {
-				System.out.println(member.getName());
-				if(member.getName().equals(workerId)) {
-					// we want this one
-					logger.debug(workerId+" "+speed);
-					logger.debug(createUrl(speed, "stop", member, workerId));
-				}
-			}
-		}
+		String action = "Disable";
+		action(workerId, speed, action);
 	}
 	
 	@Override
-	public String createUrl(String url, String action, JkMember jkMember, String workerId) {
+	public String createUrl(String action, JkMember jkMember, String workerId) {
 		String newUrl;// = url.replaceAll(REPLACEMENT, host);
 		
 		String lf = ""+jkMember.getLbfactor();
 		String ls = ""+jkMember.getRead();  //member.setRead(Integer.valueOf(matcher.group(_5SET).trim()));
-		String to = ""+jkMember.getBusy();  //member.setBusy(Integer.valueOf(matcher.group(_8TO).trim()));
 		String wr = jkMember.getRoute();
-		String actionContext = "&lf="+lf+"&ls="+ls+"&wr="+wr+"&rr=&dw="+action;
-		if(logger.isTraceEnabled()) { logger.trace(""+lf+" : "+ls+" : "+to+" : "+jkMember.getType()); }
-		if(logger.isDebugEnabled()) { logger.debug("Context: "+actionContext); }
+		String actionContext = "lf="+lf+"&ls="+ls+"&wr="+wr+"&rr=&dw="+action;
 		
-		String newContext = getContext(jkMember);
+		String basicContext = getContext(jkMember);
+		if(logger.isTraceEnabled()) { logger.trace("Context: [{}] basicContext: [{}]", actionContext, basicContext); }
 		
-//		if(workerId.indexOf('/') > 0 || 
-//				workerId.indexOf(':') > 0) {
-//			try {
-//				workerId = URLEncoder.encode(workerId,"UTF-8");
-//			} catch (UnsupportedEncodingException e) {
-//				logger.error(workerId, e);
-//			}
-//		}
+		String context = basicContext.replaceAll(REPLACEMENT, workerId);
+		newUrl = "?" + actionContext + "&" + context;
 		
-		String context = newContext.replaceAll(REPLACEMENT, workerId);
-		newUrl = "?" + actionContext + "&" + context; 
+		if(logger.isTraceEnabled()) { logger.trace("Created new action URL: {}", newUrl); }
 		return newUrl;
 	}
 	
-	private JkMember getMember(JkStatus jkStatus, String workerId, String host) {
-		int memberCount = jkStatus.getBalancers().getBalancer().getMemberCount();
-		for (int i = 0; i < memberCount; i++) {
-			JkMember jkMember = jkStatus.getBalancers().getBalancer().getMember().get(i);
-			if(jkMember.getAddress().equals(host) &&
-					jkMember.getName().equals(workerId)) {
-				return jkMember;
-			}
-		}
-		return null;
-	}
-
 	private String getContext(JkMember jkMember) {
 		String context = jkMember.getType().replaceAll(jkMember.getName(), REPLACEMENT);
 		int beginIndex = context.indexOf("?");
 		if(beginIndex > 0) {
-			return context.substring(beginIndex+1);
+			return context.substring(beginIndex + 1);
 		}
 		return null;
 	}

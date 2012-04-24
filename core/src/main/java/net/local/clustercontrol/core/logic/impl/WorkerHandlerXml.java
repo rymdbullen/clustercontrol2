@@ -17,8 +17,8 @@ public class WorkerHandlerXml extends AbstractWorkerHandler implements IWorkerHa
 	private static final Logger logger = LoggerFactory.getLogger(WorkerHandlerXml.class);
 	private static final String type = "xml";
 
-	public WorkerHandlerXml(IHttpClient httpClient, String body, String initUrl) {
-		super(httpClient, body, initUrl);
+	public WorkerHandlerXml(IHttpClient httpClient, String body, String url) {
+		super(httpClient, body, url);
 	}
 	
 	@Override
@@ -29,26 +29,31 @@ public class WorkerHandlerXml extends AbstractWorkerHandler implements IWorkerHa
 	@Override
 	public IStatusParser handleInit() {
 		// parse body
-		return new StatusParserXml(this.body);
+		return new StatusParserXml(this.body, initUrl);
 	}
 	
 	@Override
 	public void handlePoll() {
-		
+		throw new RuntimeException("Not implemented");
+	}
+	
+	@Override
+	public void handleUrl(String url, String context) {
+		throw new RuntimeException("Not implemented");
 	}
 	
 	@Override
 	public void handleStart(String workerId, String speed) {
-		
+		throw new RuntimeException("Not implemented");
 	}
 	
 	@Override
 	public void handleStop(String workerId, String speed) {
-		
+		throw new RuntimeException("Not implemented");
 	}
 
 	@Override
-	public String createUrl(String url, String action, JkMember jkMember, String workerId) {
-		return null;
+	public String createUrl(String action, JkMember jkMember, String workerId) {
+		throw new RuntimeException("Not implemented");
 	}
 }

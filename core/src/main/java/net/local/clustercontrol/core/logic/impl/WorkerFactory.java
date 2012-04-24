@@ -89,7 +89,7 @@ public class WorkerFactory implements IWorkerFactory {
 			logger.error(response.getError().getMessage());
 			
 		}
-		JkStatus jkStatus = getJkStatus(response);
+		JkStatus jkStatus = getJkStatus(response, url);
 		
 		if(jkStatus==null) {
 			return false;
@@ -142,7 +142,7 @@ public class WorkerFactory implements IWorkerFactory {
 			if(response.getError()!=null) {
 				logger.error(response.getError().getMessage());
 			}
-			getJkStatus(response);
+			getJkStatus(response, url);
 		}
 		return true;
 	}
@@ -266,8 +266,8 @@ public class WorkerFactory implements IWorkerFactory {
 
 		return httpClient.getWorkerResponseForUrl(url);
 	}
-	private JkStatus getJkStatus(WorkerResponse workerResponse) {
-		JkStatus jkStatus = parseWorkerStatus(workerResponse.getBody());
+	private JkStatus getJkStatus(WorkerResponse workerResponse, String url) {
+		JkStatus jkStatus = parseWorkerStatus(workerResponse.getBody(), url);
 		if(jkStatus	== null) {
 			return null;
 		}
@@ -288,17 +288,17 @@ public class WorkerFactory implements IWorkerFactory {
 	 * @param statusBody
 	 * @return
 	 */
-	private JkStatus parseWorkerStatus(String statusBody) {
+	private JkStatus parseWorkerStatus(String statusBody, String url) {
 		
 		// 1. Try with ajp host
-		StatusParserXml statusParserXml = new StatusParserXml(statusBody); 
+		StatusParserXml statusParserXml = new StatusParserXml(statusBody, url); 
 		JkStatus jkStatus = statusParserXml.getStatus();
 		if(jkStatus != null) {
 			return jkStatus;
 		}
 		
 		// 2. Try with html host
-		StatusParserHtml statusParserHtml = new StatusParserHtml(statusBody);
+		StatusParserHtml statusParserHtml = new StatusParserHtml(statusBody, url);
 		jkStatus = statusParserHtml.getStatus();
 		if(jkStatus != null) {
 			return jkStatus;

@@ -28,6 +28,8 @@ public class WorkerStatusHtml2Test {
 	                      "<td>t2</td><td></td><td>1</td><td>0</td><td>Ok</td><td>1</td><td>  0 </td><td>1.0K</td></tr> </table> <hr /> "+
 	                      "<address>Apache/2.2.11 (Ubuntu) PHP/5.2.6-3ubuntu4.6 with Suhosin-Patch Server at 192.168.10.116 Port 80</address> </body></html> ";
 
+	private String url = "http://192.168.10.116/balancer-manager";
+
 	private String body2 = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">"+
 			"<html><head><title>Balancer Manager</title></head>"+
 			"<body><h1>Load Balancer Manager for 172.18.151.172</h1>"+
@@ -58,6 +60,8 @@ public class WorkerStatusHtml2Test {
 			"<address>Apache/2.2.20 (Ubuntu) Server at 172.18.151.172 Port 80</address>"+
 			"</body></html>";
 
+	private String url2 = "http://172.18.151.172/balancer-manager";
+
 	@BeforeClass
 	public static void setUp() throws Exception {
         System.setProperty("catalina.home", "./target");
@@ -78,21 +82,21 @@ public class WorkerStatusHtml2Test {
 	
 	@Test
 	public void getEntityTest() {
-		StatusParserHtml ws = new StatusParserHtml(body);
+		StatusParserHtml ws = new StatusParserHtml(body, url);
 		JkStatus jkStatus = ws.getStatus();
 		
 		assertEquals(new Integer(80), jkStatus.getServer().getPort());
 	}
 	@Test
 	public void getEntity2Test() {
-		StatusParserHtml ws = new StatusParserHtml(body2);
+		StatusParserHtml ws = new StatusParserHtml(body2, url2);
 		JkStatus jkStatus = ws.getStatus();
 		assertEquals(new Integer(6), jkStatus.getBalancers().getBalancer().getMemberCount());
 		assertEquals(new Integer(80), jkStatus.getServer().getPort());
 	}
 	@Test
 	public void createUrlsTest() {
-		StatusParserHtml ws = new StatusParserHtml(body2);
+		StatusParserHtml ws = new StatusParserHtml(body2, url2);
 		JkStatus jkStatus = ws.getStatus();
 		String url = "http://@@replacement@@/balancer-manager";
 		WorkerFactory wf = new WorkerFactory(null, url);
@@ -104,7 +108,7 @@ public class WorkerStatusHtml2Test {
 	}
 	@Test
 	public void createUrlsForJkStatusTest() {
-		StatusParserHtml ws = new StatusParserHtml(body2);
+		StatusParserHtml ws = new StatusParserHtml(body2, url2);
 		JkStatus jkStatus = ws.getStatus();
 		String url = "http://@@replacement@@/balancer-manager";
 		WorkerFactory wf = new WorkerFactory(null, url);
@@ -115,13 +119,13 @@ public class WorkerStatusHtml2Test {
 	}
 	@Test
 	public void getHostTest() {
-		StatusParserHtml ws = new StatusParserHtml(body);
+		StatusParserHtml ws = new StatusParserHtml(body, url);
 		String value = ws.getStatus().getServer().getName();
 		assertEquals("the host was not retrieved correct", "192.168.10.116", value);
 	}
 	@Test
 	public void getHost2Test() {
-		StatusParserHtml ws = new StatusParserHtml(body2);
+		StatusParserHtml ws = new StatusParserHtml(body2, url2);
 		String value = ws.getStatus().getServer().getName();
 		assertEquals("the host was not retrieved correct", "172.18.151.172", value);
 	}
