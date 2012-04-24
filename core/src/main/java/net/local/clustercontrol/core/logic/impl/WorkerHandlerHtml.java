@@ -1,11 +1,11 @@
 package net.local.clustercontrol.core.logic.impl;
 
 import java.util.Iterator;
+import java.util.List;
 
 import net.local.clustercontrol.api.model.xml.JkMember;
 import net.local.clustercontrol.api.model.xml.JkStatus;
 import net.local.clustercontrol.core.http.IHttpClient;
-import net.local.clustercontrol.core.http.impl.HttpClient;
 import net.local.clustercontrol.core.logic.IWorkerHandler;
 import net.local.clustercontrol.core.parsers.IStatusParser;
 import net.local.clustercontrol.core.parsers.StatusParserHtml;
@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
  */
 public class WorkerHandlerHtml extends AbstractWorkerHandler implements IWorkerHandler {
 
-	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(WorkerHandlerHtml.class);
 	private static final String type = "html";
 
@@ -48,30 +47,77 @@ public class WorkerHandlerHtml extends AbstractWorkerHandler implements IWorkerH
 			getBody(url);
 			StatusParserHtml status = new StatusParserHtml(body);
 			boolean notInit = false;
-			if(notInit && perHostStatuses.get(url) != null) {
-				System.out.println("url already added: "+url);
+			if(notInit && statusesPerHost.get(url) != null) {
+				if(logger.isTraceEnabled()) logger.trace("url already added: "+url);
 				continue;
 			}
-			perHostStatuses.put(url, status.getStatus());
+			statusesPerHost.put(url, status.getStatus());
 		}
 	}
 
 	@Override
-	public void handleStart(String workerId) {
+	public void handleStart(String workerId, String speed) {
 		String action = "start";
-		Iterator<String> urls = perHostStatuses.keySet().iterator();
+		Iterator<String> urls = statusesPerHost.keySet().iterator();
 		while (urls.hasNext()) {
 			String url = (String) urls.next();
 			String host = "";
 			// create url for this workerId
-			JkMember jkMember = getMember(perHostStatuses.get(url), workerId, host);
+			JkMember jkMember = getMember(statusesPerHost.get(url), workerId, host);
 			url = createUrl(url, action, jkMember, workerId);
 			getBody(url);
 			if(body != null && body.trim().length() > 0) {
-				System.out.println("url already added: "+url);				
+				if(logger.isTraceEnabled()) logger.trace("url already added: "+url);				
 			}
 		}
 		handlePoll();
+	}
+	
+	@Override
+	public void handleStop(String workerId, String speed) {
+		if(speed==null) {
+			
+		}
+		for (JkStatus status : statusesPerHost.values()) {
+			System.out.println(status.getBalancers().getBalancer().getMemberCount());
+			List<JkMember> members = status.getBalancers().getBalancer().getMember();
+			for (JkMember member : members) {
+				System.out.println(member.getName());
+				if(member.getName().equals(workerId)) {
+					// we want this one
+					logger.debug(workerId+" "+speed);
+					logger.debug(createUrl(speed, "stop", member, workerId));
+				}
+			}
+		}
+	}
+	
+	@Override
+	public String createUrl(String url, String action, JkMember jkMember, String workerId) {
+		String newUrl;// = url.replaceAll(REPLACEMENT, host);
+		
+		String lf = ""+jkMember.getLbfactor();
+		String ls = ""+jkMember.getRead();  //member.setRead(Integer.valueOf(matcher.group(_5SET).trim()));
+		String to = ""+jkMember.getBusy();  //member.setBusy(Integer.valueOf(matcher.group(_8TO).trim()));
+		String wr = jkMember.getRoute();
+		String actionContext = "&lf="+lf+"&ls="+ls+"&wr="+wr+"&rr=&dw="+action;
+		if(logger.isTraceEnabled()) { logger.trace(""+lf+" : "+ls+" : "+to+" : "+jkMember.getType()); }
+		if(logger.isDebugEnabled()) { logger.debug("Context: "+actionContext); }
+		
+		String newContext = getContext(jkMember);
+		
+//		if(workerId.indexOf('/') > 0 || 
+//				workerId.indexOf(':') > 0) {
+//			try {
+//				workerId = URLEncoder.encode(workerId,"UTF-8");
+//			} catch (UnsupportedEncodingException e) {
+//				logger.error(workerId, e);
+//			}
+//		}
+		
+		String context = newContext.replaceAll(REPLACEMENT, workerId);
+		newUrl = "?" + actionContext + "&" + context; 
+		return newUrl;
 	}
 	
 	private JkMember getMember(JkStatus jkStatus, String workerId, String host) {
@@ -86,40 +132,12 @@ public class WorkerHandlerHtml extends AbstractWorkerHandler implements IWorkerH
 		return null;
 	}
 
-	@Override
-	public String createUrl(String url, String action, JkMember jkMember, String workerId) {
-//		String newUrl = url.replaceAll(REPLACEMENT, host);
-//		
-//		jkStatus.getBalancers().getBalancer().getMemberCount();
-//		
-//		String lf = ""+jkMember.getLbfactor();
-//		String ls = ""+jkMember.getRead();  //member.setRead(Integer.valueOf(matcher.group(_5SET).trim()));
-//		String to = ""+jkMember.getBusy();  //member.setBusy(Integer.valueOf(matcher.group(_8TO).trim()));
-//		String wr = jkMember.getRoute();
-//		String actionContext = "&lf="+lf+"&ls="+ls+"&wr="+wr+"&rr=&dw="+action;
-//		if(logger.isTraceEnabled()) { logger.trace(""+lf+" : "+ls+" : "+to+" : "+jkMember.getType()); }
-//		if(logger.isDebugEnabled()) { logger.debug("Context: "+actionContext); }
-//		
-//		String newContext = getContext(jkMember);
-//		
-//		if(workerName.indexOf('/') > 0 || 
-//				workerName.indexOf(':') > 0) {
-//			try {
-//				workerName = URLEncoder.encode(workerName,"UTF-8");
-//			} catch (UnsupportedEncodingException e) {
-//				logger.error(workerName, e);
-//			}
-//		}
-//		
-//		String context = newContext.replaceAll(REPLACEMENT, workerId);
-//		newUrl = newUrl + "?" + actionContext + "&" + context; 
-//		return newUrl;
+	private String getContext(JkMember jkMember) {
+		String context = jkMember.getType().replaceAll(jkMember.getName(), REPLACEMENT);
+		int beginIndex = context.indexOf("?");
+		if(beginIndex > 0) {
+			return context.substring(beginIndex+1);
+		}
 		return null;
 	}
-
-	@Override
-	public void handleStop(String workerId) {
-
-	}
-
 }

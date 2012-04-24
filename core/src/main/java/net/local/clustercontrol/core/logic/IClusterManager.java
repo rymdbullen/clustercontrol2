@@ -1,6 +1,5 @@
 package net.local.clustercontrol.core.logic;
 
-import java.net.MalformedURLException;
 import java.util.Map;
 
 import net.local.clustercontrol.core.model.dto.Cluster;
@@ -11,32 +10,31 @@ import net.local.clustercontrol.core.model.dto.Cluster;
  */
 public interface IClusterManager {
 	/**
-	 * Initializes the WorkerManager with a body a boolean status of the action
-	 * @param body the body to initialize with
-	 * @throws MalformedURLException 
-	 * @throws WorkerNotFoundException 
+	 * Returns the status message for an initialization of the ClusterManager with the provided url
+	 * @param url the url to initialize with
 	 */
 	Map<String, String> init(String url);
 	/**
-	 * Enables the worker for the supplied loadbalancer and returns a boolean status of the action
+	 * Enables the worker and returns a boolean status of the action
 	 * @param worker the worker to enable
 	 * @param speed the speed to enable the worker
-	 * @return list of perHostStatuses
+	 * @return list of statusesPerHost
 	 */
-	boolean enable(String worker, String speed);
+	void enable(String worker, String speed);
 	/**
-	 * Disables the worker for the supplied loadbalancer and returns a boolean status of the action
+	 * Disables the worker and returns a boolean status of the action
 	 * @param worker the worker to disable
 	 * @param speed the speed to disable the worker
-	 * @return list of perHostStatuses
+	 * @return list of statusesPerHost
 	 */
-	boolean disable(String worker, String speed);
+	void disable(String worker, String speed);
 	/**
-	 * Stops the worker for the supplied loadbalancer and returns a boolean status of the action
+	 * Stops the worker and returns a boolean status of the action
 	 * @param worker the worker to disable
-	 * @return list of perHostStatuses
+	 * @param speed the speed to stop the worker
+	 * @return list of statusesPerHost
 	 */
-	boolean stop(String worker);
+	void stop(String worker);
 	/**
 	 * Returns the cluster instance
 	 * @return the cluster instance

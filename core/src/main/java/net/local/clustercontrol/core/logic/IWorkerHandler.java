@@ -3,6 +3,7 @@ package net.local.clustercontrol.core.logic;
 import java.util.Map;
 
 import net.local.clustercontrol.api.model.xml.JkMember;
+import net.local.clustercontrol.api.model.xml.JkStatus;
 import net.local.clustercontrol.core.parsers.IStatusParser;
 
 public interface IWorkerHandler {
@@ -13,14 +14,45 @@ public interface IWorkerHandler {
 	 */
 	IStatusParser handleInit();
 
+	/**
+	 * Handles the poll of all statues on all servers in cluster
+	 */
 	void handlePoll();
 	
-	void handleStart(String workerId);
+	/**
+	 * Handles the start of a worker on all servers in cluster
+	 * @param workerId
+	 * @param speed
+	 */
+	void handleStart(String workerId, String speed);
 	
-	void handleStop(String workerId);
+	/**
+	 * Handles the stop of a worker on all servers in cluster
+	 * @param workerId
+	 * @param speed
+	 */
+	void handleStop(String workerId, String speed);
 
+	/**
+	 * Creates the action url for each server in cluster
+	 * @param url the base url
+	 * @param action the action to perform
+	 * @param jkMember the jkMember to get data from to construct the url
+	 * @param workerId the worker id to handle
+	 * @return the action url for each server in cluster
+	 */
 	String createUrl(String url, String action, JkMember jkMember, String workerId);
 
-	Map<String, String> getStatus();
+	/**
+	 * Returns the latest status message
+	 * @return
+	 */
+	Map<String, String> getStatusMessage();
+
+	/**
+	 * Returns all the statuses for all servers in cluster 
+	 * @return all the statuses for all servers in cluster
+	 */
+	Map<String, JkStatus> getStatuses();
 	
 }

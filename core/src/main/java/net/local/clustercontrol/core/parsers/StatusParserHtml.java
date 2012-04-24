@@ -93,7 +93,8 @@ public class StatusParserHtml extends IStatusParser {
 		String workerName = null;
 		Matcher workerAddressMatcher = workerAddressPattern.matcher(workerAddressText);
 		if(workerAddressMatcher.matches()) {
-//if(logger.isTraceEnabled()) { logger.trace("Pattern: \n["+workerAddressPattern.pattern()+"]: \n"+workerAddressText); }	
+//if(logger.isTraceEnabled()) { logger.trace("Pattern: \n["+workerAddressPattern.pattern()+"]: \n"+workerAddressText); }
+			
 			balancerName = workerAddressMatcher.group(2);
 			workerName = workerAddressMatcher.group(3);
 			String workerAddress = workerAddressMatcher.group(4);

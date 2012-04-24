@@ -3,6 +3,7 @@ package net.local.clustercontrol.core.logic.impl;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -42,42 +43,40 @@ public class ClusterManager implements IClusterManager {
 		this.workerHandlerFactory = workerHandlerFactory;
 	}
 
-	
-	/**
-	 * Initializes the ClusterManager with a body.
-	 * @param url the url to initialize with
-	 */
 	@Override
 	public Map<String, String> init(String url) {
-
 		// get handler only if none exists previously
 		if(handler == null) {
 			handler = workerHandlerFactory.getHandler(url);
 		}
-		return handler.getStatus();
+		return handler.getStatusMessage();
 	}
 
 	@Override
 	@Async
-	public boolean enable(String workerId, String speed) {
-		//handler.handleStart(workerId);
-		return action("Enable", workerId, speed);
+	public void enable(String workerId, String speed) {
+		handler.handleStart(workerId, speed);
 	}
 	
 	@Override
 	@Async
-	public boolean disable(String workerId, String speed) {
-		//handler.handleStop(workerId);
-		return action("Disable", workerId, speed);
+	public void disable(String workerId, String speed) {
+		handler.handleStop(workerId, speed);
 	}
 
 	@Override
 	@Async
-	public boolean stop(String workerId) {
-		//handler.handleStop(workerId);
-		return action("Stop", workerId, null);
+	public void stop(String workerId) {
+		handler.handleStop(workerId, null);
 	}
 	
+	/**
+	 * 
+	 * @param action
+	 * @param workerId
+	 * @param speed
+	 * @return
+	 */
 	boolean action(String action, String workerId, String speed) {
 		if(logger.isTraceEnabled()) {
 			String threadName = Thread.currentThread().getName();
@@ -86,7 +85,7 @@ public class ClusterManager implements IClusterManager {
 		String workerName = cssValidName(workerId, false);
 		try {
 			workerFactory.performAction(workerName, action, speed);
-			updateCluster(statusListPerWorker());
+			updateCluster(statusListPerWorker(workerFactory.getStatuses()));
 			_cluster.setStatusMessage("ok");
 			return true;
 		} catch (MalformedURLException e) {
@@ -99,6 +98,8 @@ public class ClusterManager implements IClusterManager {
 	
 	@Override
 	public Cluster getCluster() {
+		LinkedHashMap<String, HashMap<String, JkMember>> statusListPerWorker = statusListPerWorker(handler.getStatuses());
+		updateCluster(statusListPerWorker);
 		return _cluster;
 	}
 	
@@ -121,13 +122,19 @@ public class ClusterManager implements IClusterManager {
 	}
 
 	/**
-	 * Converts the perHostStatuses from per-host to per-worker. transforms the matrix.
+	 * Converts the statusesPerHost from per-host to per-worker. transforms the matrix.
 	 */
-	private LinkedHashMap<String, HashMap<String, JkMember>> statusListPerWorker() {
+	private LinkedHashMap<String, HashMap<String, JkMember>> statusListPerWorker(Map<String, JkStatus> map) {
+		return statusListPerWorker(map.values());
+	}
+	/**
+	 * Converts the statusesPerHost from per-host to per-worker. transforms the matrix.
+	 */
+	private LinkedHashMap<String, HashMap<String, JkMember>> statusListPerWorker(Collection<JkStatus> jkStatuses) {
 		_cluster = new Cluster();
 		
 		LinkedHashMap<String, HashMap<String, JkMember>> membersList = new LinkedHashMap<String, HashMap<String, JkMember>>();
-		for (JkStatus jkStatus : workerFactory.getStatuses().values()) {
+		for (JkStatus jkStatus : jkStatuses) {
 			String hostName = jkStatus.getServer().getName();
 			Integer hostPort = jkStatus.getServer().getPort();
 			List<JkMember> members = jkStatus.getBalancers().getBalancer().getMember();
@@ -156,9 +163,9 @@ public class ClusterManager implements IClusterManager {
 		return membersList;
 	}
 	/**
-	 * Converts the perHostStatuses from per-host to per worker. transforms the matrix.
+	 * Converts the statusesPerHost from per-host to per worker. transforms the matrix.
 	 * 
-	 * @param perHostStatuses
+	 * @param statusesPerHost
 	 */
 	private void updateCluster(LinkedHashMap<String, HashMap<String, JkMember>> membersList) {
 		// initialize new cluster

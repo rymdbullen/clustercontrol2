@@ -49,7 +49,7 @@ public class WorkerFactory implements IWorkerFactory {
 	private IHttpClient httpClient;
 	/** the initial body, hostname replaced with placeholder */
 	private String _url;
-	/** Contains the current view of all hosts perHostStatuses, one status per host */ 
+	/** Contains the current view of all hosts statusesPerHost, one status per host */ 
 	private HashMap<String, JkStatus> _statuses;
 
 	/**
@@ -155,7 +155,7 @@ public class WorkerFactory implements IWorkerFactory {
 	 */
 	ArrayList<String> createUrls(String workerName, String action) {
 		if(_statuses == null || _statuses.size() == 0) {
-			throw new IllegalArgumentException("Cluster perHostStatuses not initialized");
+			throw new IllegalArgumentException("Cluster statusesPerHost not initialized");
 		}
 		
 		ArrayList<String> urls = new ArrayList<String>();
@@ -234,6 +234,16 @@ public class WorkerFactory implements IWorkerFactory {
 		String context = newContext.replaceAll(REPLACEMENT, workerName);
 		newUrl = newUrl + "?" + actionContext + "&" + context; 
 		return newUrl;
+	}
+	
+	private String getInitHost(String initUrl) {
+		int beginIndex = initUrl.indexOf("://");
+		int endIndex = initUrl.indexOf("/", beginIndex+3);
+		if(endIndex==-1) {
+			return initUrl.substring(beginIndex+3);			
+		} else {
+			return initUrl.substring(beginIndex+3, endIndex);
+		}
 	}
 
 	private String getContext(JkMember jkMember) {

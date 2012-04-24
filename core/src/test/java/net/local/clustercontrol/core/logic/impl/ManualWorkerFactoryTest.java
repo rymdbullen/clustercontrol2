@@ -171,8 +171,7 @@ public class ManualWorkerFactoryTest {
 		Map<String, String> response = clusterManager.init(localhostUrl);
 		assertEquals("This must work, init must be 'ok'", "ok", response.get("initStatus"));
 		
-		boolean initOk = clusterManager.disable("ajp://localhost:8019", "medium");
-		assertEquals("This must work, init must be true", true, initOk);
+		clusterManager.disable("ajp://localhost:8019", "medium");
 		assertEquals("This must work, init must be true", "ok", clusterManager.getCluster().getStatusMessage());
 		
 		assertEquals("There must be one status", 1, workerFactory.getStatuses().size());
@@ -185,8 +184,7 @@ public class ManualWorkerFactoryTest {
 		Map<String, String> response = clusterManager.init(localhostUrl);
 		assertEquals("This must work, init must be 'ok'", "ok", response.get("initStatus"));
 		
-		boolean initOk = clusterManager.enable("ajp://localhost:8019", "medium");
-		assertEquals("This must work, init must be true", true, initOk);
+		clusterManager.enable("ajp://localhost:8019", "medium");
 		assertEquals("This must work, init must be true", "ok", clusterManager.getCluster().getStatusMessage());
 		
 		assertEquals("There must be one status", 1, workerFactory.getStatuses().size());

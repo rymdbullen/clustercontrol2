@@ -49,9 +49,9 @@ public class WorkerStatusTest {
 		logger.debug("Running testActivateUnmarshall");
 		String workerName = "footprint1";
 		String speed = "medium";
-		boolean initOk = clusterManager.enable(workerName, speed);
+		clusterManager.enable(workerName, speed);
 		
-		ArrayList<JkStatus> workerLists = null;
+		ArrayList<JkStatus> workerLists = null;//clusterManager.getCluster().getWorkers();
 		for (int i = 0; i < workerLists.size(); i++) {
 			JkStatus workerList = workerLists.get(i);
 			JkBalancer balancer = workerList.getBalancers().getBalancer();

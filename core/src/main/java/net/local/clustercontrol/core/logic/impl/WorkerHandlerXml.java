@@ -31,11 +31,6 @@ public class WorkerHandlerXml extends AbstractWorkerHandler implements IWorkerHa
 		// parse body
 		return new StatusParserXml(this.body);
 	}
-
-	@Override
-	public void extractUrls() {
-		
-	}
 	
 	@Override
 	public void handlePoll() {
@@ -43,12 +38,12 @@ public class WorkerHandlerXml extends AbstractWorkerHandler implements IWorkerHa
 	}
 	
 	@Override
-	public void handleStart(String workerId) {
+	public void handleStart(String workerId, String speed) {
 		
 	}
 	
 	@Override
-	public void handleStop(String workerId) {
+	public void handleStop(String workerId, String speed) {
 		
 	}
 
