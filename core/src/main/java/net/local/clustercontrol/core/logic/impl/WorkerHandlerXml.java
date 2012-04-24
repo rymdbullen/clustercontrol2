@@ -17,8 +17,9 @@ public class WorkerHandlerXml extends AbstractWorkerHandler implements IWorkerHa
 	private static final Logger logger = LoggerFactory.getLogger(WorkerHandlerXml.class);
 	private static final String type = "xml";
 
-	public WorkerHandlerXml(IHttpClient httpClient, String body, String url) {
-		super(httpClient, body, url);
+	public WorkerHandlerXml() {}
+	public WorkerHandlerXml(IHttpClient httpClient, String url) {
+		super(httpClient, url);
 	}
 	
 	@Override

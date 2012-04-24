@@ -3,8 +3,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>clustercontrol-parent</artifactId>
 		<groupId>net.local.clustercontrol</groupId>
+		<artifactId>clustercontrol-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -12,37 +12,22 @@
 	<artifactId>clustercontrol-web-vaadin</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<name>ClusterControl 2 - WEB Vaadin</name>
+	<name>&gt; ClusterControl 2 - WEB Vaadin</name>
+    <description>WEB module for ClusterControl2 for Apache-Tomcat load-balanced Clusters</description>
 
 	<build>
+		<finalName>ROOT</finalName>
 		<plugins>
-			<!-- Compile custom GWT components or widget dependencies with the GWT 
-				compiler -->
-			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>gwt-maven-plugin</artifactId> 
-				<version>${gwt.plugin.version}</version> <configuration> <webappDirectory>${project.build.directory}/${project.build.finalName}/VAADIN/widgetsets</webappDirectory> 
-				<extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs> <runTarget>web-vaadin</runTarget> 
-				<hostedWebapp>${project.build.directory}/${project.build.finalName}</hostedWebapp> 
-				<noServer>true</noServer> <port>8080</port> <compileReport>false</compileReport> 
-				</configuration> <executions> <execution> <goals> <goal>resources</goal> 
-				<goal>compile</goal> </goals> </execution> </executions> <dependencies> <dependency> 
-				<groupId>com.google.gwt</groupId> <artifactId>gwt-dev</artifactId> <version>${gwt.version}</version> 
-				</dependency> <dependency> <groupId>com.google.gwt</groupId> <artifactId>gwt-user</artifactId> 
-				<version>${gwt.version}</version> </dependency> </dependencies> </plugin> 
-				<plugin> <groupId>com.vaadin</groupId> <artifactId>vaadin-maven-plugin</artifactId> 
-				<version>1.0.2</version> <executions> <execution> <configuration> </configuration> 
-				<goals> <goal>update-widgetset</goal> </goals> </execution> </executions> 
-				</plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1.1</version>
+				<version>2.2</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>tomcat-maven-plugin</artifactId>
 				<version>1.1</version>
 				<configuration>
-					<warSourceDirectory>${basedir}/war/src</warSourceDirectory>
 					<path>/</path>
 				</configuration>
 			</plugin>
@@ -52,12 +37,11 @@
 			<plugin>
 				<groupId>org.mortbay.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>8.0.4.v20111024</version>
+				<version>8.1.3.v20120416</version>
 				<configuration>
 					<scanIntervalSeconds>10</scanIntervalSeconds>
 					<stopKey>foo</stopKey>
 					<stopPort>9999</stopPort>
-					<webAppSourceDirectory>${basedir}/war/src</webAppSourceDirectory>
 					<jettyEnvXml>${basedir}/jetty-env.xml</jettyEnvXml>
 					<connectors>
 						<connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
@@ -93,30 +77,7 @@
 			<url>http://maven.vaadin.com/vaadin-addons</url>
 		</repository>
 	</repositories>
-<!-- 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>codehaus-snapshots</id>
-			<url>http://nexus.codehaus.org/snapshots</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</pluginRepository>
-		<pluginRepository>
-			<id>vaadin-snapshots</id>
-			<url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-		</pluginRepository>
-	</pluginRepositories>
- -->
+
 	<dependencies>
 		<dependency>
 			<groupId>net.local.clustercontrol</groupId>

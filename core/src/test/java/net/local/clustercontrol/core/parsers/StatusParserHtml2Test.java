@@ -1,8 +1,7 @@
-package net.local.clustercontrol.core.logic.impl;
+package net.local.clustercontrol.core.parsers;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.Properties;
 
 import org.apache.log4j.PropertyConfigurator;
@@ -10,11 +9,10 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import net.local.clustercontrol.core.logic.impl.WorkerFactory;
 import net.local.clustercontrol.core.parsers.StatusParserHtml;
 import net.local.clustercontrol.api.model.xml.JkStatus;
 
-public class WorkerStatusHtml2Test {
+public class StatusParserHtml2Test {
 	
 	private String body = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\"> <html><head><title>Balancer Manager</title></head>" +
 	                      "<body><h1>Load Balancer Manager for 192.168.10.116</h1>  <dl><dt>Server Version: Apache/2.2.11 (Ubuntu) PHP/5.2.6-3ubuntu4.6 with Suhosin-Patch</dt>" +
@@ -93,29 +91,6 @@ public class WorkerStatusHtml2Test {
 		JkStatus jkStatus = ws.getStatus();
 		assertEquals(new Integer(6), jkStatus.getBalancers().getBalancer().getMemberCount());
 		assertEquals(new Integer(80), jkStatus.getServer().getPort());
-	}
-	@Test
-	public void createUrlsTest() {
-		StatusParserHtml ws = new StatusParserHtml(body2, url2);
-		JkStatus jkStatus = ws.getStatus();
-		String url = "http://@@replacement@@/balancer-manager";
-		WorkerFactory wf = new WorkerFactory(null, url);
-		String workerName = "ajp://172.18.151.174:8029";
-		String newUrl = wf.createUrl(jkStatus.getBalancers().getBalancer().getMember().get(0), "172.18.151.172", workerName , "Enable");
-		
-		assertNotNull("Url must be available", newUrl);
-		assertEquals("http://172.18.151.172/balancer-manager?&lf=1&ls=0&wr=s1&rr=&dw=Enable&b=cluster&w=ajp%3A%2F%2F172.18.151.174%3A8029&nonce=57badbdb-e0bf-4cf2-8ad3-375a2ebeaca9", newUrl);
-	}
-	@Test
-	public void createUrlsForJkStatusTest() {
-		StatusParserHtml ws = new StatusParserHtml(body2, url2);
-		JkStatus jkStatus = ws.getStatus();
-		String url = "http://@@replacement@@/balancer-manager";
-		WorkerFactory wf = new WorkerFactory(null, url);
-		ArrayList<String> newUrls = wf.initUrlsFromJkStatus(jkStatus);
-		
-		assertEquals("Must create the other host body: ", 1, newUrls.size());
-		assertEquals("Must create the second body from status", "http://172.18.151.174/balancer-manager", newUrls.get(0));
 	}
 	@Test
 	public void getHostTest() {

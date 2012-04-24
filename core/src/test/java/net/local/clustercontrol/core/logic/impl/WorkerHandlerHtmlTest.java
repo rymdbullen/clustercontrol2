@@ -4,6 +4,7 @@
 package net.local.clustercontrol.core.logic.impl;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -15,6 +16,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.local.clustercontrol.api.model.xml.WorkerResponse;
 import net.local.clustercontrol.core.http.impl.AbstractBaseTestCase;
 import net.local.clustercontrol.core.http.impl.HttpClient;
 
@@ -105,8 +107,14 @@ public class WorkerHandlerHtmlTest extends AbstractBaseTestCase {
 	public void testCycle() {
 		logger.debug("Running testCycle");
 		String initUrl = "http://172.18.151.172/balancer-manager";
-		HttpClient httpClient = new HttpClient();
-		WorkerHandlerHtml html = new WorkerHandlerHtml(httpClient, body2, initUrl);
+		HttpClient mockHttpClient = mock(HttpClient.class);
+		
+		WorkerResponse wr = new WorkerResponse();
+		wr.setBody(body2);
+		
+		when(mockHttpClient.getWorkerResponseForUrl(isA(String.class))).thenReturn(wr);
+		
+		WorkerHandlerHtml html = new WorkerHandlerHtml(mockHttpClient, initUrl);
 		assertNotNull(html);
 		assertEquals(2, html.urls.size());
 	}

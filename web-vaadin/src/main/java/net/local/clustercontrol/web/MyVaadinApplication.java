@@ -17,7 +17,6 @@ package net.local.clustercontrol.web;
 
 
 import net.local.clustercontrol.AppConfig;
-import net.local.clustercontrol.core.configuration.EnvironmentAwareProperties;
 import net.local.clustercontrol.core.logic.IClusterManager;
 import net.local.clustercontrol.core.logic.impl.ClusterManager;
 
@@ -29,8 +28,8 @@ import com.vaadin.ui.Window;
 /**
  * The Application's "main" class
  */
-@SuppressWarnings("serial")
 public class MyVaadinApplication extends Application {
+	private static final long serialVersionUID = 7230334633423374190L;
 	private Window window;
 
 	@Override

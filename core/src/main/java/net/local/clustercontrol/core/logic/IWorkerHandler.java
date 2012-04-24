@@ -43,21 +43,15 @@ public interface IWorkerHandler {
 	String createUrl(String action, JkMember jkMember, String workerId);
 
 	/**
-	 * Returns the latest status message
-	 * @return
-	 */
-	Map<String, String> getStatusMessage();
-
-	/**
 	 * Returns all the statuses for all servers in cluster 
 	 * @return all the statuses for all servers in cluster
 	 */
 	Map<String, JkStatus> getStatuses();
 
 	/**
-	 * 
-	 * @param url
-	 * @param context
+	 * Handles the url, i.e. gets the html/xml body and parses it 
+	 * @param url the url to get body for
+	 * @param context the context of the url
 	 */
 	void handleUrl(String url, String context);
 	

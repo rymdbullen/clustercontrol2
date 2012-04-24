@@ -3,7 +3,6 @@ package net.local.clustercontrol;
 import net.local.clustercontrol.core.configuration.EnvironmentAwarePropertyConfigurer;
 import net.local.clustercontrol.core.http.impl.HttpClient;
 import net.local.clustercontrol.core.logic.impl.ClusterManager;
-import net.local.clustercontrol.core.logic.impl.WorkerFactory;
 import net.local.clustercontrol.core.logic.impl.WorkerHandlerFactory;
 import net.local.clustercontrol.web.LoginView;
 
@@ -33,13 +32,7 @@ public class AppConfig {
 	@Bean
 	public ClusterManager clusterManager() 
 	{
-		return new ClusterManager(this.workerFactory(), this.workerHandlerFactory()); 
-	}
-	
-	@Bean
-	public WorkerFactory workerFactory() 
-	{
-		return new WorkerFactory(this.httpClient());
+		return new ClusterManager(this.workerHandlerFactory()); 
 	}
 	
 	@Bean

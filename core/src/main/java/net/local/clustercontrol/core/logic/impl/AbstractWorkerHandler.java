@@ -1,6 +1,5 @@
 package net.local.clustercontrol.core.logic.impl;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +12,7 @@ import net.local.clustercontrol.api.model.xml.JkMember;
 import net.local.clustercontrol.api.model.xml.JkStatus;
 import net.local.clustercontrol.api.model.xml.WorkerResponse;
 import net.local.clustercontrol.core.http.IHttpClient;
+import net.local.clustercontrol.core.logic.ControlCommandException;
 import net.local.clustercontrol.core.logic.IWorkerHandler;
 import net.local.clustercontrol.core.parsers.IStatusParser;
 
@@ -27,20 +27,20 @@ public abstract class AbstractWorkerHandler implements IWorkerHandler {
 	String initUrl;
 	HashSet<String> urls = new HashSet<String>();
 	ConcurrentHashMap<String, JkStatus> statusesPerHost = null;
-	Map<String, String> statusMessages = new HashMap<String, String>();
 	
-	public AbstractWorkerHandler(IHttpClient httpClient, String body, String initUrl) {
+	public AbstractWorkerHandler() {}
+	public AbstractWorkerHandler(IHttpClient httpClient, String initUrl) {
 
-		this.body = body;
 		this.initUrl= initUrl;
 		this.httpClient = httpClient;
+
+		// implicitly setting body 
+		getBody(initUrl);
 		urls.add(initUrl);
 		
 		// setup for subsequent parsing
 		IStatusParser parser = handleInit();
 		if(parser == null || parser.getStatus() == null) {
-			statusMessages.put("initStatus", "nok");
-			statusMessages.put("initStatusMessage", "Failed to initialize using URL: "+initUrl);			
 			return;
 		}
 		
@@ -52,9 +52,6 @@ public abstract class AbstractWorkerHandler implements IWorkerHandler {
 		
 		// from now on its like polling the state
 		handlePoll();
-		
-		statusMessages.put("initStatus", "ok");
-		statusMessages.put("initStatusMessage", "Initialize ["+statusesPerHost.size()+"] hosts using URL: "+initUrl);
 		
 	}
 	
@@ -75,7 +72,7 @@ public abstract class AbstractWorkerHandler implements IWorkerHandler {
 		}
 	}
 
-	Map<String, JkStatus> getStatusesPerHost() {
+	protected Map<String, JkStatus> getStatusesPerHost() {
 		return statusesPerHost;
 	}
 	
@@ -86,7 +83,7 @@ public abstract class AbstractWorkerHandler implements IWorkerHandler {
 				if(!member.getName().equals(workerId)) {
 					continue;
 				}
-				// we want this one
+				// we want this member
 				String contextUrl = createUrl(action, member, workerId);
 				
 				for (String url : urls)
@@ -100,8 +97,27 @@ public abstract class AbstractWorkerHandler implements IWorkerHandler {
 		}		
 	}
 	
+	/**
+	 * Delays the current thread
+	 * @param i
+	 * @param speed
+	 */
+	private void delay(int i, String speed) {
+		if(speed==null) {
+			return;
+		}
+		int millis = 3000;
+    	try {
+			long incrementalMillis = millis*i;
+			logger.trace("Sleeping between requests: "+incrementalMillis+"ms"); // TODO add thread name
+			Thread.sleep(incrementalMillis);
+		} catch (InterruptedException e) {
+			throw new ControlCommandException("Failed to sleep thread for: "+millis+" millis", e);
+		}
+	}
+	
 	protected void getBody(String url) {
-		if(logger.isTraceEnabled()) logger.trace("AbstractWorkerHandler");
+		if(logger.isTraceEnabled()) logger.trace("getBody for url {}", url);
 		WorkerResponse wr = httpClient.getWorkerResponseForUrl(url);
 		if(wr.getError() != null) {
 			// throw error
@@ -109,10 +125,7 @@ public abstract class AbstractWorkerHandler implements IWorkerHandler {
 		}
 		body = wr.getBody();
 	}
-	@Override
-	public Map<String, String> getStatusMessage() {
-		return statusMessages;
-	}
+	
 	@Override
 	public Map<String, JkStatus> getStatuses() {
 		return statusesPerHost;

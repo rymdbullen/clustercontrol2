@@ -1,7 +1,5 @@
 package net.local.clustercontrol.core.logic.impl;
 
-import java.net.MalformedURLException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import net.local.clustercontrol.api.model.xml.JkMember;
 import net.local.clustercontrol.api.model.xml.JkStatus;
-import net.local.clustercontrol.core.logic.IWorkerFactory;
 import net.local.clustercontrol.core.logic.IClusterManager;
 import net.local.clustercontrol.core.logic.IWorkerHandler;
 import net.local.clustercontrol.core.logic.IWorkerHandlerFactory;
@@ -31,25 +28,33 @@ public class ClusterManager implements IClusterManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(ClusterManager.class);
 
-	private IWorkerFactory workerFactory;
 	private IWorkerHandlerFactory workerHandlerFactory;
 
+	private Map<String, String> statusMessages = new HashMap<String, String>();
+	
 	private Cluster _cluster;
 	private IWorkerHandler handler;
 
 	@Autowired
-	public ClusterManager(IWorkerFactory workerFactory, IWorkerHandlerFactory workerHandlerFactory) {
-		this.workerFactory = workerFactory;
+	public ClusterManager(IWorkerHandlerFactory workerHandlerFactory) {
 		this.workerHandlerFactory = workerHandlerFactory;
 	}
 
 	@Override
-	public Map<String, String> init(String url) {
+	public Map<String, String> init(String initUrl) {
 		// get handler only if none exists previously
 		if(handler == null) {
-			handler = workerHandlerFactory.getHandler(url);
+			handler = workerHandlerFactory.getHandler(initUrl);
 		}
-		return handler.getStatusMessage();
+		if(handler.getStatuses()==null) {
+			statusMessages.put("initStatus", "nok");
+			statusMessages.put("initStatusMessage", "Failed to initialize using URL: "+initUrl);
+		} else {
+			statusMessages.put("initStatus", "ok");
+			statusMessages.put("initStatusMessage", "Initialize ["+handler.getStatuses().size()+"] hosts using URL: "+initUrl);
+		}
+		
+		return statusMessages;
 	}
 
 	@Override
@@ -70,32 +75,6 @@ public class ClusterManager implements IClusterManager {
 		handler.handleStop(workerId, null);
 	}
 	
-	/**
-	 * 
-	 * @param action
-	 * @param workerId
-	 * @param speed
-	 * @return
-	 */
-	boolean action(String action, String workerId, String speed) {
-		if(logger.isTraceEnabled()) {
-			String threadName = Thread.currentThread().getName();
-			logger.trace("Process thread " + threadName + " using Async method");
-		}
-		String workerName = cssValidName(workerId, false);
-		try {
-			workerFactory.performAction(workerName, action, speed);
-			updateCluster(statusListPerWorker(workerFactory.getStatuses()));
-			_cluster.setStatusMessage("ok");
-			return true;
-		} catch (MalformedURLException e) {
-			_cluster.setStatusMessage("Failed to perform action="+action+", workerId="+workerId+", speed="+speed+", update cluster status");
-		} catch (UnknownHostException e) {
-			_cluster.setStatusMessage("Failed to perform action="+action+", workerId="+workerId+", speed="+speed+", update cluster status");
-		}
-		return false;
-	}
-	
 	@Override
 	public Cluster getCluster() {
 		LinkedHashMap<String, HashMap<String, JkMember>> statusListPerWorker = statusListPerWorker(handler.getStatuses());
@@ -104,21 +83,8 @@ public class ClusterManager implements IClusterManager {
 	}
 	
 	@Override
-	public boolean poll() {
+	public void poll() {
 		handler.handlePoll();
-		
-		return action("poll", null, null);
-// 		if(_cluster==null) {
-//			return false;
-//		}
-//		boolean isSuccess = workerFactory.performAction(null, "poll", null);
-//		if(isSuccess) {
-//			updateCluster(statusListPerWorker());
-//			_cluster.setStatusMessage("ok");
-//			return true;
-//		}
-//		_cluster.setStatusMessage("Failed to update cluster status");
-//		return false;
 	}
 
 	/**

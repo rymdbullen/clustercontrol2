@@ -16,36 +16,19 @@ public class WorkerHandlerFactory implements IWorkerHandlerFactory {
 	@Override
 	public IWorkerHandler getHandler(String initUrl) {
 		
-		// get the body for further processing
-		String body = getBody(initUrl);
-		
 		// 1. Try with ajp host
-		WorkerHandlerXml workerHandlerXml = new WorkerHandlerXml(httpClient, body, initUrl);
+		WorkerHandlerXml workerHandlerXml = new WorkerHandlerXml(httpClient, initUrl);
 		if(workerHandlerXml.getStatusesPerHost() != null) {
 			return workerHandlerXml;
 		}
 		
 		// 2. Try with html host
-		WorkerHandlerHtml workerHandlerHtml = new WorkerHandlerHtml(httpClient, body, initUrl);
+		WorkerHandlerHtml workerHandlerHtml = new WorkerHandlerHtml(httpClient, initUrl);
 		if(workerHandlerHtml.getStatusesPerHost() != null) {
 			return workerHandlerHtml;
 		}
 		
 		throw new UnsupportedOperationException("Failed to handle this type of request for url: " + initUrl);
 
-	}
-	/**
-	 * Returns the html body for the provided url.
-	 * @param initUrl the url to get body for.
-	 * @return the html body for the provided url.
-	 */
-	private String getBody(String initUrl) {
-		WorkerResponse wr = httpClient.getWorkerResponseForUrl(initUrl);
-		if(wr.getError() != null) {
-			// throw error
-			// TODO create my exception that returns an error status message
-			throw new RuntimeException("Failed to get response using URL: "+initUrl);
-		}
-		return wr.getBody();
 	}
 }

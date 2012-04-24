@@ -44,5 +44,5 @@ public interface IClusterManager {
 	 * Polls status from workers
 	 * @return
 	 */
-	boolean poll();
+	void poll();
 }
