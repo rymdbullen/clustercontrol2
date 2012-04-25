@@ -1,4 +1,4 @@
-package net.local.clustercontrol.mvc.ajax.json;
+package net.local.clustercontrol.web.ajax.json;
 
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;

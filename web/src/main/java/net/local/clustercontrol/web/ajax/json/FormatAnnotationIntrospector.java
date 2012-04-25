@@ -1,4 +1,4 @@
-package net.local.clustercontrol.mvc.ajax.json;
+package net.local.clustercontrol.web.ajax.json;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

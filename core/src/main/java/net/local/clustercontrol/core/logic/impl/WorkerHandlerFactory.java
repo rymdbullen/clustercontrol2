@@ -3,7 +3,6 @@ package net.local.clustercontrol.core.logic.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import net.local.clustercontrol.api.model.xml.WorkerResponse;
 import net.local.clustercontrol.core.http.IHttpClient;
 import net.local.clustercontrol.core.logic.IWorkerHandler;
 import net.local.clustercontrol.core.logic.IWorkerHandlerFactory;

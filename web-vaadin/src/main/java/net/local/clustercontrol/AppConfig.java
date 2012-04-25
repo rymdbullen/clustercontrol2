@@ -32,7 +32,7 @@ public class AppConfig {
 	@Bean
 	public ClusterManager clusterManager() 
 	{
-		return new ClusterManager(this.workerHandlerFactory()); 
+		return new ClusterManager(); 
 	}
 	
 	@Bean

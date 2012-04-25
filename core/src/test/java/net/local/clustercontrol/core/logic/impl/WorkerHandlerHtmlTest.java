@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.local.clustercontrol.api.model.xml.WorkerResponse;
-import net.local.clustercontrol.core.http.impl.AbstractBaseTestCase;
+import net.local.clustercontrol.core.AbstractBaseTestCase;
 import net.local.clustercontrol.core.http.impl.HttpClient;
 
 /**

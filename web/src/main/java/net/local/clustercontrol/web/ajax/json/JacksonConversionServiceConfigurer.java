@@ -1,4 +1,4 @@
-package net.local.clustercontrol.mvc.ajax.json;
+package net.local.clustercontrol.web.ajax.json;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;

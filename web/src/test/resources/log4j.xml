@@ -11,7 +11,7 @@
 	</appender>
 	
 	<!-- Application Loggers -->
-	<logger name="net.local.clustercontrol.mvc">
+	<logger name="net.local.clustercontrol.web">
 		<level value="info" />
 	</logger>
 	

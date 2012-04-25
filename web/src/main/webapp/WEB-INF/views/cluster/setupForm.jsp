@@ -12,7 +12,7 @@
 			<link rel="stylesheet" href="<c:url value="/resources/blueprint/ie.css" />" type="text/css" media="screen, projection">
 		<![endif]-->
 		<link rel="stylesheet" href="<c:url value="/resources/popup.css" />" type="text/css" media="screen, projection">
-		<script type="text/javascript" src="<c:url value="/resources/jquery-1.4.min.js" /> "></script>
+		<script type="text/javascript" src="<c:url value="/resources/jquery-1.7.1.min.js" /> "></script>
 		<script type="text/javascript" src="<c:url value="/resources/json.min.js" /> "></script>
 	</head>
 	<body>

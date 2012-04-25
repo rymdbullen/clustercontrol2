@@ -1,4 +1,4 @@
-package net.local.clustercontrol.mvc;
+package net.local.clustercontrol.web;
 
 import javax.validation.constraints.NotNull;
 

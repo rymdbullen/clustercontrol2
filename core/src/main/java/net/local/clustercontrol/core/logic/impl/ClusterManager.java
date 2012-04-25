@@ -28,17 +28,13 @@ public class ClusterManager implements IClusterManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(ClusterManager.class);
 
+	@Autowired 
 	private IWorkerHandlerFactory workerHandlerFactory;
 
 	private Map<String, String> statusMessages = new HashMap<String, String>();
 	
 	private Cluster _cluster;
 	private IWorkerHandler handler;
-
-	@Autowired
-	public ClusterManager(IWorkerHandlerFactory workerHandlerFactory) {
-		this.workerHandlerFactory = workerHandlerFactory;
-	}
 
 	@Override
 	public Map<String, String> init(String initUrl) {
@@ -49,10 +45,11 @@ public class ClusterManager implements IClusterManager {
 		if(handler.getStatuses()==null) {
 			statusMessages.put("initStatus", "nok");
 			statusMessages.put("initStatusMessage", "Failed to initialize using URL: "+initUrl);
-		} else {
-			statusMessages.put("initStatus", "ok");
-			statusMessages.put("initStatusMessage", "Initialize ["+handler.getStatuses().size()+"] hosts using URL: "+initUrl);
 		}
+		LinkedHashMap<String, HashMap<String, JkMember>> statusListPerWorker = statusListPerWorker(handler.getStatuses());
+		updateCluster(statusListPerWorker);
+		statusMessages.put("initStatus", "ok");
+		statusMessages.put("initStatusMessage", "Initialize ["+_cluster.getWorkers().size()+"] workers on ["+_cluster.getHostNames().size()+"] hosts using URL: "+initUrl);
 		
 		return statusMessages;
 	}
@@ -77,6 +74,9 @@ public class ClusterManager implements IClusterManager {
 	
 	@Override
 	public Cluster getCluster() {
+		if(_cluster == null) {
+			return null;
+		}
 		LinkedHashMap<String, HashMap<String, JkMember>> statusListPerWorker = statusListPerWorker(handler.getStatuses());
 		updateCluster(statusListPerWorker);
 		return _cluster;
@@ -100,13 +100,15 @@ public class ClusterManager implements IClusterManager {
 		_cluster = new Cluster();
 		
 		LinkedHashMap<String, HashMap<String, JkMember>> membersList = new LinkedHashMap<String, HashMap<String, JkMember>>();
-		for (JkStatus jkStatus : jkStatuses) {
+		for (JkStatus jkStatus : jkStatuses) 
+		{
 			String hostName = jkStatus.getServer().getName();
 			Integer hostPort = jkStatus.getServer().getPort();
 			List<JkMember> members = jkStatus.getBalancers().getBalancer().getMember();
 			
-			for (JkMember jkMember : members) {
-				logger.debug("Adding jkMember: "+hostName+": "+hostPort+": "+jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getType());
+			for (JkMember jkMember : members) 
+			{
+				if(logger.isTraceEnabled()) logger.trace("Adding jkMember: "+hostName+": "+hostPort+": "+jkMember.getName()+" "+jkMember.getActivation()+" "+jkMember.getType());
 				
 				String workerName = jkMember.getName();
 				HashMap<String, JkMember> memberList = membersList.get(workerName);
@@ -118,10 +120,10 @@ public class ClusterManager implements IClusterManager {
 				memberList.put(hostName, jkMember);
 			}
 			String hostWithPort = hostName;
-			if(hostPort!=null && hostPort > 0 && hostPort != 80) {
+			if(hostPort != null && hostPort > 0 && hostPort != 80) {
 				hostWithPort = hostWithPort + ":" + hostPort;
 			}
-			if(false == _cluster.getHostNames().contains(hostWithPort)) {
+			if(!_cluster.getHostNames().contains(hostWithPort)) {
 				_cluster.getHostNames().add(hostWithPort);
 			}
 			_cluster.setName(jkStatus.getBalancers().getBalancer().getName());

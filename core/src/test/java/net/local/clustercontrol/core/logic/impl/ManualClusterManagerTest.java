@@ -19,8 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import net.local.clustercontrol.core.AbstractBaseTestCase;
 import net.local.clustercontrol.core.configuration.Constants;
-import net.local.clustercontrol.core.http.impl.AbstractBaseTestCase;
 import net.local.clustercontrol.core.logic.WorkerNotFoundException;
 import net.local.clustercontrol.core.logic.impl.ClusterManager;
 import net.local.clustercontrol.core.model.dto.Cluster;
@@ -28,7 +28,7 @@ import net.local.clustercontrol.core.model.dto.WorkerStatus;
 import net.local.clustercontrol.core.model.dto.Workers;
 
 /**
- * @author admin
+ * @author jstenvall
  */
 public class ManualClusterManagerTest extends AbstractBaseTestCase {
 

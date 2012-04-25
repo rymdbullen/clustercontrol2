@@ -1,8 +1,12 @@
-package net.local.clustercontrol.core.http.impl;
+package net.local.clustercontrol.core;
+
+import net.local.clustercontrol.core.configuration.AppConfig;
 
 import org.apache.log4j.Logger;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -14,9 +18,11 @@ import java.util.ResourceBundle;
  * @author jstenvall
  * @since 1.0
  */
-@ContextConfiguration(locations = {
-		"classpath:applicationContext.xml"
-})
+//@ContextConfiguration(locations = { "classpath:applicationContext.xml" })
+@ActiveProfiles(value="devEmbedded")
+@ContextConfiguration(
+		classes={ AppConfig.class },
+		loader=AnnotationConfigContextLoader.class)
 public abstract class AbstractBaseTestCase extends AbstractJUnit4SpringContextTests {
 		
     /**
