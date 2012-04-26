@@ -11,7 +11,7 @@
 	<bean id="propertyConfigurer"
 		class="net.local.clustercontrol.core.configuration.EnvironmentAwarePropertyConfigurer"/>
 		
-	<context:component-scan base-package="net.local.clustercontrol"/>
+	<context:component-scan base-package="net.local.clustercontrol2"/>
 	<context:spring-configured/>
 	
 </beans>

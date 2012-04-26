@@ -9,7 +9,11 @@ import net.local.clustercontrol.core.logic.IWorkerHandlerFactory;
 
 @Service
 public class WorkerHandlerFactory implements IWorkerHandlerFactory {
+
 	
+	// TODO Remove httpClient from WorkerHandlerFactory 
+	// TODO Remove httpClient from WorkerHandlerFactory 
+	// TODO Remove httpClient from WorkerHandlerFactory 
 	@Autowired private IHttpClient httpClient;
 
 	@Override

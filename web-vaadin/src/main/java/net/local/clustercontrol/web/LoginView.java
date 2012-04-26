@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import net.local.clustercontrol.core.logic.IClusterManager;
-import net.local.clustercontrol.core.logic.impl.WorkerHandlerFactory;
 
 import com.vaadin.terminal.UserError;
 import com.vaadin.ui.Button;
@@ -22,14 +21,14 @@ public class LoginView extends CustomComponent {
     Logger logger = LoggerFactory.getLogger(LoginView.class);
 
 	@Autowired private IClusterManager clusterManager;
-    @Autowired private WorkerHandlerFactory factory;
+	@Autowired private MainView mainView;
 
 	/**
 	 * generated serial version uid
 	 */
 	private static final long serialVersionUID = -7238406652914240712L;
 
-	private TextField textFieldUrl = new TextField("Url");
+	private TextField textFieldUrl = new TextField("Url", "http://host1/balancer-manager");
 
 	public LoginView() {
 
@@ -43,11 +42,8 @@ public class LoginView extends CustomComponent {
 
 		layout.addComponent(button);
 
-		button.addListener(new ClickListener() {
-
-			/**
-			 * generated serial version uid
-			 */
+		button.addListener(new ClickListener() 
+		{
 			private static final long serialVersionUID = -7238406652914248812L;
 			
 			@Override
@@ -55,11 +51,10 @@ public class LoginView extends CustomComponent {
 				String url = ""+textFieldUrl.getValue();
 				Map<String, String> response = clusterManager.init(url);
 				if(response.get("initStatus").equals("nok")) {
-					textFieldUrl.setComponentError(
-							new UserError(response.get("initStatusMessage")));
+					textFieldUrl.setComponentError(new UserError(response.get("initStatusMessage")));
 				} else {
-					System.out.println(response);
-					getApplication().getMainWindow().setContent(new MainView());
+					mainView.init();
+					getApplication().getMainWindow().setContent(mainView);
 				}
 			}
 		});

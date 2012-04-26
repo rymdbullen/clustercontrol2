@@ -1,8 +1,8 @@
 package net.local.clustercontrol.core.logic;
 
 
-public interface IWorkerHandlerFactory {
 
+public interface IWorkerHandlerFactory {
 	IWorkerHandler getHandler(String url);
 
 }

@@ -45,6 +45,7 @@ public class Workers {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+	
 	public String getStatus() {
 		String lastStatus = null;
 		boolean sameAsLast = false;
@@ -61,6 +62,9 @@ public class Workers {
 		if(statuses.size()>1 && !sameAsLast) {
 			return "unknown";
 		}
+		/// TODO The parser must set a generic status... otherwise this will break
+		/// TODO The parser must set a generic status... otherwise this will break
+		/// TODO The parser must set a generic status... otherwise this will break
 		if(lastStatus.equalsIgnoreCase("dis")) {
 			return "allDisabled";
 		} if(lastStatus.equalsIgnoreCase("ok")) {

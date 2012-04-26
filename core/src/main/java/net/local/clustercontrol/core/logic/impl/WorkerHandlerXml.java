@@ -8,9 +8,7 @@ import net.local.clustercontrol.core.parsers.StatusParserXml;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-@Component
 public class WorkerHandlerXml extends AbstractWorkerHandler implements IWorkerHandler {
 	
 	@SuppressWarnings("unused")
