@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * Cluster of tomcats contains arrays of workers. Each worker contains one status for each host.
+ * Cluster of tomcats contains arrays of worker. Each worker contains one status for each worker.
  * <pre>
  * Cluster
- *        -> Workers
+ *        -> Worker
  *                  -> WorkerStatuses
  * </pre>
  * @author jstenvall
@@ -25,7 +25,7 @@ public class Cluster {
 	private String action;
 	private String initUrl;
 	
-	private ArrayList<Workers> workers = new ArrayList<Workers>(0);
+	private ArrayList<Worker> worker = new ArrayList<Worker>(0);
 	private ArrayList<String> hostNames = new ArrayList<String>(0);
 	private ArrayList<String> workerNames = new ArrayList<String>(0);
 	
@@ -41,11 +41,11 @@ public class Cluster {
 	public void setHostNames(ArrayList<String> hostNames) {
 		this.hostNames = hostNames;
 	}
-	public ArrayList<Workers> getWorkers() {
-		return workers;
+	public ArrayList<Worker> getWorkers() {
+		return worker;
 	}
-	public void setWorkers(ArrayList<Workers> workers) {
-		this.workers = workers;
+	public void setWorkers(ArrayList<Worker> worker) {
+		this.worker = worker;
 	}
 	public String getLastPoll() {
 		lastPoll = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).format(new Date());
@@ -105,8 +105,8 @@ public class Cluster {
 	@Override
 	public String toString() {
 		StringBuilder sbWorkers = new StringBuilder();
-		for (int i = 0; i < workers.size(); i++) {
-			Workers status = workers.get(i);
+		for (int i = 0; i < worker.size(); i++) {
+			Worker status = worker.get(i);
 			sbWorkers.append(status.toString()+"\n");
 		}
 		StringBuilder sbHostNames = new StringBuilder();
@@ -120,7 +120,7 @@ public class Cluster {
 		return "Cluster [name=" + name + ", type=" + type + ", context="
 				+ context + ", protocol=" + protocol + ", port=" + port + ", statusMessage="
 				+ statusMessage + ", lastPoll=" + lastPoll + ", action="
-				+ action + ", body=" + initUrl + ", workers={" + sbWorkers.toString() +"}"
+				+ action + ", body=" + initUrl + ", worker={" + sbWorkers.toString() +"}"
 						+ ", workerNames={" + sbWorkerNames.toString().substring(0, sbWorkerNames.toString().length()-1) + "}"
 						+ ", hostNames={" + sbHostNames.toString().substring(0, sbHostNames.toString().length()-1) + "}]";
 	}

@@ -12,23 +12,23 @@ import java.util.ArrayList;
  * @author jstenvall
  *
  */
-public class Workers {
+public class Worker {
 	public String TYPE_XML  = "XML";
 	public String TYPE_HTML = "HTML";
-	@SuppressWarnings("unused")
 	private String status;
 	private String name;
+	private String host;
 	private String type;
 	private String id;
 	
-	/** all workers with same name, ie not per host */
-	private ArrayList<WorkerStatus> statuses = new ArrayList<WorkerStatus>();
+	/** all workers per host */
+	private ArrayList<WorkerStatus> statusesPerHost = new ArrayList<WorkerStatus>();
 
-	public ArrayList<WorkerStatus> getStatuses() {
-		return statuses;
+	public ArrayList<WorkerStatus> getStatusesPerHost() {
+		return statusesPerHost;
 	}
-	public void setStatuses(ArrayList<WorkerStatus> statuses) {
-		this.statuses = statuses;
+	public void setStatusesPerHost(ArrayList<WorkerStatus> statusesPerHost) {
+		this.statusesPerHost = statusesPerHost;
 	}
 	public String getName() {
 		return name;
@@ -50,7 +50,7 @@ public class Workers {
 		String lastStatus = null;
 		boolean sameAsLast = false;
 		
- 		for (WorkerStatus workerStatus : statuses) {
+ 		for (WorkerStatus workerStatus : statusesPerHost) {
 			String thisStatus = workerStatus.getStatus();
 			if(lastStatus!=null && lastStatus.equalsIgnoreCase(thisStatus)) {
 				sameAsLast = true;
@@ -59,7 +59,7 @@ public class Workers {
 			}
 			lastStatus = thisStatus;
 		}
-		if(statuses.size()>1 && !sameAsLast) {
+		if(statusesPerHost.size()>1 && !sameAsLast) {
 			return "unknown";
 		}
 		/// TODO The parser must set a generic status... otherwise this will break
@@ -78,13 +78,19 @@ public class Workers {
 	public void setId(String id) {
 		this.id = id;
 	}
+	public String getHost() {
+		return host;
+	}
+	public void setHostname(String host) {
+		this.host = host;
+	}
 	@Override
 	public String toString() {
 		StringBuilder sbWorkers = new StringBuilder();
-		for (int i = 0; i < statuses.size(); i++) {
-			WorkerStatus status = statuses.get(i);
+		for (int i = 0; i < statusesPerHost.size(); i++) {
+			WorkerStatus status = statusesPerHost.get(i);
 			sbWorkers.append(status.toString()+"\n");
 		}
-		return "Workers [name=" + name + ", id=" + id + ", statusesPerHost={" + statuses + "}]";
+		return "Worker [name=" + name + ", id=" + id  + ", host=" + host + ", status=" + status + ", statusesPerHost={" + statusesPerHost + "}]";
 	}
 }

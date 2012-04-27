@@ -29,8 +29,8 @@
 				<div style="clear: both;"></div>
 				
 				<!-- statuses -->
-				<div class="workers"><c:forEach items="${cluster.workers}" var="worker">
-					<div id="col1" class="hostName"><c:out value="${worker.name}"/></div><c:forEach items="${worker.statuses}" var="status">
+				<div class="workers"><c:forEach items="${cluster.hosts}" var="worker">
+					<div id="col1" class="hostName"><c:out value="${worker.hostname}"/></div><c:forEach items="${worker.statuses}" var="status">
 					<div class="status status-${status.id} status-${status.status}" id="stat" title="${status.hostName}, ${status.route}, ${status.loadFactor}, ${status.transferred}"><c:out value="${status.status}"/></div></c:forEach>
 					<div class="status btn-${worker.id}" id="stat-btn">
 						<input id="${worker.id}-disable" class="${worker.id}-disable" type="button" value="Disable" onclick="confirmAction('disable','${worker.id}','${worker.name}')" disabled />
@@ -122,12 +122,12 @@
 			});
 		}
 		function fieldUpdate(cluster) {
-			var workers = cluster.workers;
-			for (i=0;i < workers.length;i++)
+			var hosts = cluster.hosts;
+			for (i=0;i < hosts.length;i++)
 			{
-				var statuses = workers[i].statuses;
-				var workerName = workers[i].id;
-				var lastStatus = workers[i].status;
+				var statuses = hosts[i].statuses;
+				var workerName = hosts[i].id;
+				var lastStatus = hosts[i].status;
 				for (j=0;j < statuses.length;j++)
 				{
 					var status = statuses[j];
@@ -143,11 +143,11 @@
 						$("div.status."+field).css("color", "yellow");
 					}
 				}
-				if(workers[i].status == "allDisabled") {
+				if(hosts[i].status == "allDisabled") {
 					// set button state - Disable #x
 					$('#'+workerName+'-disable').attr('disabled', true);
 					$('#'+workerName+'-enable').attr('disabled', false);
-				} else if(workers[i].status == "allEnabled") {
+				} else if(hosts[i].status == "allEnabled") {
 					// set button state - Enable #x
 					$('#'+workerName+'-disable').attr('disabled', false);
 					$('#'+workerName+'-enable').attr('disabled', true);

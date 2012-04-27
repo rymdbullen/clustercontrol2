@@ -1,4 +1,4 @@
-package net.local.clustercontrol.web;
+package net.local.clustercontrol.web.views;
 
 import java.util.Map;
 
@@ -48,6 +48,14 @@ public class LoginView extends CustomComponent {
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
+				
+				// DEBUG
+				if(true) {
+					mainView.init();
+					getApplication().getMainWindow().setContent(mainView);
+					return;
+				}
+				
 				String url = ""+textFieldUrl.getValue();
 				Map<String, String> response = clusterManager.init(url);
 				if(response.get("initStatus").equals("nok")) {

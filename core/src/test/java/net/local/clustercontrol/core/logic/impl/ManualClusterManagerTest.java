@@ -25,7 +25,7 @@ import net.local.clustercontrol.core.logic.WorkerNotFoundException;
 import net.local.clustercontrol.core.logic.impl.ClusterManager;
 import net.local.clustercontrol.core.model.dto.Cluster;
 import net.local.clustercontrol.core.model.dto.WorkerStatus;
-import net.local.clustercontrol.core.model.dto.Workers;
+import net.local.clustercontrol.core.model.dto.Worker;
 
 /**
  * @author jstenvall
@@ -77,10 +77,10 @@ public class ManualClusterManagerTest extends AbstractBaseTestCase {
 		assertEquals(6,cluster.getWorkerNames().size());
 		//assertEquals(2,cluster.getHostNames().size());
 		
-		ArrayList<Workers> workers = cluster.getWorkers();
+		ArrayList<Worker> workers = cluster.getWorkers();
 		for (int index = 0; index < workers.size(); index++) {
-			Workers worker = workers.get(index);
-			ArrayList<WorkerStatus> statuses = worker.getStatuses();
+			Worker worker = workers.get(index);
+			ArrayList<WorkerStatus> statuses = worker.getStatusesPerHost();
 			for (WorkerStatus workerStatus : statuses) {
 				logger.debug("Found: worker: "+worker.getName()+" on "+workerStatus.getHostName()+": "+workerStatus.getStatus());
 			}
@@ -131,10 +131,10 @@ public class ManualClusterManagerTest extends AbstractBaseTestCase {
 		String speed = "medium";
 		clusterManager.enable(worker, speed);
 		
-		ArrayList<Workers> workerLists = clusterManager.getCluster().getWorkers();
+		ArrayList<Worker> workerLists = clusterManager.getCluster().getWorkers();
 		for (int i = 0; i < workerLists.size(); i++) {
-			Workers workerList = workerLists.get(i);
-			ArrayList<WorkerStatus> statuses = workerList.getStatuses();
+			Worker workerList = workerLists.get(i);
+			ArrayList<WorkerStatus> statuses = workerList.getStatusesPerHost();
 			for (int index = 0; index < statuses.size(); index++) {
 				WorkerStatus workerStatus = statuses.get(index);
 				logger.debug("["+i+":"+index+"]: "+workerStatus.getHostName()+" "+workerStatus.getStatus());
@@ -160,10 +160,10 @@ public class ManualClusterManagerTest extends AbstractBaseTestCase {
 		
 		assertEquals("This must work, init must be true", "ok", clusterManager.getCluster().getStatusMessage());
 
-		ArrayList<Workers> workerLists = clusterManager.getCluster().getWorkers();
+		ArrayList<Worker> workerLists = clusterManager.getCluster().getWorkers();
 		for (int i = 0; i < workerLists.size(); i++) {
-			Workers workerList = workerLists.get(i);
-			ArrayList<WorkerStatus> statuses = workerList.getStatuses();
+			Worker workerList = workerLists.get(i);
+			ArrayList<WorkerStatus> statuses = workerList.getStatusesPerHost();
 			for (int index = 0; index < statuses.size(); index++) {
 				WorkerStatus workerStatus = statuses.get(index);
 				logger.debug("["+i+":"+index+"]: "+workerStatus.getHostName()+" "+workerStatus.getStatus());

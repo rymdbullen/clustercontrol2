@@ -21,10 +21,12 @@ import net.local.clustercontrol.core.logic.IWorkerHandler;
 import net.local.clustercontrol.core.logic.IWorkerHandlerFactory;
 import net.local.clustercontrol.core.model.dto.Cluster;
 import net.local.clustercontrol.core.model.dto.WorkerStatus;
-import net.local.clustercontrol.core.model.dto.Workers;
+import net.local.clustercontrol.core.model.dto.Worker;
 
 @Service
 public class ClusterManager implements IClusterManager {
+
+	private static final long serialVersionUID = -400828556917282230L;
 
 	private static final Logger logger = LoggerFactory.getLogger(ClusterManager.class);
 
@@ -141,10 +143,10 @@ public class ClusterManager implements IClusterManager {
 		// convert to cluster
 		Iterator<String> keysIter = membersList.keySet().iterator();
 		while (keysIter.hasNext()) {
-			Workers workers = new Workers();
+			Worker worker = new Worker();
 			String workerName = keysIter.next();
-			workers.setName(workerName);
-			workers.setId(cssValidName(workerName, true));
+			worker.setName(workerName);
+			worker.setId(cssValidName(workerName, true));
 			
 			HashMap<String, JkMember> jkMembersList = membersList.get(workerName);
 			Iterator<String> workerMemberListIter = jkMembersList.keySet().iterator();
@@ -163,9 +165,10 @@ public class ClusterManager implements IClusterManager {
 				workerStatus.setLoadFactor(jkMember.getLbfactor());
 				workerStatus.setName(jkMember.getName());
 				workerStatus.setId(cssValidName(hostName, true)+"-"+cssValidName(workerName, true));
-				workers.getStatuses().add(workerStatus);
+				worker.getStatusesPerHost().add(workerStatus);
+				worker.setHostname(hostName);
 			}
-			_cluster.getWorkers().add(workers);
+			_cluster.getWorkers().add(worker);
 		}
 		
 		_cluster.getWorkerNames().addAll(membersList.keySet());

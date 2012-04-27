@@ -4,7 +4,7 @@ package net.local.clustercontrol.core.model.dto;
  * Cluster of tomcats contains arrays of workers. Each worker contains one status for each host.
  * <pre>
  * Cluster
- *        -> Workers
+ *        -> Worker
  *                  -> WorkerStatuses
  * </pre>
 

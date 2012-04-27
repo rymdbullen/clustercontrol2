@@ -1,5 +1,6 @@
 package net.local.clustercontrol.core.logic;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import net.local.clustercontrol.core.model.dto.Cluster;
@@ -8,7 +9,7 @@ import net.local.clustercontrol.core.model.dto.Cluster;
  * @author jstenvall
  *
  */
-public interface IClusterManager {
+public interface IClusterManager extends Serializable {
 	/**
 	 * Returns the status message for an initialization of the ClusterManager with the provided url
 	 * @param url the url to initialize with

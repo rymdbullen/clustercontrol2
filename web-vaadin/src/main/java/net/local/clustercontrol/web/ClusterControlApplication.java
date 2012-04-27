@@ -2,6 +2,7 @@ package net.local.clustercontrol.web;
 
 
 import net.local.clustercontrol.web.configuration.VaadinAppConfig;
+import net.local.clustercontrol.web.views.LoginView;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.stereotype.Component;

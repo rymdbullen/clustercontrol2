@@ -46,7 +46,7 @@ public class ManualHttpClientTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testPerformActionOnHost() throws ClientProtocolException, IOException {
-//		Host host = new Host();
+//		Worker host = new Worker();
 //		host.setContext("/balancer-manager");
 //		host.setIpAddress("localhost");
 //		host.setPort(8080);

@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import net.local.clustercontrol.api.model.xml.JkStatus;
 import net.local.clustercontrol.core.model.dto.Cluster;
-import net.local.clustercontrol.core.model.dto.Workers;
+import net.local.clustercontrol.core.model.dto.Worker;
 import net.local.clustercontrol.core.parsers.StatusParserHtml;
 
 import org.apache.log4j.PropertyConfigurator;
@@ -56,8 +56,8 @@ public class ClusterControllerTest {
 		//ClusterManager cm = new ClusterManager(null);
 		//cm.convert(statuses, cluster);
 		
-		ArrayList<Workers> workers = cluster.getWorkers();
-		for (Workers worker : workers) {
+		ArrayList<Worker> workers = cluster.getWorkers();
+		for (Worker worker : workers) {
 			System.out.println(worker.getStatus());
 		}
 		assertEquals(new Integer(80), jkStatus.getServer().getPort());
