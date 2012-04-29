@@ -136,7 +136,7 @@ public class StatusParserHtml extends IStatusParser {
 		member.setLbfactor(Integer.valueOf(matcher.group(_4FACTOR).trim()));
 		float txFloat = Float.valueOf(matcher.group(_9FROM).replace('K', ' ').trim());
 		int txInt = Math.round(txFloat);
-		member.setTransferred(txInt);
+		member.setTransferred(""+txInt);
 		member.setType(context.trim());
 		
 		if(logger.isDebugEnabled()) { logger.debug("Parsed: host: "+member.getHost()+", address: "+member.getAddress()+", name: "+member.getName()+", port: "+member.getPort()+ ", read: "+member.getRead()+ "; route: "+member.getRoute()+ "; redirect: "+member.getRedirect()+ "; elected: "+member.getElected()+ "; state: "+member.getState()+ "; busy: "+member.getBusy()+ ", context: "+context); }

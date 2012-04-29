@@ -136,8 +136,6 @@ public class ClusterImposter {
 	 * @param statusesPerHost
 	 */
 	private static void updateCluster(LinkedHashMap<String, HashMap<String, JkMember>> membersList) {
-		// initialize new cluster
-		_cluster = new Cluster();
 		// convert to cluster
 		Iterator<String> keysIter = membersList.keySet().iterator();
 		while (keysIter.hasNext()) {
@@ -159,7 +157,7 @@ public class ClusterImposter {
 				workerStatus.setTo(jkMember.getBusy());  // html to
 				workerStatus.setSet(jkMember.getRead()); // html set
 				workerStatus.setRoute(jkMember.getRoute()); // html set
-				workerStatus.setTransferred(jkMember.getTransferred());
+				workerStatus.setTransferred(Integer.parseInt(jkMember.getTransferred()));
 				workerStatus.setLoadFactor(jkMember.getLbfactor());
 				workerStatus.setName(jkMember.getName());
 //				workerStatus.setId(cssValidName(hostName, true)+"-"+cssValidName(workerName, true));

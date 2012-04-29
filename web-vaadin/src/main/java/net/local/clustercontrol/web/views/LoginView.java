@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import net.local.clustercontrol.core.configuration.Constants;
 import net.local.clustercontrol.core.logic.IClusterManager;
 
 import com.vaadin.terminal.UserError;
@@ -49,13 +50,13 @@ public class LoginView extends CustomComponent {
 			@Override
 			public void buttonClick(ClickEvent event) {
 				
-				// DEBUG
-				if(true) {
+				if(Constants.IS_DEVMODE) {
 					mainView.init();
 					getApplication().getMainWindow().setContent(mainView);
 					return;
 				}
 				
+				@SuppressWarnings("unused")
 				String url = ""+textFieldUrl.getValue();
 				Map<String, String> response = clusterManager.init(url);
 				if(response.get("initStatus").equals("nok")) {

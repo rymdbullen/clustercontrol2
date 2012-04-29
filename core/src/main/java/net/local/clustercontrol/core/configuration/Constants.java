@@ -15,4 +15,6 @@ public class Constants {
 	public static final String APPLICATION_NAME = "clustercontrol2";
 	public static final String APPLICATION_NAME_DISPLAY = "Cluster Control 2";
 	
+	public static final boolean IS_DEVMODE = true;
+	
 }

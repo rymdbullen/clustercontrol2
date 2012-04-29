@@ -10,6 +10,7 @@ import net.local.clustercontrol.core.logic.IWorkerHandlerFactory;
 @Service
 public class WorkerHandlerFactory implements IWorkerHandlerFactory {
 
+	private static final long serialVersionUID = -5089798768778335423L;
 	
 	// TODO Remove httpClient from WorkerHandlerFactory 
 	// TODO Remove httpClient from WorkerHandlerFactory 

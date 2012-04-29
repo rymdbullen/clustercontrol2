@@ -25,6 +25,7 @@ import net.local.clustercontrol.core.logic.ControlCommandException;
 @Component
 public class HttpClient implements IHttpClient {
 
+	private static final long serialVersionUID = 8455019850730968236L;
 	private static final Logger logger = LoggerFactory.getLogger(HttpClient.class);
 
 	@Override
