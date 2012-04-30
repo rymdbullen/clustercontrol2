@@ -13,7 +13,7 @@
     <groupId>net.local.clustercontrol</groupId>
     <artifactId>clustercontrol-api</artifactId>
     <packaging>jar</packaging>
-    <name>ClusterControl 2 - API</name>
+    <name>&gt; ClusterControl 2 - API</name>
     <description>API - ClusterControl2 for Tomcat AJP Clusters</description>
 
     <build>
