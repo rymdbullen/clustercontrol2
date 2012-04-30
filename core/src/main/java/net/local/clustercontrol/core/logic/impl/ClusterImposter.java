@@ -1,4 +1,4 @@
-package net.local.clustercontrol.web;
+package net.local.clustercontrol.core.logic.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -81,8 +81,8 @@ public class ClusterImposter {
 			+ "</body></html>";
 
 	public static Cluster generateCluster(IClusterManager clusterManager) {
-		StatusParserHtml parser1 = new StatusParserHtml(body1, "http://172.18.151.174/balancerManager");
-		StatusParserHtml parser2 = new StatusParserHtml(body2, "http://172.18.151.172/balancerManager");
+		StatusParserHtml parser1 = new StatusParserHtml(body1, "http://172.18.151.174/balancer-manager");
+		StatusParserHtml parser2 = new StatusParserHtml(body2, "http://172.18.151.172/balancer-manager");
 		
 		JkStatus status1 = parser1.getStatus();
 		JkStatus status2 = parser2.getStatus();

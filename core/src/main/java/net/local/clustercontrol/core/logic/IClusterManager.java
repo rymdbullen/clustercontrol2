@@ -30,6 +30,13 @@ public interface IClusterManager extends Serializable {
 	 */
 	void disable(String worker, String speed);
 	/**
+	 * Handles the action on the worker with the provided speed
+	 * @param workerId
+	 * @param speed
+	 * @param action 
+	 */
+	void handle(String workerId, String speed, String action);
+	/**
 	 * Stops the worker and returns a boolean status of the action
 	 * @param worker the worker to disable
 	 * @param speed the speed to stop the worker

@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import net.local.clustercontrol.api.model.xml.JkMember;
 import net.local.clustercontrol.api.model.xml.JkStatus;
+import net.local.clustercontrol.core.configuration.Constants;
+import net.local.clustercontrol.core.configuration.EnvironmentAwareProperties;
 import net.local.clustercontrol.core.logic.IClusterManager;
 import net.local.clustercontrol.core.logic.IWorkerHandler;
 import net.local.clustercontrol.core.logic.IWorkerHandlerFactory;
@@ -76,6 +78,9 @@ public class ClusterManager implements IClusterManager {
 	
 	@Override
 	public Cluster getCluster() {
+		if(EnvironmentAwareProperties.getInstance().getProperty("dev_mode") != null && Constants.IS_DEVMODE) {
+			return ClusterImposter.generateCluster(this);
+		}
 		if(_cluster == null) {
 			return null;
 		}
@@ -89,6 +94,21 @@ public class ClusterManager implements IClusterManager {
 		handler.handlePoll();
 	}
 
+	@Override
+	public void handle(String workerId, String speed, String action) {
+		if(action.equals("Enable")) {
+			this.enable(workerId, speed);
+		} else if(action.equals("Disable")) {
+			this.disable(workerId, speed);			
+		} else if(action.equals("Stop")) {
+			this.stop(workerId);						
+		} else {
+			throw new IllegalArgumentException("Failed to map action: " + action);
+		}
+			
+	}
+	
+	// ----------------------------------------------------------------------- private
 	/**
 	 * Converts the statusesPerHost from per-host to per-worker. transforms the matrix.
 	 */

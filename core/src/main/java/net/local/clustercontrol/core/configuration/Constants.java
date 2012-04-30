@@ -1,5 +1,8 @@
 package net.local.clustercontrol.core.configuration;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Constants {
 	public static final String TARGET_MIME_XML = "xml";
 	public static final String TARGET_MIME_PROP = "prop";
@@ -16,5 +19,7 @@ public class Constants {
 	public static final String APPLICATION_NAME_DISPLAY = "Cluster Control 2";
 	
 	public static final boolean IS_DEVMODE = true;
+	public static final List<String> SPEEDS = Arrays.asList(new String[] { "Fast", "Medium", "Slow", "Halt" });
+	public static final List<String> ACTIONS = Arrays.asList(new String[] { "Enable", "Disable", "Stop" });
 	
 }

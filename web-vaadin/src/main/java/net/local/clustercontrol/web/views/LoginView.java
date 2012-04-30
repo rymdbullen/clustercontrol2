@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import net.local.clustercontrol.core.configuration.Constants;
 import net.local.clustercontrol.core.logic.IClusterManager;
 
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.terminal.UserError;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -37,10 +40,27 @@ public class LoginView extends CustomComponent {
 
 		setCompositionRoot(layout);
 
+		String regExp="^(?:https|http)://[a-z0-9-]+(?:.[a-z0-9-]+)+";
+		RegexpValidator validator = new RegexpValidator(regExp, "{0} is not a valid URL") ;
+		textFieldUrl.setRequired(true);
+		textFieldUrl.setRequiredError("URL is required");
+		textFieldUrl.addValidator(validator);
 		layout.addComponent(textFieldUrl);
 
-		Button button = new Button("Login");
+		final Button button = new Button("Login");
+		button.setEnabled(textFieldUrl.isValid());
+		ValueChangeListener valueChangeListener = new ValueChangeListener() {
+			
+			private static final long serialVersionUID = -258297701571239546L;
 
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				button.setEnabled(textFieldUrl.isValid());
+			}
+		};
+		textFieldUrl.setImmediate(true);
+		textFieldUrl.addListener(valueChangeListener);
+		
 		layout.addComponent(button);
 
 		button.addListener(new ClickListener() 

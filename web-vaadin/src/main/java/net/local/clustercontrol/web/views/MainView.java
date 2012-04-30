@@ -5,13 +5,14 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.local.clustercontrol.core.configuration.Constants;
 import net.local.clustercontrol.core.logic.IClusterManager;
 import net.local.clustercontrol.core.model.dto.Cluster;
 import net.local.clustercontrol.core.model.dto.WorkerStatus;
 import net.local.clustercontrol.core.model.dto.Worker;
-import net.local.clustercontrol.web.ClusterImposter;
 
+import com.vaadin.data.Property;
+import com.vaadin.data.util.ObjectProperty;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
@@ -64,37 +65,44 @@ public class MainView extends VerticalLayout {
 	 */
 	public MainView(IClusterManager clusterManager) {
 		this.clusterManager = clusterManager;
+		
+		Property lastPollObject = new ObjectProperty<String>(clusterManager.getCluster().getLastPoll());
+		fieldLastPoll.setPropertyDataSource(lastPollObject);
+		
+		
+    	// Configure the windows layout; by default a VerticalLayout
+        VerticalLayout layout = (VerticalLayout) subwindow.getContent();
+        layout.setMargin(true);
+        layout.setSpacing(true);
+		
+        // Add some content; a label and a close-button
+        Label message = new Label("This is a subwindow");
+        subwindow.addComponent(message);
+        
+        Button cancel = new Button("Cancel", new Button.ClickListener() {
+			private static final long serialVersionUID = -6777718430390788755L;
+
+			// inline click-listener
+			@Override
+            public void buttonClick(ClickEvent event) {
+                // close the window by removing it from the parent window
+				(subwindow.getParent()).removeWindow(subwindow);
+            }
+        });
+		
+        // The components added to the window are actually added to the window's
+        // layout; you can use either. Alignments are set using the layout
+        layout.addComponent(cancel);
+        layout.setComponentAlignment(cancel, Alignment.BOTTOM_RIGHT);
 	}
 	
 	public void init() {
 		
-		Cluster cluster;
-		if(Constants.IS_DEVMODE) {
-			cluster = ClusterImposter.generateCluster(clusterManager);
-		} else {
-			cluster = clusterManager.getCluster();
-		}
+		Cluster cluster = clusterManager.getCluster();
 		if(cluster==null) {
-			throw new IllegalArgumentException("Failed to retreive Cluster");
+			throw new IllegalArgumentException("Failed to retrieve Cluster");
 		}
 		
-		GridLayout layout = new GridLayout(3,5);
-
-		Panel panel = new Panel();
-		panel.setWidth("600px"); // Defined width.
-		panel.addComponent(layout);
-		
-		addComponent(panel);
-//		setCompositionRoot(panel);
-		
-		fieldLastPoll.setValue(cluster.getLastPoll());
-		fieldLastAction.setValue("");
-		
-		layout.addComponent(fieldLastAction, 1, 1);
-		layout.addComponent(fieldLastPoll, 1, 2);
-		layout.addComponent(chkAutoRefresh, 1, 3);
-		layout.addComponent(button, 1, 4);
-
 //		ClassResource resource = new ClassResource(
 //	            "/com/vaadin/book/examples/application/images/image.png",
 //	            getApplication());
@@ -163,9 +171,25 @@ public class MainView extends VerticalLayout {
 			logger.debug("{}:{} header btnEnable[]:", new Object[] {rowIdx, colIdx});
 			statusesLayout.addComponent(createActionButton("Enable", thisWorker), colIdx, rowIdx);			
 		}
-		layout.addComponent(statusesLayout, 0, 0);
+		VerticalLayout layout = new VerticalLayout();
+
+		Panel panel = new Panel();
+		panel.setWidth("600px"); // Defined width.
+		panel.addComponent(layout);
+		
+		addComponent(panel);
+		
+		fieldLastPoll.setValue(cluster.getLastPoll());
+		fieldLastAction.setValue("");
+		
+		layout.addComponent(statusesLayout);
 		Label labelAlternatives = new Label("Alternatives");
-		layout.addComponent(labelAlternatives , 1, 0);
+		layout.addComponent(labelAlternatives);
+		layout.addComponent(fieldLastAction);
+		layout.addComponent(fieldLastPoll);
+		layout.addComponent(chkAutoRefresh);
+		layout.addComponent(button);
+
 	}
 
 	private Button createActionButton(final String action, final Worker thisWorker) {
@@ -186,7 +210,7 @@ public class MainView extends VerticalLayout {
             }
         });
 		button.setData(thisWorker.getId());
-		button.setEnabled(thisWorker.getStatus().equals("all"+action+"d"));
+		button.setEnabled(!thisWorker.getStatus().equals("all"+action+"d"));
 		return button;
 	}
 }
