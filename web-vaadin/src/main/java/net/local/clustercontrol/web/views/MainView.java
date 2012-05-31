@@ -172,12 +172,14 @@ public class MainView extends VerticalLayout {
 			statusesLayout.addComponent(createActionButton("Enable", thisWorker), colIdx, rowIdx);			
 		}
 		VerticalLayout layout = new VerticalLayout();
-
+		layout.setSizeFull();
+		
 		Panel panel = new Panel();
 		panel.setWidth("600px"); // Defined width.
 		panel.addComponent(layout);
 		
 		addComponent(panel);
+		setComponentAlignment(panel, Alignment.MIDDLE_CENTER);
 		
 		fieldLastPoll.setValue(cluster.getLastPoll());
 		fieldLastAction.setValue("");

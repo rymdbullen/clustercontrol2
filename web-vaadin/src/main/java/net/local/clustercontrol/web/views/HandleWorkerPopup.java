@@ -31,6 +31,7 @@ public class HandleWorkerPopup extends Window implements
         addComponent(workerName);
         addComponent(speedOptions);
         addComponent(action);
+        this.setWidth("200px");
 
         apply = new Button("Apply", new Button.ClickListener() {
 			private static final long serialVersionUID = -6777718430390788756L;
